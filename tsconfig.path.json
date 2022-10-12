@@ -5,7 +5,9 @@
       "@/*": ["*"],
       "@pages/*": ["pages/*"],
       "@components": ["components"],
-      "@components/*": ["components/*"]
+      "@components/*": ["components/*"],
+      "@interfaces/*": ["interfaces/*"],
+      "@utils/*": ["utils/*"]
     }
   }
 }
