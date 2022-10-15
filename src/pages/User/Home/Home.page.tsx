@@ -1,10 +1,19 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 
 const Home: React.FC = () => {
   return (
-    <div>
+    <>
+      <Helmet>
+        <title>Home | ar.gent</title>
+      </Helmet>
+
       <h1>Home</h1>
-    </div>
+
+      <div>
+        <p>HOME</p>
+      </div>
+    </>
   );
 };
 

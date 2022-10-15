@@ -7,7 +7,9 @@
       "@components": ["components"],
       "@components/*": ["components/*"],
       "@interfaces/*": ["interfaces/*"],
-      "@utils/*": ["utils/*"]
+      "@utils/*": ["utils/*"],
+      "@hooks/*": ["hooks/*"],
+      "@store/*": ["store/*"]
     }
   }
 }
