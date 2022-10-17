@@ -11,18 +11,15 @@ import {
   EMAIL_REGEX,
   PHONE_NUMBER_REGEX,
 } from '@/constant/_regex';
-import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { useAppDispatch, useAppSelector } from '@hooks/redux.hooks';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux.hook';
 import { registerUser } from '@store/authSlice';
 import { ToastContainer } from 'react-toastify';
 
 const Register: React.FC = () => {
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   // global state
-  const isAuth = useAppSelector((state) => state.auth.isAuth);
   const isLoading = useAppSelector((state) => state.auth.isLoading);
 
   const genderValues = Object.values(EGender);
@@ -146,8 +143,6 @@ const Register: React.FC = () => {
     e.preventDefault();
     const isValid = validate();
 
-    console.log(errors);
-
     if (!isValid || !phoneNumber || !avatar || !zipCode) {
       return;
     }
@@ -181,15 +176,16 @@ const Register: React.FC = () => {
       formData.append(key, newUser[key].toString());
     }
 
+    if (
+      localStorage.getItem('persist') === null ||
+      localStorage.getItem('persist') === 'false' ||
+      localStorage.getItem('persist')
+    ) {
+      localStorage.setItem('persist', 'true');
+    }
+
     dispatch(registerUser(formData));
   };
-
-  // check if logged in
-  // useEffect(() => {
-  //   if (isAuth) {
-  //     navigate('/');
-  //   }
-  // }, [isAuth]);
 
   // validate
   useEffect(() => {

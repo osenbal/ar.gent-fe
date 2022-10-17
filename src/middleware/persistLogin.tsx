@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppSelector } from '@/hooks/redux.hook';
-import { Outlet, Navigate } from 'react-router-dom';
 import useRefreshToken from '@/hooks/refreshToken.hook';
+import { Outlet } from 'react-router-dom';
 
-const GuestRoute: React.FC = () => {
-  const { isAuth, persist } = useAppSelector((state) => state.auth);
+const PersistLogin: React.FC = () => {
+  const { persist, isAuth } = useAppSelector((state) => state.auth);
   const [isLoading, setIsLoading] = useState(true);
   const refresh = useRefreshToken();
 
   // Check access token from cookie
   useEffect(() => {
     let isMounted = true;
-
     const verifyToken = async () => {
       try {
         await refresh();
@@ -33,13 +32,7 @@ const GuestRoute: React.FC = () => {
     };
   }, []);
 
-  return !isAuth ? (
-    <Outlet />
-  ) : isLoading ? (
-    <p>Loading</p>
-  ) : (
-    <Navigate to="/home" />
-  );
+  return <>{!persist ? <Outlet /> : isLoading ? <p>Loading</p> : <Outlet />}</>;
 };
 
-export default GuestRoute;
+export default PersistLogin;

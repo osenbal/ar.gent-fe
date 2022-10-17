@@ -7,6 +7,7 @@ import { IUserLogin, IUserType } from '@/interfaces/user.interface';
 // Define a type for the slice state
 interface AuthState {
   isAuth: boolean;
+  persist: boolean;
   isLoading: boolean;
   user: IUserType | null;
   userDetails: object;
@@ -15,8 +16,11 @@ interface AuthState {
 }
 
 // Define the initial state using that type
+const persistStorage = localStorage.getItem('persist');
+
 const initialState: AuthState = {
   isAuth: false,
+  persist: persistStorage !== null ? JSON.parse(persistStorage) : false,
   isLoading: false,
   user: null,
   userDetails: {},
@@ -49,7 +53,7 @@ export const asyncLogout = createAsyncThunk(
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async (payload: FormData) => {
-    const res = await fetch(`${BACKEND_URL}/auth/user/signup`, {
+    const res = await fetch(`${BACKEND_URL}/user`, {
       method: 'POST',
       body: payload,
       headers: {
@@ -154,6 +158,15 @@ export const authSlice = createSlice({
       state.isAuth = true;
       // state.userDetails = action.payload.userDetails;
     },
+    setIsAuth: (state, action) => {
+      state.isAuth = action.payload;
+    },
+    setPersist: (state, action) => {
+      state.persist = action.payload;
+    },
+    setIsLoading: (state, action) => {
+      state.isLoading = action.payload;
+    },
   },
   extraReducers: {
     [asyncUser.fulfilled.type]: (state, { payload }) => {
@@ -191,7 +204,8 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setUser } = authSlice.actions;
+export const { setUser, setIsAuth, setPersist, setIsLoading } =
+  authSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectAuth = (state: RootState) => state.auth;

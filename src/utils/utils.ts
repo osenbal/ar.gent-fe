@@ -24,3 +24,11 @@ export const onlyNumberKeyInput = (evt: any) => {
   if (ASCIICode > 31 && (ASCIICode < 48 || ASCIICode > 57)) return false;
   return true;
 };
+
+export const getCookieValue = (name: string) => {
+  const value = `; ${document.cookie}`;
+  const parts: string[] = value.split(`; ${name}=`);
+
+  return parts;
+  // if (parts.length === 2 && parts) return parts.pop().split(';').shift();
+};

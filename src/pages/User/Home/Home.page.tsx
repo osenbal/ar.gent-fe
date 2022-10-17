@@ -1,3 +1,4 @@
+import { getCookieValue } from '@/utils/utils';
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
@@ -13,6 +14,8 @@ const Home: React.FC = () => {
       <div>
         <p>HOME</p>
       </div>
+
+      <a href="/login">login</a>
     </>
   );
 };
