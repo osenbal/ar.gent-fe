@@ -25,10 +25,15 @@ export const onlyNumberKeyInput = (evt: any) => {
   return true;
 };
 
-export const getCookieValue = (name: string) => {
-  const value = `; ${document.cookie}`;
-  const parts: string[] = value.split(`; ${name}=`);
+export const parseDate = (date: Date) => {
+  const yyyy = date.getFullYear();
+  let mm = (date.getMonth() + 1).toString(); // Months start at 0!
+  let dd = date.getDate().toString();
 
-  return parts;
-  // if (parts.length === 2 && parts) return parts.pop().split(';').shift();
+  if (Number(dd) < 10) dd = '0' + dd;
+  if (Number(mm) < 10) mm = '0' + mm;
+
+  const formattedToday = yyyy + '-' + mm + '-' + dd;
+
+  return formattedToday;
 };

@@ -1,5 +1,5 @@
 import { useAppDispatch } from '@hooks/redux.hook';
-import { setIsAuth } from '@/store/authSlice';
+import { setIsAuth, setUser, setUserId } from '@/store/authSlice';
 import { BACKEND_URL } from '@/config/config';
 
 const useRefreshToken = () => {
@@ -14,10 +14,10 @@ const useRefreshToken = () => {
       },
     });
     if (response.ok) {
+      const data = await response.json();
       dispatch(setIsAuth(true));
+      dispatch(setUserId(data.data._id));
     }
-    const data = await response.json();
-    return data;
   };
   return refreshToken;
 };

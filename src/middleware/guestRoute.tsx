@@ -34,6 +34,7 @@ const GuestRoute: React.FC = () => {
   }, []);
 
   return !isAuth ? (
+    
     <Outlet />
   ) : isLoading ? (
     <p>Loading</p>

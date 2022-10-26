@@ -32,7 +32,9 @@ const PersistLogin: React.FC = () => {
     };
   }, []);
 
-  return <>{!persist ? <Outlet /> : isLoading ? <p>Loading</p> : <Outlet />}</>;
+  return (
+    <>{!persist ? <Outlet /> : isLoading ? <p>Loading..</p> : <Outlet />}</>
+  );
 };
 
 export default PersistLogin;

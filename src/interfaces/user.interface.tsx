@@ -66,7 +66,7 @@ export interface IUserType {
 
 export interface IUserDetailsType {
   userId: string;
-  address: IAddress[];
+  address: IAddress;
   experience: IExperience[];
   education: IEducation[];
   skill: string[];
@@ -85,10 +85,6 @@ export default interface IUserRegister {
   phoneNumber: E164Number;
   gender: string;
   birthday: string;
-  street: string;
-  city: string;
-  country: string;
-  zipCode: number;
   email: string;
   password: string;
 }
@@ -103,6 +99,7 @@ export interface IUser {
   avatar: string;
   banner: string;
   username: string;
+  about: string;
   email: string;
   fullName: string;
   phoneNumber: string;

@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { EGender } from '@interfaces/user.interface';
 import { isEmpty } from '@utils/utils';
 import IUserRegister from '@interfaces/user.interface';
-import PhoneInput from 'react-phone-number-input';
-import { E164Number } from 'libphonenumber-js';
 import 'react-phone-number-input/style.css';
 import {
   USERNAME_REGEX,
@@ -15,6 +13,30 @@ import { Helmet } from 'react-helmet-async';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux.hook';
 import { registerUser } from '@store/authSlice';
 import { ToastContainer } from 'react-toastify';
+import { VisibilityOff, Visibility } from '@mui/icons-material';
+import {
+  Container,
+  TextField,
+  Select,
+  MenuItem,
+  FormGroup,
+  Typography,
+  Grid,
+  Avatar,
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  Input,
+  OutlinedInput,
+  InputAdornment,
+  IconButton,
+  FormHelperText,
+} from '@mui/material';
+import { MuiTelInput } from 'mui-tel-input';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import { Dayjs } from 'dayjs';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
 
 const Register: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -34,26 +56,22 @@ const Register: React.FC = () => {
   const [usernameFocus, setUsernameFocus] = useState<boolean>(false);
 
   const [fullName, setFullName] = useState<string>('');
-  const [gender, setGender] = useState<string>(EGender.MALE);
+  const [gender, setGender] = useState<string | undefined>('');
 
-  const [phoneNumber, setPhoneNumber] = useState<E164Number | undefined>();
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [validPhoneNumber, setValidPhoneNumber] = useState<boolean>(false);
 
-  const [birthday, setBirthday] = useState<string>('');
-  const [street, setStreet] = useState<string>('');
-  const [city, setCity] = useState<string>('');
-  const [country, setCountry] = useState<string>('');
-  const [zipCode, setZipCode] = useState<number | undefined>();
+  const [birthday, setBirthday] = useState<Dayjs | null>(null);
 
   const [email, setEmail] = useState<string>('');
   const [validEmail, setValidEmail] = useState<boolean>(false);
-  const [emailFocus, setEmailFocus] = useState<boolean>(false);
 
   const [password, setPassword] = useState<string>('');
   const [validPassword, setValidPassword] = useState<boolean>(false);
-  const [passwordFocus, setPasswordFocus] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const [matchPassword, setMatchPassword] = useState<string>('');
+  const [showMatchPassword, setShowMatchPassword] = useState<boolean>(false);
   const [validMatch, setValidMatch] = useState<boolean>(false);
 
   const [errors, setErrors] = useState<object | null>();
@@ -85,7 +103,7 @@ const Register: React.FC = () => {
       errors['fullName'] = 'Please input your name.';
     }
 
-    if (isEmpty(gender)) {
+    if (!gender || gender === undefined || gender === '') {
       isValid = false;
       errors['gender'] = 'Please input your gender.';
     }
@@ -98,26 +116,6 @@ const Register: React.FC = () => {
     if (birthday === null || birthday === undefined) {
       isValid = false;
       errors['birthday'] = 'Please input your date birthday';
-    }
-
-    if (isEmpty(street)) {
-      isValid = false;
-      errors['street'] = 'Please input your street address.';
-    }
-
-    if (isEmpty(city)) {
-      isValid = false;
-      errors['city'] = 'Please input your city.';
-    }
-
-    if (isEmpty(country)) {
-      isValid = false;
-      errors['country'] = 'Please input your country.';
-    }
-
-    if (!zipCode || zipCode === null || zipCode === undefined) {
-      isValid = false;
-      errors['zipCode'] = 'Please input your zip code.';
     }
 
     if (isEmpty(email) || !validEmail) {
@@ -142,8 +140,7 @@ const Register: React.FC = () => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const isValid = validate();
-
-    if (!isValid || !phoneNumber || !avatar || !zipCode) {
+    if (!isValid || !phoneNumber || !avatar || !gender || !birthday) {
       return;
     }
 
@@ -154,17 +151,13 @@ const Register: React.FC = () => {
     const formData = new FormData();
     const newUser: IUserRegister = {
       avatar: avatar,
-      username: username,
-      fullName: fullName,
+      username: username.trim(),
+      fullName: fullName.trim(),
       gender: gender,
-      phoneNumber: phoneNumber,
-      birthday: birthday,
-      street: street,
-      city: city,
-      country: country,
-      zipCode: zipCode,
-      email: email,
-      password: password,
+      phoneNumber: phoneNumber.replaceAll(/\s/g, '').trim(),
+      birthday: birthday.toISOString(),
+      email: email.trim(),
+      password: password.trim(),
     };
 
     let key: keyof typeof newUser;
@@ -200,10 +193,6 @@ const Register: React.FC = () => {
     email,
     password,
     matchPassword,
-    street,
-    city,
-    country,
-    zipCode,
   ]);
 
   // check username
@@ -214,7 +203,7 @@ const Register: React.FC = () => {
   // check phone number
   useEffect(() => {
     if (phoneNumber) {
-      setValidPhoneNumber(PHONE_NUMBER_REGEX.test(phoneNumber.toString()));
+      setValidPhoneNumber(PHONE_NUMBER_REGEX.test(phoneNumber));
     }
   }, [phoneNumber]);
 
@@ -242,182 +231,334 @@ const Register: React.FC = () => {
 
       <ToastContainer />
 
-      <h1>Register</h1>
+      <main>
+        <Grid container justifyContent="center" alignItems="center">
+          <Grid
+            sx={{
+              display: {
+                xs: 'none',
+                md: 'grid',
+                minHeight: '100vh',
+                background: '#96C7D1',
+              },
+            }}
+            item
+            md={6}
+          ></Grid>
 
-      <img src={avatarPrev} alt="avatar" />
-      <form>
-        <label htmlFor="avatar">Avatar</label>
-        <input
-          onChange={handleFileInput}
-          multiple={false}
-          type="file"
-          id="avatar"
-          placeholder="avatar"
-          name="avatar"
-          accept="image/*"
-          required
-        />
-        <br />
-        <label htmlFor="username">Username</label>
-        <input
-          onChange={(e) => setUsername(e.target.value.trim())}
-          value={username}
-          type="text"
-          autoComplete="off"
-          name="username"
-          placeholder="username"
-          required
-          onFocus={() => setUsernameFocus(true)}
-          onBlur={() => setUsernameFocus(false)}
-        />
-        {username && usernameFocus && !validUsername ? (
-          <>
-            <p>Useraname not valid</p>
-          </>
-        ) : (
-          ''
-        )}
-        <br />
-        <label htmlFor="fullName">Full Name</label>
-        <input
-          onChange={(e) => setFullName(e.target.value)}
-          value={fullName}
-          type="text"
-          name="fullName"
-          id="fullName"
-          placeholder="Full Name"
-          required
-        />
-        <br />
-        <label htmlFor="gender">Gender</label>
-        <select
-          name="gender"
-          id="gender"
-          onChange={(e) => setGender(e.target.value)}
-          required
-          value={gender}
-        >
-          {genderValues.map((gender) => (
-            <option key={gender} value={gender}>
-              {gender}
-            </option>
-          ))}
-        </select>
-        <br />
-        <label htmlFor="phoneNumber">Phone Number</label>
-        <PhoneInput
-          placeholder="Enter phone number"
-          value={phoneNumber}
-          onChange={setPhoneNumber}
-          defaultCountry="ID"
-        />
-        <br />
-        <label htmlFor="birthday">Birthday</label>
-        <input
-          onChange={(e) => setBirthday(e.target.value)}
-          value={birthday}
-          type="date"
-          name="birthday"
-          id="birthday"
-          placeholder="Date of Birth"
-          required
-        />
-        <br />
-        <label htmlFor="street">Street</label>
-        <input
-          onChange={(e) => setStreet(e.target.value)}
-          value={street}
-          type="text"
-          name="street"
-          id="street"
-          placeholder="street"
-          required
-        />
-        <br />
-        <label htmlFor="city">City</label>
-        <input
-          onChange={(e) => setCity(e.target.value)}
-          value={city}
-          type="text"
-          name="city"
-          id="city"
-          placeholder="city"
-          required
-        />
-        <br />
-        <label htmlFor="country">Country</label>
-        <input
-          onChange={(e) => setCountry(e.target.value)}
-          value={country}
-          type="text"
-          name="country"
-          id="country"
-          placeholder="country"
-          required
-        />
-        <br />
-        <label htmlFor="zipCode">Zip Code</label>
-        <input
-          onChange={(e) => setZipCode(Number(e.target.value))}
-          value={zipCode?.toString() || ''}
-          type="number"
-          name="zipCode"
-          id="zipCode"
-          placeholder="zip code"
-          required
-        />
-        <br />
-        <label htmlFor="email">Email</label>
-        <input
-          onChange={(e) => setEmail(e.target.value)}
-          value={email}
-          type="email"
-          name="email"
-          placeholder="Email"
-          required
-          onFocus={() => setEmailFocus(true)}
-          onBlur={() => setEmailFocus(false)}
-        />
-        {!validEmail && emailFocus ? <p>ex: example@gmail.com</p> : ''}
-        <br />
-        <label htmlFor="password">Password</label>
-        <input
-          onChange={(e) => setPassword(e.target.value)}
-          value={password}
-          type="password"
-          name="password"
-          placeholder="password"
-          required
-          onFocus={() => setPasswordFocus(true)}
-          onBlur={() => setPasswordFocus(false)}
-        />
-        {!validPassword && passwordFocus ? (
-          <p id="pwdnote">
-            8 to 24 characters.
-            <br />
-            Must include at leas 1 letters, 1 number
-            <br />
-          </p>
-        ) : (
-          <></>
-        )}
-        <br />
-        <label htmlFor="confirmPassword">Confirm Password</label>
-        <input
-          type="password"
-          id="confirmPassword"
-          name="confirmPassword"
-          placeholder="confirm password"
-          required
-          onChange={(e) => setMatchPassword(e.target.value)}
-          value={matchPassword}
-        />
-        {validMatch ? <p>Password Match</p> : <p>Password Not Match</p>}
-        <br />
-        <button disabled={isLoading} type="submit" onClick={handleSubmit}>
-          Register
-        </button>
-      </form>
+          <Grid
+            item
+            xs={12}
+            md={6}
+            sx={{
+              background: '#ffffff',
+              paddingTop: '40px !important',
+              paddingBottom: '40px !important',
+            }}
+          >
+            <Container maxWidth="lg">
+              <Typography variant="h4">Register</Typography>
+              <FormGroup sx={{ mt: '42px' }}>
+                <FormGroup sx={{ margin: { xs: '0 auto', md: '0' } }}>
+                  <label
+                    style={{
+                      cursor: 'pointer',
+                      position: 'relative',
+                      width: 125,
+                      height: 125,
+                    }}
+                    htmlFor="avatar_pic"
+                  >
+                    <Box
+                      sx={{
+                        position: 'relative',
+                      }}
+                    >
+                      <Avatar
+                        src={avatarPrev}
+                        sx={{
+                          height: 125,
+                          width: 125,
+                          border: '1px solid #333333',
+                        }}
+                        // style={{ marginBottom: '1.25rem' }}
+                      />
+
+                      <Avatar
+                        sx={{ position: 'absolute', right: 5, bottom: 2 }}
+                      >
+                        <CameraAltIcon />
+                      </Avatar>
+                    </Box>
+                    <Input
+                      onChange={handleFileInput}
+                      type="file"
+                      id="avatar_pic"
+                      placeholder="avatar"
+                      name="avatar"
+                      required
+                      hidden
+                    />
+                  </label>
+                </FormGroup>
+                <br />
+                <FormGroup
+                  sx={{
+                    display: 'flex',
+                    gap: '32px',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    justifyContent: { xs: 'center', md: 'space-between' },
+                  }}
+                >
+                  <TextField
+                    sx={{ width: { xs: '100%', md: '45%' } }}
+                    id="username"
+                    label="Username"
+                    variant="outlined"
+                    autoComplete="off"
+                    required
+                    value={username.replace(/\s/g, '').trim()}
+                    onChange={(e) => setUsername(e.target.value.trim())}
+                  />
+
+                  <TextField
+                    sx={{ width: { xs: '100%', md: '45%' } }}
+                    id="fullName"
+                    label="Full Name"
+                    variant="outlined"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                  />
+                </FormGroup>
+                <br />
+                <FormGroup
+                  sx={{
+                    display: 'flex',
+                    gap: '32px',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    justifyContent: { xs: 'center', md: 'space-between' },
+                  }}
+                >
+                  <FormControl sx={{ width: { xs: '100%', md: '45%' } }}>
+                    <InputLabel id="genderSelect">Gender</InputLabel>
+                    <Select
+                      labelId="genderSelect"
+                      value={gender}
+                      label="gender"
+                      onChange={(e) => setGender(e.target.value)}
+                      required
+                    >
+                      {genderValues.map((gender) => (
+                        <MenuItem key={gender} value={gender}>
+                          {gender}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <FormControl sx={{ width: { xs: '100%', md: '45%' } }}>
+                    <DesktopDatePicker
+                      label="Birthday"
+                      inputFormat="MM/DD/YYYY"
+                      value={birthday}
+                      onChange={(newValue: Dayjs | null) =>
+                        setBirthday(newValue)
+                      }
+                      renderInput={(params) => <TextField {...params} />}
+                    />
+                  </FormControl>
+                </FormGroup>
+                <br />
+                <MuiTelInput
+                  label="phone number"
+                  required
+                  value={phoneNumber}
+                  onChange={(newPhone: string) => setPhoneNumber(newPhone)}
+                  defaultCountry="ID"
+                  error={!validPhoneNumber}
+                  helperText={
+                    !validPhoneNumber ? 'phone number not valid !' : ''
+                  }
+                />
+                <br />
+                <TextField
+                  id="email"
+                  label="Email"
+                  required
+                  type="email"
+                  variant="outlined"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  error={!validEmail}
+                  helperText={!validEmail ? 'email not valid' : ''}
+                />
+                <FormControl sx={{ mt: '16px' }} variant="outlined">
+                  <InputLabel htmlFor="outlined-adornment-password">
+                    Password *
+                  </InputLabel>
+                  <OutlinedInput
+                    id="outlined-adornment-password"
+                    required
+                    autoComplete="off"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    error={!validPassword}
+                    onChange={(e) => setPassword(e.target.value)}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={(e) => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                    label="Password *"
+                  />
+                  {!validPassword && (
+                    <FormHelperText error id="accountId-error">
+                      Password must contain number and string (min 8 character)!
+                    </FormHelperText>
+                  )}
+                </FormControl>
+                <FormControl sx={{ mt: '16px' }} variant="outlined">
+                  <InputLabel htmlFor="confirmPassword">
+                    Confirm Password *
+                  </InputLabel>
+                  <OutlinedInput
+                    id="confirmPassword"
+                    required={true}
+                    name="confirmPassword"
+                    type={showMatchPassword ? 'text' : 'password'}
+                    value={matchPassword}
+                    onChange={(e) => setMatchPassword(e.target.value)}
+                    error={!validMatch}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={(e) =>
+                            setShowMatchPassword(!showMatchPassword)
+                          }
+                          edge="end"
+                        >
+                          {showMatchPassword ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                    label="Confirm Password *"
+                  />
+                  {!validMatch && (
+                    <FormHelperText error id="accountId-error">
+                      Password not match!
+                    </FormHelperText>
+                  )}
+                </FormControl>
+              </FormGroup>
+              {/* <FormGroup sx={{ marginTop: 3 }}>
+                <Typography variant="h5">Address</Typography>
+                <TextField
+                  sx={{ mt: '16px' }}
+                  id="street"
+                  label="Street"
+                  required
+                  type="text"
+                  variant="outlined"
+                  name="street"
+                  value={street}
+                  onChange={(e) => setStreet(e.target.value)}
+                />
+
+                <FormControl sx={{ mt: '16px' }}>
+                  <InputLabel id="countrySelect">Country</InputLabel>
+                  <Select
+                    labelId="countrySelect"
+                    label="Country"
+                    name="country"
+                    value={country}
+                    onChange={(e) => {
+                      setCountry(e.target.value);
+                      setState('');
+                      setCity('');
+                    }}
+                    required
+                  >
+                    {Country.getAllCountries().map((c) => (
+                      <MenuItem key={c.isoCode} value={c.isoCode}>
+                        {c.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ mt: '16px' }}>
+                  <InputLabel id="stateSelect">State</InputLabel>
+                  <Select
+                    labelId="stateSelect"
+                    label="State"
+                    name="state"
+                    value={state}
+                    onChange={(e) => {
+                      setState(e.target.value);
+                      setCity('');
+                    }}
+                    required
+                  >
+                    {State.getStatesOfCountry(country).map((s) => (
+                      <MenuItem key={s.isoCode} value={s.isoCode}>
+                        {s.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ mt: '16px' }}>
+                  <InputLabel id="citySelect">City</InputLabel>
+                  <Select
+                    labelId="citySelect"
+                    label="City"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    required
+                  >
+                    {City.getCitiesOfState(country, state).map((city) => (
+                      <MenuItem key={city.name} value={city.name}>
+                        {city.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <TextField
+                  sx={{ mt: '16px' }}
+                  id="zipCode"
+                  label="zip code"
+                  required
+                  type="number"
+                  inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                  variant="outlined"
+                  name="zipCode"
+                  value={zipCode}
+                  onChange={(e) => setZipCode(e.target.value)}
+                />
+              </FormGroup> */}
+              <Button
+                type="submit"
+                onClick={handleSubmit}
+                sx={{ width: '100%', mt: '24px' }}
+                variant="contained"
+              >
+                Register
+              </Button>
+            </Container>
+          </Grid>
+        </Grid>
+      </main>
     </>
   );
 };

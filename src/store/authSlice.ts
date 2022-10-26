@@ -2,15 +2,21 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { toast } from 'react-toastify';
 import { RootState } from '.';
 import { BACKEND_URL } from '@/config/config';
-import { IUserLogin, IUserType } from '@/interfaces/user.interface';
+import {
+  IUser,
+  IUserDetailsType,
+  IUserLogin,
+  IUserType,
+} from '@interfaces/user.interface';
 
 // Define a type for the slice state
 interface AuthState {
+  userId: string | null;
   isAuth: boolean;
   persist: boolean;
   isLoading: boolean;
-  user: IUserType | null;
-  userDetails: object;
+  user: IUser | null;
+  userDetails: IUserDetailsType | null;
   visited_user: object;
   visited_userDetails: object;
 }
@@ -22,8 +28,9 @@ const initialState: AuthState = {
   isAuth: false,
   persist: persistStorage !== null ? JSON.parse(persistStorage) : false,
   isLoading: false,
+  userId: null,
   user: null,
-  userDetails: {},
+  userDetails: null,
   visited_user: {},
   visited_userDetails: {},
 };
@@ -81,7 +88,7 @@ export const registerUser = createAsyncThunk(
 );
 
 export const loginUser = createAsyncThunk(
-  `${BACKEND_URL}/auth/login`,
+  `auth/login`,
   async (payload: IUserLogin) => {
     const res = await fetch(`${BACKEND_URL}/auth/login`, {
       method: 'POST',
@@ -155,11 +162,16 @@ export const authSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.user = action.payload;
-      state.isAuth = true;
       // state.userDetails = action.payload.userDetails;
+    },
+    setUserDetail: (state, action) => {
+      state.userDetails = action.payload;
     },
     setIsAuth: (state, action) => {
       state.isAuth = action.payload;
+    },
+    setUserId: (state, action) => {
+      state.userId = action.payload;
     },
     setPersist: (state, action) => {
       state.persist = action.payload;
@@ -199,13 +211,19 @@ export const authSlice = createSlice({
       state.isLoading = false;
       state.isAuth = false;
       state.user = null;
-      state.userDetails = {};
+      state.userDetails = null;
     },
   },
 });
 
-export const { setUser, setIsAuth, setPersist, setIsLoading } =
-  authSlice.actions;
+export const {
+  setUser,
+  setIsAuth,
+  setPersist,
+  setIsLoading,
+  setUserDetail,
+  setUserId,
+} = authSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectAuth = (state: RootState) => state.auth;
