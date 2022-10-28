@@ -40,8 +40,6 @@ import CameraAltIcon from '@mui/icons-material/CameraAlt';
 
 const Register: React.FC = () => {
   const dispatch = useAppDispatch();
-
-  // global state
   const isLoading = useAppSelector((state) => state.auth.isLoading);
 
   const genderValues = Object.values(EGender);
@@ -53,7 +51,6 @@ const Register: React.FC = () => {
 
   const [username, setUsername] = useState<string>('');
   const [validUsername, setValidUsername] = useState<boolean>(false);
-  const [usernameFocus, setUsernameFocus] = useState<boolean>(false);
 
   const [fullName, setFullName] = useState<string>('');
   const [gender, setGender] = useState<string | undefined>('');

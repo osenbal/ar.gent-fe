@@ -15,7 +15,7 @@ const Home: React.FC = () => {
 
       <Ribbon />
       <main>
-        <Container style={{ minHeight: '100vh' }} maxWidth="xl">
+        <Container style={{ minHeight: '100vh' }} maxWidth="lg">
           <Typography
             variant="h3"
             sx={{ marginTop: { xs: '62px', md: '278px' } }}

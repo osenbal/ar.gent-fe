@@ -1,5 +1,5 @@
 import { useAppDispatch } from '@hooks/redux.hook';
-import { setIsAuth, setUser, setUserId } from '@/store/authSlice';
+import { setIsAuth, setUserId } from '@/store/authSlice';
 import { BACKEND_URL } from '@/config/config';
 
 const useRefreshToken = () => {

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
-import { setUserDetail, setUser } from '@/store/authSlice';
+import { setUser } from '@/store/authSlice';
 import { BACKEND_URL } from '@/config/config';
-import Experience from './Experience/Experience';
 import Summary from './Summary/Summary';
 import Education from './Education/Education';
 import { useParams } from 'react-router-dom';
+import Experience from './Experience/Experience';
+import Skills from './Skills/Skills';
 
 const Profile: React.FC = () => {
   const { user, userId } = useAppSelector((state) => state.auth);
@@ -60,6 +61,9 @@ const Profile: React.FC = () => {
       ) : (
         <>
           <Summary />
+          <Education />
+          <Experience />
+          <Skills />
         </>
       )}
     </>

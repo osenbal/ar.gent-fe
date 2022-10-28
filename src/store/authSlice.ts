@@ -6,7 +6,6 @@ import {
   IUser,
   IUserDetailsType,
   IUserLogin,
-  IUserType,
 } from '@interfaces/user.interface';
 
 // Define a type for the slice state

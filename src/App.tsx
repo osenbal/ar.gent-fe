@@ -12,7 +12,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 const App: React.FC = () => {
   const locales = ['en', 'fr', 'de', 'ru', 'ar-sa'] as const;
   const [mode, setMode] = useState<'light' | 'dark'>('light');
-  const [locale, setLocale] = React.useState<typeof locales[number]>('en');
+  const [locale] = React.useState<typeof locales[number]>('en');
 
   const colorMode = useMemo(
     () => ({

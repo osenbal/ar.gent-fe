@@ -18,11 +18,10 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import { useMediaQuery } from '@mui/material';
-import MailIcon from '@mui/icons-material/Mail';
 import { useAppSelector } from '@/hooks/redux.hook';
 import { Outlet } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
-import { Link, NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 const drawerWidth = 240;
 
@@ -32,6 +31,9 @@ const Main = styled('main')<{
 }>(({ theme, open, uptab }) => ({
   flexGrow: 1,
   padding: theme.spacing(3),
+  ...(!uptab && {
+    padding: `${theme.spacing(3)} 8px`,
+  }),
   ...(open
     ? {
         transition: theme.transitions.create('margin', {
@@ -89,8 +91,8 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function UserLoggedInLayout() {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(true);
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
+  const [open, setOpen] = React.useState(upTabScreen);
   const { userId } = useAppSelector((state) => state.auth);
   const location = useLocation();
 
