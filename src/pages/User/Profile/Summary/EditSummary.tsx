@@ -25,7 +25,6 @@ type props = {
 const EditSummary: React.FC<props> = ({ open, handleClose }) => {
   const { user } = useAppSelector((state) => state.auth);
   const [fullName, setFullName] = useState<string>('');
-
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [validPhoneNumber, setValidPhoneNumber] = useState<boolean>(false);
 
@@ -42,7 +41,6 @@ const EditSummary: React.FC<props> = ({ open, handleClose }) => {
   useEffect(() => {
     if (user) {
       setFullName(user.fullName);
-      setUsername(user.username);
       setGender(user.gender);
       setBirthday(dayjs(user.birthday));
       setPhoneNumber(user.phoneNumber);
