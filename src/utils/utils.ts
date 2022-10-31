@@ -25,15 +25,20 @@ export const onlyNumberKeyInput = (evt: any) => {
   return true;
 };
 
-export const parseDate = (date: Date) => {
-  const yyyy = date.getFullYear();
-  let mm = (date.getMonth() + 1).toString(); // Months start at 0!
-  let dd = date.getDate().toString();
+export const parseDate = (date: Date | undefined) => {
+  if (!date) {
+    return '';
+  }
+  const d = new Date(date);
+
+  const yyyy = d.getFullYear();
+  let mm = (d.getMonth() + 1).toString(); // Months start at 0!
+  let dd = d.getDate().toString();
 
   if (Number(dd) < 10) dd = '0' + dd;
   if (Number(mm) < 10) mm = '0' + mm;
 
-  const formattedToday = yyyy + '-' + mm + '-' + dd;
+  const formattedToday = dd + '-' + mm + '-' + yyyy;
 
   return formattedToday;
 };

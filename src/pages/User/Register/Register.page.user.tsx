@@ -356,7 +356,7 @@ const Register: React.FC = () => {
                   <FormControl sx={{ width: { xs: '100%', md: '45%' } }}>
                     <DesktopDatePicker
                       label="Birthday"
-                      inputFormat="MM/DD/YYYY"
+                      inputFormat="DD/MM/YYYY"
                       value={birthday}
                       onChange={(newValue: Dayjs | null) =>
                         setBirthday(newValue)

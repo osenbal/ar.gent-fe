@@ -11,7 +11,7 @@ const Experience: React.FC = () => {
         <CardContent>
           <IconButton
             sx={{
-              backgroundColor: '#eeeeee',
+              backgroundColor: 'inherit',
               position: 'absolute',
               top: 4,
               right: 8,

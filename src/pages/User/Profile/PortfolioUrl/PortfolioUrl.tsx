@@ -8,10 +8,9 @@ import {
   Button,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { Edit } from '@mui/icons-material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
-const Skills: React.FC = () => {
+const PortfolioUrl: React.FC = () => {
   return (
     <Box sx={{ position: 'relative', marginTop: 2 }}>
       <Card>
@@ -27,21 +26,21 @@ const Skills: React.FC = () => {
             <AddIcon />
           </IconButton>
           <Typography variant="h6" sx={{ fontWeight: '700' }}>
-            Skills
+            Portfolio URL
           </Typography>
         </CardContent>
 
         <CardContent sx={{ display: 'flex', gap: 4 }}>
           <Button>
-            HTML{' '}
+            www.github.com/osenbal{' '}
             <DeleteForeverIcon sx={{ marginLeft: '0.5rem', width: '20px' }} />
           </Button>
           <Button>
-            Javascript{' '}
+            www.instagram.com{' '}
             <DeleteForeverIcon sx={{ marginLeft: '0.5rem', width: '20px' }} />
           </Button>
           <Button>
-            CSS{' '}
+            www.canva.com{' '}
             <DeleteForeverIcon sx={{ marginLeft: '0.5rem', width: '20px' }} />
           </Button>
         </CardContent>
@@ -50,4 +49,4 @@ const Skills: React.FC = () => {
   );
 };
 
-export default Skills;
+export default PortfolioUrl;

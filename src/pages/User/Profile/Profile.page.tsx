@@ -8,6 +8,7 @@ import Education from './Education/Education';
 import { useParams } from 'react-router-dom';
 import Experience from './Experience/Experience';
 import Skills from './Skills/Skills';
+import PortfolioUrl from './PortfolioUrl/PortfolioUrl';
 
 const Profile: React.FC = () => {
   const { user, userId } = useAppSelector((state) => state.auth);
@@ -46,6 +47,7 @@ const Profile: React.FC = () => {
     };
   }, [id]);
 
+  console.log(id);
   return (
     <>
       <Helmet>
@@ -60,10 +62,11 @@ const Profile: React.FC = () => {
         <p>User Not Found</p>
       ) : (
         <>
-          <Summary />
+          <Summary id={id} />
           <Education />
           <Experience />
           <Skills />
+          <PortfolioUrl />
         </>
       )}
     </>
