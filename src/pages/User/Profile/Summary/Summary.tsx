@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAppSelector } from '@/hooks/redux.hook';
 import {
   Avatar,
@@ -11,25 +11,61 @@ import {
   Modal,
   Fade,
   Backdrop,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  DialogTitle,
+  DialogContent,
+  Dialog,
   Input,
 } from '@mui/material';
+import EditSummary from './EditSummary';
 import { styled } from '@mui/material/styles';
 import { Edit, CameraAlt } from '@mui/icons-material';
+import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import { parseDate } from '@/utils/utils';
+import dayjs, { Dayjs } from 'dayjs';
+import { EGender } from '@/interfaces/user.interface';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import { MuiTelInput } from 'mui-tel-input';
+import { City, Country, State } from 'country-state-city';
+import { PHONE_NUMBER_REGEX } from '@/constant/_regex';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import EditSummary from './EditSummary';
+import { BACKEND_URL } from '@/config/config';
 
 const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
   const { userId, user } = useAppSelector((state) => state.auth);
+  const [username, setUsername] = useState<string>('');
+  const [fullName, setFullName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [cv, setCv] = useState<string>('');
+
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [validPhoneNumber, setValidPhoneNumber] = useState<boolean>(false);
+
+  const genderValues = Object.values(EGender);
+  const [gender, setGender] = useState<string>('');
+  const [birthday, setBirthday] = useState<Dayjs | null>(null);
 
   const [avatar, setAvatar] = useState<string | undefined>(user?.avatar);
   const [banner, setBanner] = useState<string | undefined>(user?.banner);
 
+  const [street, setStreet] = useState<string>('');
+  const [city, setCity] = useState<string>('');
+  const [country, setCountry] = useState<string>('');
+  const [zipCode, setZipCode] = useState<number>();
+  const [state, setState] = useState<string>('');
+
+  const [dataEdited, setDataEdited] = useState<any>({
+    fullName: '',
+    gender: '',
+    phoneNumber: '',
+  });
+
   const [open, setOpen] = useState(false);
   const [openInfo, setOpenInfo] = useState(false);
-
-  const handleOpenEditSummary = () => setOpen(true);
-  const handleCloseEditSummary = () => setOpen(false);
 
   const Banner = styled('img')({
     width: '100%',
@@ -38,20 +74,84 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
   });
 
   const style = {
-    position: 'absolute' as 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
     width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
     p: 4,
   };
 
+  const handleOpenEditSummary = () => setOpen(true);
+  const handleCloseEditSummary = () => setOpen(false);
+
+  const handleSaveChanges = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log('save changes');
+    console.log(fullName);
+
+    const data = {
+      fullName: dataEdited.fullName,
+      gender: dataEdited.gender,
+    };
+
+    const res = await fetch(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    console.log(res);
+
+    if (res.ok) {
+      setOpen(false);
+      setFullName(dataEdited.fullName);
+      setGender(dataEdited.gender);
+      console.log(dataEdited);
+    }
+  };
+
+  const setDataSummary = useCallback(() => {
+    if (user) {
+      setFullName(user.fullName);
+      setUsername(user.username);
+      setEmail(user.email);
+      setGender(user.gender);
+      setCv(user.cv);
+      setBirthday(dayjs(user.birthday));
+      setPhoneNumber(user.phoneNumber);
+      setStreet(user.address.street);
+      setCountry(user.address.country);
+      setState(user.address.state);
+      setCity(user.address.city);
+      setZipCode(Number(user.address.zipCode));
+    }
+  }, [user]);
+
+  const handleEditChange = useCallback(() => {
+    setDataEdited((prev: any) => ({ ...prev, fullName, gender }));
+  }, [fullName, gender]);
+
+  useEffect(() => {
+    setDataSummary();
+    console.log('useEffect');
+  }, [setDataSummary]);
+
+  useEffect(() => {
+    setValidPhoneNumber(PHONE_NUMBER_REGEX.test(phoneNumber));
+  }, [phoneNumber]);
+
+  useEffect(() => {
+    handleEditChange();
+    console.log('useEffect set edit');
+  }, [handleEditChange, open]);
+
+  useEffect(() => {
+    setValidPhoneNumber(PHONE_NUMBER_REGEX.test(dataEdited.phoneNumber));
+    console.log('useEffect set phone');
+  }, [dataEdited.phoneNumber]);
   return (
     <>
-      <Box sx={{ position: 'relative' }}>
+      <Box sx={{ position: 'relative', width: '100%' }}>
         <Banner src={banner} alt="banner" />
         <IconButton sx={{ position: 'absolute', top: '0', right: '0' }}>
           <CameraAlt />
@@ -137,18 +237,194 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                   >
                     <Edit color="action" />
                   </IconButton>
-
-                  <EditSummary
+                  <CustomizeModal
+                    onSave={handleSaveChanges}
                     open={open}
-                    handleClose={() => handleCloseEditSummary()}
-                  />
+                    title="Edit Summary"
+                    handleClose={handleCloseEditSummary}
+                    id="editSummary"
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        width: '100%',
+                      }}
+                    >
+                      {/* full name */}
+                      <TextField
+                        size="small"
+                        label="Full Name"
+                        value={dataEdited.fullName}
+                        onChange={(e) =>
+                          setDataEdited((prev: any) => ({
+                            ...prev,
+                            fullName: e.target.value,
+                          }))
+                        }
+                      />
+
+                      {/* gender */}
+                      <FormControl size="small" fullWidth sx={{ mt: 3 }}>
+                        <InputLabel id="genderSelect">Gender</InputLabel>
+                        <Select
+                          labelId="genderSelect"
+                          value={dataEdited.gender}
+                          label="gender"
+                          onChange={(e) =>
+                            setDataEdited((prev: any) => ({
+                              ...prev,
+                              gender: e.target.value,
+                            }))
+                          }
+                          required
+                        >
+                          {genderValues.map((gender) => (
+                            <MenuItem key={gender} value={gender}>
+                              {gender}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
+                      {/* birthday */}
+                      <FormControl size="small" fullWidth sx={{ mt: 3 }}>
+                        <DesktopDatePicker
+                          label="Birthday"
+                          inputFormat="DD/MM/YYYY"
+                          value={birthday}
+                          onChange={(newValue: Dayjs | null) =>
+                            setBirthday(newValue)
+                          }
+                          renderInput={(params) => <TextField {...params} />}
+                        />
+                      </FormControl>
+
+                      {/* phone number */}
+                      <MuiTelInput
+                        size="small"
+                        fullWidth
+                        sx={{ mt: 3 }}
+                        label="phone number"
+                        required
+                        value={phoneNumber}
+                        onChange={(newPhone: string) =>
+                          setPhoneNumber(newPhone)
+                        }
+                        defaultCountry="ID"
+                        error={!validPhoneNumber}
+                        helperText={
+                          !validPhoneNumber ? 'phone number not valid !' : ''
+                        }
+                      />
+                      <Typography
+                        sx={{ mt: 3, fontWeight: '500' }}
+                        variant="body1"
+                      >
+                        Address
+                      </Typography>
+
+                      {/* street */}
+                      <TextField
+                        sx={{ mt: 3 }}
+                        size="small"
+                        fullWidth
+                        id="street"
+                        label="Street"
+                        required
+                        type="text"
+                        variant="outlined"
+                        name="street"
+                        value={street}
+                        onChange={(e) => setStreet(e.target.value)}
+                      />
+
+                      {/* country */}
+                      <FormControl sx={{ mt: 3 }} size="small" fullWidth>
+                        <InputLabel id="countrySelect">Country</InputLabel>
+                        <Select
+                          labelId="countrySelect"
+                          label="Country"
+                          name="country"
+                          value={country}
+                          onChange={(e) => {
+                            setCountry(e.target.value);
+                            setState('');
+                            setCity('');
+                          }}
+                          required
+                        >
+                          {Country.getAllCountries().map((c) => (
+                            <MenuItem key={c.isoCode} value={c.isoCode}>
+                              {c.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
+                      {/* state */}
+                      <FormControl sx={{ mt: 3 }} size="small" fullWidth>
+                        <InputLabel id="stateSelect">State</InputLabel>
+                        <Select
+                          labelId="stateSelect"
+                          label="State"
+                          name="state"
+                          value={state}
+                          onChange={(e) => {
+                            setState(e.target.value);
+                            setCity('');
+                          }}
+                          required
+                        >
+                          {State.getStatesOfCountry(country).map((s) => (
+                            <MenuItem key={s.isoCode} value={s.isoCode}>
+                              {s.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
+                      {/* City */}
+                      <FormControl sx={{ mt: 3 }} size="small" fullWidth>
+                        <InputLabel id="citySelect">City</InputLabel>
+                        <Select
+                          labelId="citySelect"
+                          label="City"
+                          value={city}
+                          onChange={(e) => setCity(e.target.value)}
+                          required
+                        >
+                          {City.getCitiesOfState(country, state).map((city) => (
+                            <MenuItem key={city.name} value={city.name}>
+                              {city.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
+                      {/* Zip code */}
+                      <TextField
+                        sx={{ mt: 3 }}
+                        size="small"
+                        fullWidth
+                        id="zipCode"
+                        label="zip code"
+                        required
+                        type="number"
+                        variant="outlined"
+                        name="zipCode"
+                        value={zipCode}
+                        onChange={(e) => setZipCode(Number(e.target.value))}
+                      />
+                    </Box>
+                  </CustomizeModal>{' '}
                 </>
               )}
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <Typography variant="h5" sx={{ fontWeight: '700', marginTop: 2 }}>
-                {user?.fullName}
+                {fullName}
               </Typography>
               <Box sx={{ display: 'flex', gap: 3 }}>
                 <Typography variant="body1" sx={{ fontWeight: '500' }}>
@@ -161,60 +437,101 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                   >
                     Contact Info
                   </Link>
-                  <Modal
-                    aria-labelledby="transition-modal-info"
-                    aria-describedby="transition-modal-info"
+
+                  <Dialog
+                    maxWidth="lg"
                     open={openInfo}
                     onClose={() => setOpenInfo(false)}
-                    closeAfterTransition
-                    BackdropComponent={Backdrop}
-                    BackdropProps={{
-                      timeout: 500,
-                    }}
+                    aria-labelledby="contact info"
                   >
+                    <DialogTitle id="contact info">Contact Info</DialogTitle>
+
                     <Fade in={openInfo}>
                       <Box sx={style}>
-                        <Typography
-                          id="transition-modal-title"
-                          variant="h6"
-                          component="h2"
-                        >
-                          Contact Info
-                        </Typography>
                         <Box>
-                          <Typography sx={{ mt: 2 }}>Username :</Typography>
-                          <Typography>{user?.username}</Typography>
-                        </Box>
-                        <Box>
-                          <Typography sx={{ mt: 2 }}>Full Name :</Typography>
-                          <Typography>{user?.fullName}</Typography>
-                        </Box>
-                        <Box>
-                          <Typography sx={{ mt: 2 }}>Gender :</Typography>
-                          <Typography>{user?.gender}</Typography>
-                        </Box>
-                        <Box>
-                          <Typography sx={{ mt: 2 }}>Phone number :</Typography>
-                          <Typography>
-                            {user?.phoneNumber || 'Not set'}
+                          <Typography
+                            variant="body1"
+                            sx={{ mt: 2, fontWeight: '500' }}
+                          >
+                            Username :
                           </Typography>
+                          <Typography>{username}</Typography>
                         </Box>
                         <Box>
-                          <Typography sx={{ mt: 2 }}>Address :</Typography>
+                          <Typography
+                            variant="body1"
+                            sx={{ mt: 2, fontWeight: '500' }}
+                          >
+                            Full Name :
+                          </Typography>
+                          <Typography>{fullName}</Typography>
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="body1"
+                            sx={{ mt: 2, fontWeight: '500' }}
+                          >
+                            Gender :
+                          </Typography>
+                          <Typography>{gender}</Typography>
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="body1"
+                            sx={{ mt: 2, fontWeight: '500' }}
+                          >
+                            Phone number :
+                          </Typography>
+                          <Typography>{phoneNumber || 'Not set'}</Typography>
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="body1"
+                            sx={{ mt: 2, fontWeight: '500' }}
+                          >
+                            Address :
+                          </Typography>
+                          <Typography>{street || 'not set'}</Typography>
+                          <Typography sx={{ mt: 1, fontWeight: '500' }}>
+                            City :{' '}
+                          </Typography>
+                          <Typography>{city || 'not set'}</Typography>
+                          <Typography sx={{ mt: 1, fontWeight: '500' }}>
+                            State
+                          </Typography>
+                          <Typography>{state || 'not set'}</Typography>
+                          <Typography sx={{ mt: 1, fontWeight: '500' }}>
+                            Country :{' '}
+                          </Typography>
+                          <Typography>{country || 'not set'}</Typography>
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="body1"
+                            sx={{ mt: 2, fontWeight: '500' }}
+                          >
+                            Zip Code :
+                          </Typography>
                           <Typography>
-                            {user?.address.street}, {user?.address.city},{' '}
-                            {user?.address.country}
+                            {zipCode ? zipCode : 'Not set'}
                           </Typography>
                         </Box>
 
-                        <Typography sx={{ mt: 2 }}>Birthday :</Typography>
-                        <Typography>{parseDate(user?.birthday)}</Typography>
+                        <Typography
+                          variant="body1"
+                          sx={{ mt: 2, fontWeight: '500' }}
+                        >
+                          Birthday :
+                        </Typography>
+                        <Typography>
+                          {parseDate(birthday?.toISOString())}
+                        </Typography>
                       </Box>
                     </Fade>
-                  </Modal>
+                  </Dialog>
                 </>
               </Box>
-              {user?.cv && (
+              {cv && (
                 <Link
                   color="neutral"
                   underline="hover"

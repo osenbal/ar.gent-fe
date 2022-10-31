@@ -25,15 +25,15 @@ export const onlyNumberKeyInput = (evt: any) => {
   return true;
 };
 
-export const parseDate = (date: Date | undefined) => {
+export const parseDate = (date: string | undefined) => {
   if (!date) {
     return '';
   }
-  const d = new Date(date);
+  const dateObj = new Date(date);
 
-  const yyyy = d.getFullYear();
-  let mm = (d.getMonth() + 1).toString(); // Months start at 0!
-  let dd = d.getDate().toString();
+  const yyyy = dateObj.getFullYear();
+  let mm = (dateObj.getMonth() + 1).toString(); // Months start at 0!
+  let dd = dateObj.getDate().toString();
 
   if (Number(dd) < 10) dd = '0' + dd;
   if (Number(mm) < 10) mm = '0' + mm;

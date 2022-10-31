@@ -16,6 +16,7 @@ import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { MuiTelInput } from 'mui-tel-input';
 import { City, Country, State } from 'country-state-city';
 import { PHONE_NUMBER_REGEX } from '@/constant/_regex';
+import { BACKEND_URL } from '@/config/config';
 
 type props = {
   open: boolean;
@@ -23,7 +24,7 @@ type props = {
 };
 
 const EditSummary: React.FC<props> = ({ open, handleClose }) => {
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, userId } = useAppSelector((state) => state.auth);
   const [fullName, setFullName] = useState<string>('');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [validPhoneNumber, setValidPhoneNumber] = useState<boolean>(false);
@@ -35,8 +36,29 @@ const EditSummary: React.FC<props> = ({ open, handleClose }) => {
   const [street, setStreet] = useState<string>('');
   const [city, setCity] = useState<string>('');
   const [country, setCountry] = useState<string>('');
-  const [zipCode, setZipCode] = useState<number>();
+  const [zipCode, setZipCode] = useState<number | string>('');
   const [state, setState] = useState<string>('');
+
+  const handleSaveChanges = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log('save changes');
+    console.log(fullName);
+
+    const data = {
+      fullName,
+    };
+
+    const res = await fetch(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    console.log(res);
+  };
 
   useEffect(() => {
     if (user) {
@@ -44,11 +66,11 @@ const EditSummary: React.FC<props> = ({ open, handleClose }) => {
       setGender(user.gender);
       setBirthday(dayjs(user.birthday));
       setPhoneNumber(user.phoneNumber);
-      setStreet(user.address?.street);
-      setCountry(user.address?.country);
-      setState(user.address?.state);
-      setCity(user.address?.city);
-      setZipCode(Number(user.address?.zipCode));
+      setStreet(user.address.street);
+      setCountry(user.address.country);
+      setState(user.address.state);
+      setCity(user.address.city);
+      setZipCode(Number(user.address.zipCode));
     }
   }, [user, open]);
 
@@ -61,9 +83,10 @@ const EditSummary: React.FC<props> = ({ open, handleClose }) => {
   return (
     <>
       <CustomizeModal
+        onSave={handleSaveChanges}
         open={open}
         title="Edit Summary"
-        handleClose={handleClose}
+        handleClose={() => handleClose()}
         id="editSummary"
       >
         <Box
@@ -73,12 +96,15 @@ const EditSummary: React.FC<props> = ({ open, handleClose }) => {
             width: '100%',
           }}
         >
+          {/* full name */}
           <TextField
             size="small"
             label="Full Name"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
           />
+
+          {/* gender */}
           <FormControl size="small" fullWidth sx={{ mt: 3 }}>
             <InputLabel id="genderSelect">Gender</InputLabel>
             <Select
@@ -95,6 +121,8 @@ const EditSummary: React.FC<props> = ({ open, handleClose }) => {
               ))}
             </Select>
           </FormControl>
+
+          {/* birthday */}
           <FormControl size="small" fullWidth sx={{ mt: 3 }}>
             <DesktopDatePicker
               label="Birthday"
@@ -104,6 +132,8 @@ const EditSummary: React.FC<props> = ({ open, handleClose }) => {
               renderInput={(params) => <TextField {...params} />}
             />
           </FormControl>
+
+          {/* phone number */}
           <MuiTelInput
             size="small"
             fullWidth
@@ -119,6 +149,8 @@ const EditSummary: React.FC<props> = ({ open, handleClose }) => {
           <Typography sx={{ mt: 3, fontWeight: '500' }} variant="body1">
             Address
           </Typography>
+
+          {/* street */}
           <TextField
             sx={{ mt: 3 }}
             size="small"
@@ -133,6 +165,7 @@ const EditSummary: React.FC<props> = ({ open, handleClose }) => {
             onChange={(e) => setStreet(e.target.value)}
           />
 
+          {/* country */}
           <FormControl sx={{ mt: 3 }} size="small" fullWidth>
             <InputLabel id="countrySelect">Country</InputLabel>
             <Select
@@ -154,6 +187,8 @@ const EditSummary: React.FC<props> = ({ open, handleClose }) => {
               ))}
             </Select>
           </FormControl>
+
+          {/* state */}
           <FormControl sx={{ mt: 3 }} size="small" fullWidth>
             <InputLabel id="stateSelect">State</InputLabel>
             <Select
@@ -174,6 +209,8 @@ const EditSummary: React.FC<props> = ({ open, handleClose }) => {
               ))}
             </Select>
           </FormControl>
+
+          {/* City */}
           <FormControl sx={{ mt: 3 }} size="small" fullWidth>
             <InputLabel id="citySelect">City</InputLabel>
             <Select
@@ -191,6 +228,7 @@ const EditSummary: React.FC<props> = ({ open, handleClose }) => {
             </Select>
           </FormControl>
 
+          {/* Zip code */}
           <TextField
             sx={{ mt: 3 }}
             size="small"
@@ -199,10 +237,6 @@ const EditSummary: React.FC<props> = ({ open, handleClose }) => {
             label="zip code"
             required
             type="number"
-            inputProps={{
-              inputMode: 'numeric',
-              pattern: '[0-9]*',
-            }}
             variant="outlined"
             name="zipCode"
             value={zipCode}

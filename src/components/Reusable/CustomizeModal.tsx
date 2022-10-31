@@ -53,6 +53,7 @@ type props = {
   open: boolean;
   id: string;
   handleClose: () => void;
+  onSave: (e: React.MouseEvent) => Promise<void>;
 };
 
 const CustomizeModal: React.FC<props> = ({
@@ -61,6 +62,7 @@ const CustomizeModal: React.FC<props> = ({
   open,
   handleClose,
   id,
+  onSave,
 }) => {
   return (
     <div>
@@ -70,7 +72,9 @@ const CustomizeModal: React.FC<props> = ({
         </BootstrapDialogTitle>
         <DialogContent dividers>{children}</DialogContent>
         <DialogActions>
-          <Button autoFocus>Save changes</Button>
+          <Button autoFocus onClick={onSave}>
+            Save changes
+          </Button>
         </DialogActions>
       </BootstrapDialog>
     </div>

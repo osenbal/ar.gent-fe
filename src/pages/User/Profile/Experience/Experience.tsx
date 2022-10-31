@@ -6,7 +6,7 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 const Experience: React.FC = () => {
   return (
-    <Box sx={{ position: 'relative', marginTop: 2 }}>
+    <Box sx={{ position: 'relative', marginTop: 2, width: '100%' }}>
       <Card>
         <CardContent>
           <IconButton
