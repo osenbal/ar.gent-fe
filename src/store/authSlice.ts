@@ -71,11 +71,12 @@ export const registerUser = createAsyncThunk(
     const data = await res.json();
 
     if (res.ok) {
+      console.log(data);
       toast.success(`${data.message}`, {
         position: 'top-right',
         theme: 'dark',
       });
-      return { isAuth: true };
+      return { isAuth: true, userId: data.userId };
     } else {
       toast.error(`${data.message}`, {
         position: 'bottom-left',
@@ -197,6 +198,7 @@ export const authSlice = createSlice({
     },
     [registerUser.fulfilled.type]: (state, { payload }) => {
       state.isAuth = payload.isAuth;
+      state.userId = payload.userId;
       state.isLoading = false;
     },
     [loginUser.fulfilled.type]: (state, { payload }) => {
