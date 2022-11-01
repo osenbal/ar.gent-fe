@@ -1,39 +1,34 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import CustomizeModal from '@/components/Reusable/CustomizeModal';
+import { MuiTelInput } from 'mui-tel-input';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { useAppSelector } from '@/hooks/redux.hook';
+import { EGender } from '@/interfaces/user.interface';
+import dayjs, { Dayjs } from 'dayjs';
+import { City, Country, State } from 'country-state-city';
+import { parseDate } from '@/utils/utils';
+import { BACKEND_URL } from '@/config/config';
+import { PHONE_NUMBER_REGEX } from '@/constant/_regex';
+import { styled } from '@mui/material/styles';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import { Edit, CameraAlt } from '@mui/icons-material';
+import { ToastContainer, toast } from 'react-toastify';
 import {
   Avatar,
-  Card,
-  CardContent,
   Box,
   Typography,
   Link,
   IconButton,
-  Modal,
   Fade,
-  Backdrop,
   TextField,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   DialogTitle,
-  DialogContent,
   Dialog,
   Input,
 } from '@mui/material';
-import EditSummary from './EditSummary';
-import { styled } from '@mui/material/styles';
-import { Edit, CameraAlt } from '@mui/icons-material';
-import CustomizeModal from '@/components/Reusable/CustomizeModal';
-import { parseDate } from '@/utils/utils';
-import dayjs, { Dayjs } from 'dayjs';
-import { EGender } from '@/interfaces/user.interface';
-import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import { MuiTelInput } from 'mui-tel-input';
-import { City, Country, State } from 'country-state-city';
-import { PHONE_NUMBER_REGEX } from '@/constant/_regex';
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import { BACKEND_URL } from '@/config/config';
 
 const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
   const { userId, user } = useAppSelector((state) => state.auth);
@@ -83,12 +78,16 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
 
   const handleSaveChanges = async (e: React.MouseEvent) => {
     e.preventDefault();
-    console.log('save changes');
-    console.log(fullName);
+
+    if (!validPhoneNumber) {
+      toast.error('Phone number is not valid');
+      return;
+    }
 
     const data = {
       fullName: dataEdited.fullName,
       gender: dataEdited.gender,
+      phoneNumber: dataEdited.phoneNumber,
     };
 
     const res = await fetch(`${BACKEND_URL}/user/${userId}`, {
@@ -106,6 +105,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
       setOpen(false);
       setFullName(dataEdited.fullName);
       setGender(dataEdited.gender);
+      setPhoneNumber(dataEdited.phoneNumber);
       console.log(dataEdited);
     }
   };
@@ -128,8 +128,9 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
   }, [user]);
 
   const handleEditChange = useCallback(() => {
-    setDataEdited((prev: any) => ({ ...prev, fullName, gender }));
-  }, [fullName, gender]);
+    setDataEdited((prev: any) => ({ ...prev, fullName, gender, phoneNumber }));
+    console.log('set default');
+  }, [fullName, gender, phoneNumber]);
 
   useEffect(() => {
     setDataSummary();
@@ -149,8 +150,10 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     setValidPhoneNumber(PHONE_NUMBER_REGEX.test(dataEdited.phoneNumber));
     console.log('useEffect set phone');
   }, [dataEdited.phoneNumber]);
+
   return (
     <>
+      <ToastContainer />
       <Box sx={{ position: 'relative', width: '100%' }}>
         <Banner src={banner} alt="banner" />
         <IconButton sx={{ position: 'absolute', top: '0', right: '0' }}>
@@ -307,9 +310,12 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                         sx={{ mt: 3 }}
                         label="phone number"
                         required
-                        value={phoneNumber}
+                        value={dataEdited.phoneNumber}
                         onChange={(newPhone: string) =>
-                          setPhoneNumber(newPhone)
+                          setDataEdited((prev: any) => ({
+                            ...prev,
+                            phoneNumber: newPhone,
+                          }))
                         }
                         defaultCountry="ID"
                         error={!validPhoneNumber}
@@ -428,7 +434,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
               </Typography>
               <Box sx={{ display: 'flex', gap: 3 }}>
                 <Typography variant="body1" sx={{ fontWeight: '500' }}>
-                  {user?.address?.country}
+                  {country}
                 </Typography>
                 <>
                   <Link
@@ -456,6 +462,15 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                             Username :
                           </Typography>
                           <Typography>{username}</Typography>
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="body1"
+                            sx={{ mt: 2, fontWeight: '500' }}
+                          >
+                            Email :
+                          </Typography>
+                          <Typography>{email}</Typography>
                         </Box>
                         <Box>
                           <Typography
@@ -544,30 +559,6 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
             </Box>
           </Box>
         </Box>
-      </Box>
-
-      {/* About */}
-      <Box sx={{ position: 'relative', marginTop: 2 }}>
-        <Card>
-          <IconButton
-            sx={{
-              background: 'inherit',
-              position: 'absolute',
-              top: 4,
-              right: 8,
-            }}
-          >
-            <Edit />
-          </IconButton>
-          <CardContent>
-            <Typography variant="h6" sx={{ fontWeight: '700' }}>
-              About
-            </Typography>
-            <Typography variant="body1" sx={{ fontWeight: '500' }}>
-              {user?.about}
-            </Typography>
-          </CardContent>
-        </Card>
       </Box>
     </>
   );

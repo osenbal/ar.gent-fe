@@ -7,6 +7,7 @@ import Summary from './Summary/Summary';
 import Education from './Education/Education';
 import { useParams } from 'react-router-dom';
 import Experience from './Experience/Experience';
+import About from './About/About';
 import Skills from './Skills/Skills';
 import PortfolioUrl from './PortfolioUrl/PortfolioUrl';
 
@@ -63,6 +64,7 @@ const Profile: React.FC = () => {
       ) : (
         <>
           <Summary id={id} />
+          <About />
           <Education />
           <Experience />
 
