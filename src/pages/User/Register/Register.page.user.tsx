@@ -229,14 +229,17 @@ const Register: React.FC = () => {
       <ToastContainer />
 
       <main>
-        <Grid container justifyContent="center" alignItems="center">
+        <Grid
+          container
+          justifyContent="center"
+          alignItems="center"
+          sx={{ background: '#96C7D1' }}
+        >
           <Grid
             sx={{
               display: {
                 xs: 'none',
                 md: 'grid',
-                minHeight: '100vh',
-                background: '#96C7D1',
               },
             }}
             item

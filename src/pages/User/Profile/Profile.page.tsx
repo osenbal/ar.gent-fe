@@ -69,8 +69,8 @@ const Profile: React.FC = () => {
           <Experience />
 
           {/* problem responsive */}
-          {/* <Skills /> */}
-          {/* <PortfolioUrl /> */}
+          <Skills />
+          <PortfolioUrl />
         </>
       )}
     </>

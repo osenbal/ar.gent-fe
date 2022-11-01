@@ -31,7 +31,7 @@ const Skills: React.FC = () => {
           </Typography>
         </CardContent>
 
-        <CardContent sx={{ display: 'flex', gap: 4 }}>
+        <CardContent sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
           <Button>
             HTML{' '}
             <DeleteForeverIcon sx={{ marginLeft: '0.5rem', width: '20px' }} />
@@ -40,6 +40,26 @@ const Skills: React.FC = () => {
             Javascript{' '}
             <DeleteForeverIcon sx={{ marginLeft: '0.5rem', width: '20px' }} />
           </Button>
+          <Button>
+            CSS{' '}
+            <DeleteForeverIcon sx={{ marginLeft: '0.5rem', width: '20px' }} />
+          </Button>
+          <Button>
+            CSS{' '}
+            <DeleteForeverIcon sx={{ marginLeft: '0.5rem', width: '20px' }} />
+          </Button>
+          <Button>
+            CSS{' '}
+            <DeleteForeverIcon sx={{ marginLeft: '0.5rem', width: '20px' }} />
+          </Button>
+          <Button>
+            CSS{' '}
+            <DeleteForeverIcon sx={{ marginLeft: '0.5rem', width: '20px' }} />
+          </Button>
+          <Button>
+            CSS{' '}
+            <DeleteForeverIcon sx={{ marginLeft: '0.5rem', width: '20px' }} />
+          </Button>{' '}
           <Button>
             CSS{' '}
             <DeleteForeverIcon sx={{ marginLeft: '0.5rem', width: '20px' }} />

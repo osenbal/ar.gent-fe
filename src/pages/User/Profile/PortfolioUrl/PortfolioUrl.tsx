@@ -30,7 +30,7 @@ const PortfolioUrl: React.FC = () => {
           </Typography>
         </CardContent>
 
-        <CardContent sx={{ display: 'flex', gap: 4 }}>
+        <CardContent sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
           <Button>
             www.github.com/osenbal{' '}
             <DeleteForeverIcon sx={{ marginLeft: '0.5rem', width: '20px' }} />

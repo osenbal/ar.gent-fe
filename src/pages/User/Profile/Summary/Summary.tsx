@@ -13,6 +13,7 @@ import { styled } from '@mui/material/styles';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { Edit, CameraAlt } from '@mui/icons-material';
 import { ToastContainer, toast } from 'react-toastify';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 import {
   Avatar,
   Box,
@@ -28,6 +29,7 @@ import {
   DialogTitle,
   Dialog,
   Input,
+  Button,
 } from '@mui/material';
 
 const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
@@ -56,7 +58,13 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
   const [dataEdited, setDataEdited] = useState<any>({
     fullName: '',
     gender: '',
+    birthday: '',
     phoneNumber: '',
+    street: '',
+    city: '',
+    state: '',
+    country: '',
+    zipCode: '',
   });
 
   const [open, setOpen] = useState(false);
@@ -88,6 +96,12 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
       fullName: dataEdited.fullName,
       gender: dataEdited.gender,
       phoneNumber: dataEdited.phoneNumber,
+      birthday: dataEdited.birthday,
+      street: dataEdited.street,
+      city: dataEdited.city,
+      state: dataEdited.state,
+      country: dataEdited.country,
+      zipCode: dataEdited.zipCode,
     };
 
     const res = await fetch(`${BACKEND_URL}/user/${userId}`, {
@@ -106,6 +120,12 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
       setFullName(dataEdited.fullName);
       setGender(dataEdited.gender);
       setPhoneNumber(dataEdited.phoneNumber);
+      setBirthday(dataEdited.birthday);
+      setStreet(dataEdited.street);
+      setCity(dataEdited.city);
+      setState(dataEdited.state);
+      setCountry(dataEdited.country);
+      setZipCode(dataEdited.zipCode);
       console.log(dataEdited);
     }
   };
@@ -128,9 +148,30 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
   }, [user]);
 
   const handleEditChange = useCallback(() => {
-    setDataEdited((prev: any) => ({ ...prev, fullName, gender, phoneNumber }));
+    setDataEdited((prev: any) => ({
+      ...prev,
+      fullName,
+      gender,
+      phoneNumber,
+      birthday,
+      street,
+      city,
+      state,
+      country,
+      zipCode,
+    }));
     console.log('set default');
-  }, [fullName, gender, phoneNumber]);
+  }, [
+    birthday,
+    city,
+    country,
+    fullName,
+    gender,
+    phoneNumber,
+    state,
+    street,
+    zipCode,
+  ]);
 
   useEffect(() => {
     setDataSummary();
@@ -166,7 +207,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
             paddingBottom: 2,
           }}
         >
-          <Box sx={{ marginLeft: 2 }}>
+          <Box sx={{ marginLeft: 2, marginRight: 2 }}>
             <Box>
               {userId === id ? (
                 <label
@@ -252,6 +293,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                         display: 'flex',
                         flexDirection: 'column',
                         width: '100%',
+                        minWidth: { xs: '100%', lg: '350px' },
                       }}
                     >
                       {/* full name */}
@@ -295,9 +337,12 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                         <DesktopDatePicker
                           label="Birthday"
                           inputFormat="DD/MM/YYYY"
-                          value={birthday}
+                          value={dataEdited.birthday}
                           onChange={(newValue: Dayjs | null) =>
-                            setBirthday(newValue)
+                            setDataEdited((prev: any) => ({
+                              ...prev,
+                              birthday: newValue,
+                            }))
                           }
                           renderInput={(params) => <TextField {...params} />}
                         />
@@ -341,8 +386,13 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                         type="text"
                         variant="outlined"
                         name="street"
-                        value={street}
-                        onChange={(e) => setStreet(e.target.value)}
+                        value={dataEdited.street}
+                        onChange={(e) =>
+                          setDataEdited((prev: any) => ({
+                            ...prev,
+                            street: e.target.value,
+                          }))
+                        }
                       />
 
                       {/* country */}
@@ -352,11 +402,17 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                           labelId="countrySelect"
                           label="Country"
                           name="country"
-                          value={country}
+                          value={dataEdited.country}
                           onChange={(e) => {
-                            setCountry(e.target.value);
-                            setState('');
-                            setCity('');
+                            setDataEdited((prev: any) => ({
+                              ...prev,
+                              country: e.target.value,
+                              state: '',
+                              city: '',
+                            }));
+
+                            // setState('');
+                            // setCity('');
                           }}
                           required
                         >
@@ -375,10 +431,14 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                           labelId="stateSelect"
                           label="State"
                           name="state"
-                          value={state}
+                          value={dataEdited.state}
                           onChange={(e) => {
-                            setState(e.target.value);
-                            setCity('');
+                            setDataEdited((prev: any) => ({
+                              ...prev,
+                              state: e.target.value,
+                              city: '',
+                            }));
+                            // setCity('');
                           }}
                           required
                         >
@@ -396,8 +456,13 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                         <Select
                           labelId="citySelect"
                           label="City"
-                          value={city}
-                          onChange={(e) => setCity(e.target.value)}
+                          value={dataEdited.city}
+                          onChange={(e) =>
+                            setDataEdited((prev: any) => ({
+                              ...prev,
+                              city: e.target.value,
+                            }))
+                          }
                           required
                         >
                           {City.getCitiesOfState(country, state).map((city) => (
@@ -419,8 +484,13 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                         type="number"
                         variant="outlined"
                         name="zipCode"
-                        value={zipCode}
-                        onChange={(e) => setZipCode(Number(e.target.value))}
+                        value={dataEdited.zipCode}
+                        onChange={(e) =>
+                          setDataEdited((prev: any) => ({
+                            ...prev,
+                            zipCode: e.target.value,
+                          }))
+                        }
                       />
                     </Box>
                   </CustomizeModal>{' '}
@@ -434,7 +504,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
               </Typography>
               <Box sx={{ display: 'flex', gap: 3 }}>
                 <Typography variant="body1" sx={{ fontWeight: '500' }}>
-                  {country}
+                  {Country.getCountryByCode(country)?.name}
                 </Typography>
                 <>
                   <Link
@@ -514,11 +584,16 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                           <Typography sx={{ mt: 1, fontWeight: '500' }}>
                             State
                           </Typography>
-                          <Typography>{state || 'not set'}</Typography>
+                          <Typography>
+                            {State.getStateByCode(state)?.name || 'not set'}
+                          </Typography>
                           <Typography sx={{ mt: 1, fontWeight: '500' }}>
                             Country :{' '}
                           </Typography>
-                          <Typography>{country || 'not set'}</Typography>
+                          <Typography>
+                            {Country.getCountryByCode(country)?.name ||
+                              'not set'}
+                          </Typography>
                         </Box>
                         <Box>
                           <Typography
@@ -546,7 +621,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                   </Dialog>
                 </>
               </Box>
-              {cv && (
+              {cv ? (
                 <Link
                   color="neutral"
                   underline="hover"
@@ -555,6 +630,23 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                 >
                   Download CV
                 </Link>
+              ) : userId === id ? (
+                <>
+                  <Button
+                    sx={{
+                      width: { sm: '100%', md: '25%', xl: '15%' },
+                      height: 32,
+                    }}
+                    variant="contained"
+                    component="label"
+                    endIcon={<FileUploadIcon />}
+                  >
+                    Upload Cv
+                    <input hidden accept="image/*" multiple type="file" />
+                  </Button>
+                </>
+              ) : (
+                <></>
               )}
             </Box>
           </Box>
