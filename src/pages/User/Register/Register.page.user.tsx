@@ -40,7 +40,7 @@ import CameraAltIcon from '@mui/icons-material/CameraAlt';
 
 const Register: React.FC = () => {
   const dispatch = useAppDispatch();
-  const isLoading = useAppSelector((state) => state.auth.isLoading);
+  const { isLoading } = useAppSelector((state) => state.auth);
 
   const genderValues = Object.values(EGender);
 
@@ -548,6 +548,7 @@ const Register: React.FC = () => {
                 />
               </FormGroup> */}
               <Button
+                disabled={isLoading}
                 type="submit"
                 onClick={handleSubmit}
                 sx={{ width: '100%', mt: '24px' }}

@@ -113,8 +113,6 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
       body: JSON.stringify(data),
     });
 
-    console.log(res);
-
     if (res.ok) {
       setOpen(false);
       setFullName(dataEdited.fullName);
@@ -126,7 +124,6 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
       setState(dataEdited.state);
       setCountry(dataEdited.country);
       setZipCode(dataEdited.zipCode);
-      console.log(dataEdited);
     }
   };
 
@@ -160,7 +157,6 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
       country,
       zipCode,
     }));
-    console.log('set default');
   }, [
     birthday,
     city,
@@ -175,7 +171,6 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
 
   useEffect(() => {
     setDataSummary();
-    console.log('useEffect');
   }, [setDataSummary]);
 
   useEffect(() => {
@@ -184,12 +179,10 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
 
   useEffect(() => {
     handleEditChange();
-    console.log('useEffect set edit');
   }, [handleEditChange, open]);
 
   useEffect(() => {
     setValidPhoneNumber(PHONE_NUMBER_REGEX.test(dataEdited.phoneNumber));
-    console.log('useEffect set phone');
   }, [dataEdited.phoneNumber]);
 
   return (
@@ -585,7 +578,8 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                             State
                           </Typography>
                           <Typography>
-                            {State.getStateByCode(state)?.name || 'not set'}
+                            {State.getStateByCodeAndCountry(state, country)
+                              ?.name || 'not set'}
                           </Typography>
                           <Typography sx={{ mt: 1, fontWeight: '500' }}>
                             Country :{' '}

@@ -33,7 +33,17 @@ const PersistLogin: React.FC = () => {
   }, []);
 
   return (
-    <>{!persist ? <Outlet /> : isLoading ? <p>Loading..</p> : <Outlet />}</>
+    <>
+      {!persist ? (
+        <Outlet />
+      ) : isAuth ? (
+        <Outlet />
+      ) : isLoading ? (
+        <div>Loading...</div>
+      ) : (
+        <Outlet />
+      )}
+    </>
   );
 };
 

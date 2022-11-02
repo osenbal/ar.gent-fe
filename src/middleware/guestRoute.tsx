@@ -34,10 +34,9 @@ const GuestRoute: React.FC = () => {
   }, []);
 
   return !isAuth ? (
-    
     <Outlet />
   ) : isLoading ? (
-    <p>Loading</p>
+    <p>Loading ...</p>
   ) : (
     <Navigate to="/home" />
   );

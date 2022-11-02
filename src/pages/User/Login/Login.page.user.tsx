@@ -27,7 +27,7 @@ import {
 
 const Login: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { persist } = useAppSelector((state) => state.auth);
+  const { persist, isLoading, isAuth } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -58,7 +58,10 @@ const Login: React.FC = () => {
     }
 
     dispatch(loginUser({ email, password }));
-    navigate(location.state?.from?.pathname || '/home', { replace: true });
+
+    if (isLoading === false && isAuth) {
+      navigate(location.state?.from?.pathname || '/home', { replace: true });
+    }
   };
 
   useEffect(() => {
@@ -175,7 +178,11 @@ const Login: React.FC = () => {
 
               <br />
 
-              <Button variant="contained" onClick={handleLogin}>
+              <Button
+                disabled={isLoading}
+                variant="contained"
+                onClick={handleLogin}
+              >
                 Login
               </Button>
             </FormGroup>

@@ -70,10 +70,13 @@ const About: React.FC = () => {
         onSave={handleSaveChanges}
       >
         <TextField
-          sx={{ minWidth: '350px', minHeight: '100px' }}
+          sx={{
+            minWidth: { xs: 'auto', md: '300px', lg: '400px' },
+            minHeight: '100px',
+          }}
           placeholder="Ex: Hi there, I'm a software engineer..."
           multiline
-          rows={4}
+          minRows={4}
           value={editAbout}
           onChange={(e) => setEditAbout(e.target.value)}
           maxRows={4}

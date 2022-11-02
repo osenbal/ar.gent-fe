@@ -71,7 +71,6 @@ export const registerUser = createAsyncThunk(
     const data = await res.json();
 
     if (res.ok) {
-      console.log(data);
       toast.success(`${data.message}`, {
         position: 'top-right',
         theme: 'dark',
@@ -102,7 +101,7 @@ export const loginUser = createAsyncThunk(
 
     const data = await res.json();
     if (res.ok) {
-      return { isAuth: true };
+      return { isAuth: true, userId: data.data.userId };
     } else {
       toast.error(`${data.message}`, {
         position: 'bottom-left',
@@ -203,6 +202,7 @@ export const authSlice = createSlice({
     },
     [loginUser.fulfilled.type]: (state, { payload }) => {
       state.isAuth = payload.isAuth;
+      state.userId = payload.userId;
       state.isLoading = false;
     },
     [loginUser.pending.type]: (state, { payload }) => {

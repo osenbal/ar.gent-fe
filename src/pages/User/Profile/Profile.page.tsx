@@ -48,7 +48,6 @@ const Profile: React.FC = () => {
     };
   }, [id]);
 
-  console.log(id);
   return (
     <>
       <Helmet>
