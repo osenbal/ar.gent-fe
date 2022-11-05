@@ -12,6 +12,7 @@ import GuestRoute from '@/middleware/guestRoute';
 import PersistLogin from '@/middleware/persistLogin';
 import ForgotPassword from '@pages/User/ForgotPassword/ForgotPassword.page';
 import UserLoggedInLayout from '@/components/Layouts/UserLoggedIn.layout';
+import JobDetails from '@/pages/User/Jobs/JobDetails';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -37,7 +38,7 @@ const AppRoutes: React.FC = () => {
 
                 <Route path="job" />
                 <Route path="job/create" />
-                <Route path="job/:id" />
+                <Route path="job/:id" element={<JobDetails />} />
 
                 <Route path="search" />
 

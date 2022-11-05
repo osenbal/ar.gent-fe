@@ -10,55 +10,56 @@ import {
   FormControl,
   FormControlLabel,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Edit } from '@mui/icons-material';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import dayjs, { Dayjs } from 'dayjs';
-import CardExperience from './CardExperience';
 
-const Experience: React.FC = () => {
-  const [openAdd, setOpenAdd] = useState<boolean>(false);
+const CardExperience: React.FC = () => {
+  const [openEdit, setOpenEdit] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [current, setCurrent] = useState<boolean>(false);
 
-  const handleOnAdd = async (e: React.MouseEvent) => {
+  const handleOnEdit = async (e: React.MouseEvent) => {
     e.preventDefault();
   };
 
   return (
     <>
-      <Box sx={{ position: 'relative', marginTop: 2, width: '100%' }}>
-        <Card>
-          <CardContent>
-            <IconButton
-              onClick={() => setOpenAdd(true)}
-              sx={{
-                backgroundColor: 'inherit',
-                position: 'absolute',
-                top: 4,
-                right: 8,
-              }}
-            >
-              <AddIcon />
-            </IconButton>
-            <Typography variant="h6" sx={{ fontWeight: '700' }}>
-              Experience
-            </Typography>
-            {/* list experience */}
-            <>
-              <CardExperience />
-            </>
-          </CardContent>
-        </Card>
-      </Box>
+      <Card sx={{ marginTop: 2, position: 'relative' }}>
+        <Box>
+          <IconButton
+            onClick={() => setOpenEdit(true)}
+            sx={{ position: 'absolute', top: 4, right: 48 }}
+          >
+            <Edit />
+          </IconButton>
+          <IconButton sx={{ position: 'absolute', top: 4, right: 8 }}>
+            <DeleteForeverIcon />
+          </IconButton>
+        </Box>
+        <CardContent>
+          <Typography variant="body1" sx={{ fontWeight: '500' }}>
+            Position
+          </Typography>
+          <Typography variant="body1" sx={{ fontWeight: '500' }}>
+            Company Name - Location
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: '200' }}>
+            (12-01-2020 - present)
+          </Typography>
+        </CardContent>
+      </Card>
+
       <>
         <CustomizeModal
-          title="Add Experience"
-          open={openAdd}
-          id="addExperience"
-          handleClose={() => setOpenAdd(false)}
-          onSave={handleOnAdd}
+          title="Edit Experience"
+          open={openEdit}
+          id="editExperience"
+          handleClose={() => setOpenEdit(false)}
+          onSave={handleOnEdit}
         >
           <Box
             sx={{
@@ -120,4 +121,4 @@ const Experience: React.FC = () => {
   );
 };
 
-export default Experience;
+export default CardExperience;
