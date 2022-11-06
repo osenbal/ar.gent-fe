@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
+import { useTheme } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import InboxIcon from '@mui/icons-material/MoveToInbox';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import {
   styled,
   Toolbar,
   Typography,
-  Button,
-  Box,
   Drawer,
   List,
   ListItem,
@@ -13,15 +18,6 @@ import {
   ListItemButton,
   ListItemIcon,
 } from '@mui/material';
-import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
-import MaterialUISwitch from '../Reusable/Switch';
-import { useTheme } from '@mui/material/styles';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import useMediaQuery from '@mui/material/useMediaQuery';
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;

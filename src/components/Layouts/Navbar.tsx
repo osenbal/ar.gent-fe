@@ -1,4 +1,12 @@
 import React, { useState } from 'react';
+import ColorModeContext from '@/Context/ColorMode.context';
+import MaterialUISwitch from '../Reusable/Switch';
+import { useTheme } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import LoginIcon from '@mui/icons-material/Login';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import { AppRegistration, ChevronRight } from '@mui/icons-material';
 import {
   AppBar,
   styled,
@@ -14,14 +22,6 @@ import {
   ListItemButton,
   ListItemIcon,
 } from '@mui/material';
-import MaterialUISwitch from '../Reusable/Switch';
-import { useTheme } from '@mui/material/styles';
-import ColorModeContext from '@/Context/ColorMode.context';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import LoginIcon from '@mui/icons-material/Login';
-import AddBoxIcon from '@mui/icons-material/AddBox';
-import { AppRegistration, ChevronRight } from '@mui/icons-material';
 
 const StyledToolbar = styled(Toolbar)({
   display: 'flex',

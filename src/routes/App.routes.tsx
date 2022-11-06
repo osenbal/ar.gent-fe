@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Routes, BrowserRouter } from 'react-router-dom';
 import Home from '@pages/User/Home/Home.page';
-import MainLayout from '@components/Layouts/User.layout';
+
 import Login from '@pages/User/Login/Login.page.user';
 import Register from '@pages/User/Register/Register.page.user';
 import SuccessRegister from '@/pages/User/Register/SuccessRegister.page';
@@ -13,37 +13,34 @@ import PersistLogin from '@/middleware/persistLogin';
 import ForgotPassword from '@pages/User/ForgotPassword/ForgotPassword.page';
 import UserLoggedInLayout from '@/components/Layouts/UserLoggedIn.layout';
 import JobDetails from '@/pages/User/Jobs/JobDetails';
+import JobLayout from '@/components/Layouts/JobLayout';
 
 const AppRoutes: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Home />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
-          <Route element={<GuestRoute />}>
-            <Route path="login" element={<Login />} />
-            <Route path="signup" element={<Register />} />
-            <Route
-              path="signup-success/:username"
-              element={<SuccessRegister />}
-            />
-          </Route>
+        <Route element={<GuestRoute />}>
+          <Route path="login" element={<Login />} />
+          <Route path="signup" element={<Register />} />
+          <Route
+            path="signup-success/:username"
+            element={<SuccessRegister />}
+          />
+        </Route>
 
-          <Route element={<PersistLogin />}>
-            <Route element={<ProtectedRoute />}>
-              <Route element={<UserLoggedInLayout />}>
-                <Route path="home" element={<HomeLoggedIn />} />
+        <Route element={<PersistLogin />}>
+          <Route element={<ProtectedRoute />}>
+            <Route element={<UserLoggedInLayout />}>
+              <Route path="home" element={<HomeLoggedIn />} />
 
-                <Route path="job" />
-                <Route path="job/create" />
-                <Route path="job/:id" element={<JobDetails />} />
-
-                <Route path="search" />
-
-                <Route path="profile/:id" element={<Profile />} />
+              <Route path="job/search/" element={<JobLayout />}>
+                <Route index element={<JobDetails />} />
               </Route>
+
+              <Route path="profile/:id" element={<Profile />} />
             </Route>
           </Route>
         </Route>

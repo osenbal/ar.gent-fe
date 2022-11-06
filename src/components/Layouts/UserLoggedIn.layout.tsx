@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { styled, useTheme } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -17,11 +18,14 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
-import { useMediaQuery } from '@mui/material';
 import { useAppSelector } from '@/hooks/redux.hook';
 import { Outlet } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
+import HomeIcon from '@mui/icons-material/Home';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import MaterialUISwitch from '../Reusable/Switch';
+import { ColorModeContext } from '@/Context/ColorMode.context';
 
 const drawerWidth = 240;
 
@@ -91,6 +95,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function UserLoggedInLayout() {
   const theme = useTheme();
+  const colorMode = React.useContext(ColorModeContext);
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
   const [open, setOpen] = React.useState(upTabScreen);
   const { userId } = useAppSelector((state) => state.auth);
@@ -165,7 +170,7 @@ export default function UserLoggedInLayout() {
           >
             <ListItemButton>
               <ListItemIcon>
-                <InboxIcon />
+                <HomeIcon />
               </ListItemIcon>
               <ListItemText primary="Home" />
             </ListItemButton>
@@ -187,7 +192,7 @@ export default function UserLoggedInLayout() {
           >
             <ListItemButton>
               <ListItemIcon>
-                <InboxIcon />
+                <AccountBoxIcon />
               </ListItemIcon>
               <ListItemText primary="My Profile" />
             </ListItemButton>
@@ -240,6 +245,15 @@ export default function UserLoggedInLayout() {
               </ListItemIcon>
               <ListItemText primary="Sign out" />
             </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <Box sx={{ margin: '0 auto', mt: 1 }}>
+              <MaterialUISwitch
+                checked={theme.palette.mode === 'dark' ? true : false}
+                onChange={colorMode.toggleColorMode}
+              />
+            </Box>
           </ListItem>
         </List>
       </Drawer>

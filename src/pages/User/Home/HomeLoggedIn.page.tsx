@@ -1,22 +1,12 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  IconButton,
-  TextField,
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, InputBase } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
-
-const LinkDetailJob = styled(Link)(({ theme }) => ({
-  textDecoration: 'none',
-}));
+import JobList from '../Jobs/JobList';
+import SearchIcon from '@mui/icons-material/Search';
+import SearchApp from '@/components/Reusable/SearchApp';
+import FilterSearch from '@/components/Reusable/FilterSearch';
 
 const HomeLoggedIn: React.FC = () => {
   return (
@@ -25,9 +15,13 @@ const HomeLoggedIn: React.FC = () => {
         <title>Dashboard | ar.gent</title>
       </Helmet>
 
+      <SearchApp />
+      <Box sx={{ mt: 2, display: 'flex', overflow: 'hidden', width: '100%' }}>
+        <FilterSearch />
+      </Box>
       <Box
         sx={{
-          maxWidth: '500px',
+          maxWidth: '600px',
           margin: '0 auto',
           display: 'flex',
           flexDirection: 'column',
@@ -35,118 +29,9 @@ const HomeLoggedIn: React.FC = () => {
           alignItems: 'center',
         }}
       >
-        <Typography variant="h4" sx={{ mb: 3 }}>
-          Good Morning User
-        </Typography>
-        <Card sx={{ minWidth: '100%' }}>
-          <CardContent>
-            <LinkDetailJob to="/job/:id">
-              <Card
-                sx={{
-                  marginTop: 2,
-                  position: 'relative',
-                  padding: 1,
-                  cursor: 'pointer',
-                  transition: 'all 0.4s ease-in-out',
-                  ':hover': {
-                    backgroundColor: '#f5f5f5',
-                  },
-                }}
-              >
-                <CardContent>
-                  <Typography
-                    sx={{
-                      fontSize: {
-                        xs: '16px',
-                        sm: '18px',
-                        md: '24px',
-                        lg: '28px',
-                      },
-                      fontWeight: '700',
-                    }}
-                  >
-                    Job Title
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: {
-                        xs: '14px',
-                        sm: '16px',
-                      },
-                      fontWeight: '400',
-                    }}
-                  >
-                    Company Name
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: {
-                        xs: '14px',
-                        sm: '16px',
-                      },
-                      fontWeight: '300',
-                    }}
-                  >
-                    Salary
-                  </Typography>
-                </CardContent>
-              </Card>
-            </LinkDetailJob>
-
-            <LinkDetailJob to="/job/:id">
-              <Card
-                sx={{
-                  marginTop: 2,
-                  position: 'relative',
-                  padding: 1,
-                  cursor: 'pointer',
-                  transition: 'all 0.4s ease-in-out',
-                  ':hover': {
-                    backgroundColor: '#f5f5f5',
-                  },
-                }}
-              >
-                <CardContent>
-                  <Typography
-                    sx={{
-                      fontSize: {
-                        xs: '16px',
-                        sm: '18px',
-                        md: '24px',
-                        lg: '28px',
-                      },
-                      fontWeight: '700',
-                    }}
-                  >
-                    Job Title
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: {
-                        xs: '14px',
-                        sm: '16px',
-                      },
-                      fontWeight: '400',
-                    }}
-                  >
-                    Company Name
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: {
-                        xs: '14px',
-                        sm: '16px',
-                      },
-                      fontWeight: '300',
-                    }}
-                  >
-                    Salary
-                  </Typography>
-                </CardContent>
-              </Card>
-            </LinkDetailJob>
-          </CardContent>
-        </Card>
+        <Box sx={{ minWidth: '100%', mt: 3 }}>
+          <JobList />
+        </Box>
       </Box>
     </>
   );
