@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -10,14 +10,17 @@ import {
   FormControl,
   FormControlLabel,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import AddIcon from '@mui/icons-material/Add';
+import { Edit } from '@mui/icons-material';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
-import dayjs, { Dayjs } from 'dayjs';
-import CardExperience from './CardExperience';
+import AddEducation from './AddEducation';
+import { Dayjs } from 'dayjs';
 
-const Experience: React.FC = () => {
+const Education: React.FC = () => {
   const [openAdd, setOpenAdd] = useState<boolean>(false);
+  const [openEdit, setOpenEdit] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [current, setCurrent] = useState<boolean>(false);
@@ -26,39 +29,76 @@ const Experience: React.FC = () => {
     e.preventDefault();
   };
 
+  const handleOnEdit = async (e: React.MouseEvent) => {
+    e.preventDefault();
+  };
+
+  useEffect(() => {}, []);
+
   return (
     <>
       <Box sx={{ position: 'relative', marginTop: 2, width: '100%' }}>
         <Card>
           <CardContent>
             <IconButton
-              onClick={() => setOpenAdd(true)}
               sx={{
                 backgroundColor: 'inherit',
                 position: 'absolute',
                 top: 4,
                 right: 8,
               }}
+              onClick={() => setOpenAdd(true)}
             >
               <AddIcon />
             </IconButton>
             <Typography variant="h6" sx={{ fontWeight: '700' }}>
-              Experience
+              Education
             </Typography>
-            {/* list experience */}
-            <>
-              <CardExperience />
-            </>
+
+            <Card sx={{ marginTop: 2, position: 'relative' }}>
+              <Box>
+                <IconButton
+                  onClick={() => setOpenEdit(true)}
+                  sx={{ position: 'absolute', top: 4, right: 48 }}
+                >
+                  <Edit />
+                </IconButton>
+                <IconButton sx={{ position: 'absolute', top: 4, right: 8 }}>
+                  <DeleteForeverIcon />
+                </IconButton>
+              </Box>
+              <CardContent>
+                <Typography variant="body1" sx={{ fontWeight: '500' }}>
+                  Instance Name
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: '500' }}>
+                  Degree
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: '500' }}>
+                  Location
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: '200' }}>
+                  (12-01-2020 - 01-09-2021)
+                </Typography>
+              </CardContent>
+            </Card>
           </CardContent>
         </Card>
       </Box>
+
+      <AddEducation
+        open={openAdd}
+        handleClose={() => setOpenAdd(false)}
+        onSave={handleOnAdd}
+      />
+
       <>
         <CustomizeModal
-          title="Add Experience"
-          open={openAdd}
-          id="addExperience"
-          handleClose={() => setOpenAdd(false)}
-          onSave={handleOnAdd}
+          title="Edit Education"
+          open={openEdit}
+          id="addEducation"
+          handleClose={() => setOpenEdit(false)}
+          onSave={handleOnEdit}
         >
           <Box
             sx={{
@@ -69,22 +109,11 @@ const Experience: React.FC = () => {
               minWidth: { xs: '100%', lg: '350px' },
             }}
           >
-            <TextField size="small" label="Position" />
-            <TextField size="small" label="Company" />
+            <TextField size="small" label="Degree" />
+            <TextField size="small" label="School" />
             <TextField size="small" label="Location" />
-            <TextField
-              label="description"
-              sx={{
-                minWidth: { xs: 'auto', md: '300px', lg: '400px' },
-                minHeight: '100px',
-              }}
-              placeholder="Ex: Hi there, I'm a software engineer..."
-              multiline
-              minRows={4}
-              maxRows={4}
-            />
             <FormControlLabel
-              label="Iam currently working in this role"
+              label="Iam currently studying in this institution"
               control={
                 <Checkbox
                   value={current}
@@ -120,4 +149,4 @@ const Experience: React.FC = () => {
   );
 };
 
-export default Experience;
+export default Education;

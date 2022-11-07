@@ -6,10 +6,9 @@ import {
   Checkbox,
   FormControlLabel,
   FormControl,
-  formLabelClasses,
 } from '@mui/material';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 
 type props = {
   open: boolean;

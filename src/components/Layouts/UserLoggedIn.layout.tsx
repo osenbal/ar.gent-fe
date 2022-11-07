@@ -34,6 +34,7 @@ const Main = styled('main')<{
   uptab?: boolean;
 }>(({ theme, open, uptab }) => ({
   flexGrow: 1,
+  maxWidth: '1980px',
   padding: theme.spacing(3),
   ...(!uptab && {
     padding: `${theme.spacing(3)} 8px`,
@@ -56,6 +57,7 @@ const Main = styled('main')<{
   ...(uptab
     ? {
         marginLeft: 0,
+        margin: '0 auto',
       }
     : {
         marginLeft: `-${drawerWidth}px`,
@@ -84,13 +86,20 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
-const DrawerHeader = styled('div')(({ theme }) => ({
+interface DrawerHeaderProps extends MuiAppBarProps {
+  uptab?: boolean;
+}
+
+const DrawerHeader = styled('div')<DrawerHeaderProps>(({ theme, uptab }) => ({
   display: 'flex',
   alignItems: 'center',
   padding: theme.spacing(0, 1),
   // necessary for content to be below app bar
   ...theme.mixins.toolbar,
   justifyContent: 'flex-end',
+  ...(uptab && {
+    display: 'none',
+  }),
 }));
 
 export default function UserLoggedInLayout() {
@@ -197,12 +206,17 @@ export default function UserLoggedInLayout() {
               <ListItemText primary="My Profile" />
             </ListItemButton>
           </ListItem>
-          <ListItem disablePadding>
+          <ListItem
+            disablePadding
+            component={NavLink}
+            to="/job/create"
+            selected={'/job/create' === location.pathname}
+          >
             <ListItemButton>
               <ListItemIcon>
                 <InboxIcon />
               </ListItemIcon>
-              <ListItemText primary="Post a project" />
+              <ListItemText primary="Create Job Free" />
             </ListItemButton>
           </ListItem>
           <Divider />
@@ -211,22 +225,7 @@ export default function UserLoggedInLayout() {
           <ListItem disabled>
             <Typography variant="body1">Account</Typography>
           </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                <InboxIcon />
-              </ListItemIcon>
-              <ListItemText primary="Announcement" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                <InboxIcon />
-              </ListItemIcon>
-              <ListItemText primary="Setting" />
-            </ListItemButton>
-          </ListItem>
+
           <ListItem disablePadding>
             <ListItemButton>
               <ListItemIcon>
@@ -258,7 +257,7 @@ export default function UserLoggedInLayout() {
         </List>
       </Drawer>
       <Main open={open} uptab={upTabScreen}>
-        <DrawerHeader />
+        <DrawerHeader uptab={upTabScreen} />
         <Outlet />
       </Main>
     </Box>

@@ -1,10 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Box, Card, CardContent, Typography, InputBase } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { styled } from '@mui/material/styles';
+import { Box } from '@mui/material';
 import JobList from '../Jobs/JobList';
-import SearchIcon from '@mui/icons-material/Search';
 import SearchApp from '@/components/Reusable/SearchApp';
 import FilterSearch from '@/components/Reusable/FilterSearch';
 
