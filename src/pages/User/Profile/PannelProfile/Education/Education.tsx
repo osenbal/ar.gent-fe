@@ -17,18 +17,62 @@ import { Dayjs } from 'dayjs';
 import EducationCard from './EducationCard';
 import { useAppSelector } from '@/hooks/redux.hook';
 import { IEducation } from '@/interfaces/user.interface';
+import { BACKEND_URL } from '@/config/config';
 
 const Education: React.FC = () => {
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, userId } = useAppSelector((state) => state.auth);
 
   const [educationList, setEducationList] = useState<IEducation[] | []>([]);
   const [openAdd, setOpenAdd] = useState<boolean>(false);
+
+  const [school, setSchool] = useState<string>('');
+  const [degree, setDegree] = useState<string>('');
+  const [location, setLocation] = useState<string>('');
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
-  const [current, setCurrent] = useState<boolean>(false);
+  const [currentEducation, setCurrentEducation] = useState<boolean>(false);
 
   const handleOnAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (
+      school === '' ||
+      degree === '' ||
+      location === '' ||
+      startDate === null
+    ) {
+      return;
+    }
+
+    const newEducation: IEducation = {
+      school,
+      degree,
+      location,
+      startDate: startDate.toDate(),
+      endDate: endDate?.toDate() || null,
+      currentEducation,
+    };
+
+    const temp = [...educationList, newEducation];
+
+    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ education: temp }),
+    });
+
+    if (response.ok) {
+      setEducationList(temp);
+      setOpenAdd(false);
+      setDegree('');
+      setSchool('');
+      setLocation('');
+      setStartDate(null);
+      setEndDate(null);
+      setCurrentEducation(false);
+    }
   };
 
   const handleOnEdit = async (e: React.MouseEvent) => {
@@ -90,15 +134,30 @@ const Education: React.FC = () => {
               minWidth: { xs: '100%', lg: '350px' },
             }}
           >
-            <TextField size="small" label="Degree" />
-            <TextField size="small" label="School" />
-            <TextField size="small" label="Location" />
+            <TextField
+              value={degree}
+              onChange={(e) => setDegree(e.target.value)}
+              size="small"
+              label="Degree"
+            />
+            <TextField
+              value={school}
+              onChange={(e) => setSchool(e.target.value)}
+              size="small"
+              label="School"
+            />
+            <TextField
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              size="small"
+              label="Location"
+            />
             <FormControlLabel
               label="Iam currently studying in this institution"
               control={
                 <Checkbox
-                  value={current}
-                  onChange={() => setCurrent(!current)}
+                  value={currentEducation}
+                  onChange={() => setCurrentEducation(!currentEducation)}
                 />
               }
             />
@@ -115,7 +174,7 @@ const Education: React.FC = () => {
 
             <FormControl size="small" fullWidth>
               <DesktopDatePicker
-                disabled={current}
+                disabled={currentEducation}
                 label="end date"
                 value={endDate}
                 inputFormat="DD/MM/YYYY"
