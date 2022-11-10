@@ -3,10 +3,10 @@ import { FormControl, Box, MenuItem, InputLabel, styled } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 
 const FilterSearch = () => {
-  const [jobType, setJobType] = useState('');
-  const [category, setCategory] = useState('');
-  const [level, setLevel] = useState('');
-  const [workplace, setWorkplace] = useState('');
+  const [jobType, setJobType] = useState<string>('');
+  const [category, setCategory] = useState<string>('');
+  const [level, setLevel] = useState<string>('');
+  const [workplace, setWorkplace] = useState<string>('');
 
   const handleChangeJobType = (event: SelectChangeEvent) => {
     setJobType(event.target.value);

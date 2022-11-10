@@ -12,15 +12,17 @@ import {
 } from '@mui/material';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import AddIcon from '@mui/icons-material/Add';
-import { Edit } from '@mui/icons-material';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
-import AddEducation from './AddEducation';
 import { Dayjs } from 'dayjs';
+import EducationCard from './EducationCard';
+import { useAppSelector } from '@/hooks/redux.hook';
+import { IEducation } from '@/interfaces/user.interface';
 
 const Education: React.FC = () => {
+  const { user } = useAppSelector((state) => state.auth);
+
+  const [educationList, setEducationList] = useState<IEducation[] | []>([]);
   const [openAdd, setOpenAdd] = useState<boolean>(false);
-  const [openEdit, setOpenEdit] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [current, setCurrent] = useState<boolean>(false);
@@ -33,7 +35,11 @@ const Education: React.FC = () => {
     e.preventDefault();
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (user?.education) {
+      setEducationList(user.education);
+    }
+  }, [user?.education]);
 
   return (
     <>
@@ -54,51 +60,26 @@ const Education: React.FC = () => {
             <Typography variant="h6" sx={{ fontWeight: '700' }}>
               Education
             </Typography>
-
-            <Card sx={{ marginTop: 2, position: 'relative' }}>
-              <Box>
-                <IconButton
-                  onClick={() => setOpenEdit(true)}
-                  sx={{ position: 'absolute', top: 4, right: 48 }}
-                >
-                  <Edit />
-                </IconButton>
-                <IconButton sx={{ position: 'absolute', top: 4, right: 8 }}>
-                  <DeleteForeverIcon />
-                </IconButton>
-              </Box>
-              <CardContent>
-                <Typography variant="body1" sx={{ fontWeight: '500' }}>
-                  Instance Name
-                </Typography>
-                <Typography variant="body1" sx={{ fontWeight: '500' }}>
-                  Degree
-                </Typography>
-                <Typography variant="body1" sx={{ fontWeight: '500' }}>
-                  Location
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: '200' }}>
-                  (12-01-2020 - 01-09-2021)
-                </Typography>
-              </CardContent>
-            </Card>
+            {educationList.map((item, index) => (
+              <EducationCard
+                handleOnEdit={handleOnEdit}
+                item={item}
+                key={index}
+                index={index.toString()}
+              />
+            ))}
           </CardContent>
         </Card>
       </Box>
 
-      <AddEducation
-        open={openAdd}
-        handleClose={() => setOpenAdd(false)}
-        onSave={handleOnAdd}
-      />
-
+      {/* modal add education */}
       <>
         <CustomizeModal
-          title="Edit Education"
-          open={openEdit}
+          title="Add Education"
+          open={openAdd}
           id="addEducation"
-          handleClose={() => setOpenEdit(false)}
-          onSave={handleOnEdit}
+          handleClose={() => setOpenAdd(false)}
+          onSave={handleOnAdd}
         >
           <Box
             sx={{

@@ -25,7 +25,7 @@ export interface IEducation {
   location: string;
   startDate: Date;
   endDate: Date | null;
-  description: string;
+  currentEducation: boolean;
 }
 
 export interface IExperience {

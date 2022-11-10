@@ -15,6 +15,8 @@ import UserLoggedInLayout from '@/components/Layouts/UserLoggedIn.layout';
 import JobDetails from '@/pages/User/Jobs/JobDetails';
 import JobLayout from '@/components/Layouts/JobLayout';
 import JobCreate from '@/pages/User/Jobs/JobCreate.page';
+import JobControl from '@/pages/User/Jobs/JobControl';
+import HelpPage from '@/pages/User/Help/Help.page';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -37,7 +39,10 @@ const AppRoutes: React.FC = () => {
             <Route element={<UserLoggedInLayout />}>
               <Route path="home" element={<HomeLoggedIn />} />
 
+              <Route path="help" element={<HelpPage />} />
+
               <Route path="job/create" element={<JobCreate />} />
+              <Route path="job/control/:jobId" element={<JobControl />} />
 
               <Route path="job/search/" element={<JobLayout />}>
                 <Route index element={<JobDetails />} />

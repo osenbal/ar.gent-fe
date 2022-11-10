@@ -12,7 +12,7 @@ import {
 import { Helmet } from 'react-helmet-async';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux.hook';
 import { registerUser } from '@store/authSlice';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import { VisibilityOff, Visibility } from '@mui/icons-material';
 import {
   Container,
@@ -73,13 +73,6 @@ const Register: React.FC = () => {
 
   const [errors, setErrors] = useState<object | null>();
 
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.name === 'avatar') {
-      setAvatar(e.target.files[0]);
-      setAvatarPrev(URL.createObjectURL(e.target.files[0]));
-    }
-  };
-
   const validate = () => {
     let isValid = true;
     let errors: any = {};
@@ -134,10 +127,18 @@ const Register: React.FC = () => {
     return isValid;
   };
 
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.name === 'avatar') {
+      setAvatar(e.target.files[0]);
+      setAvatarPrev(URL.createObjectURL(e.target.files[0]));
+    }
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const isValid = validate();
     if (!isValid || !phoneNumber || !avatar || !gender || !birthday) {
+      toast.error('Please fill in all fields');
       return;
     }
 
@@ -258,8 +259,9 @@ const Register: React.FC = () => {
           >
             <Container maxWidth="lg">
               <Typography variant="h4">Register</Typography>
-              <FormGroup sx={{ mt: '42px' }}>
-                <FormGroup sx={{ margin: { xs: '0 auto', md: '0' } }}>
+              <Box sx={{ mt: '42px' }}>
+                {/* avatar */}
+                <Box sx={{ margin: { xs: '0 auto', md: '0' } }}>
                   <label
                     style={{
                       cursor: 'pointer',
@@ -281,7 +283,6 @@ const Register: React.FC = () => {
                           width: 125,
                           border: '1px solid #333333',
                         }}
-                        // style={{ marginBottom: '1.25rem' }}
                       />
 
                       <Avatar
@@ -300,9 +301,11 @@ const Register: React.FC = () => {
                       hidden
                     />
                   </label>
-                </FormGroup>
+                </Box>
                 <br />
-                <FormGroup
+
+                {/* username, fullname */}
+                <Box
                   sx={{
                     display: 'flex',
                     gap: '32px',
@@ -326,13 +329,15 @@ const Register: React.FC = () => {
                     id="fullName"
                     label="Full Name"
                     variant="outlined"
+                    autoComplete="off"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                   />
-                </FormGroup>
+                </Box>
                 <br />
-                <FormGroup
+                {/* gender,  bithday */}
+                <Box
                   sx={{
                     display: 'flex',
                     gap: '32px',
@@ -341,11 +346,11 @@ const Register: React.FC = () => {
                   }}
                 >
                   <FormControl sx={{ width: { xs: '100%', md: '45%' } }}>
-                    <InputLabel id="genderSelect">Gender</InputLabel>
+                    <InputLabel id="genderSelect">Gender *</InputLabel>
                     <Select
                       labelId="genderSelect"
                       value={gender}
-                      label="gender"
+                      label="gender*"
                       onChange={(e) => setGender(e.target.value)}
                       required
                     >
@@ -358,7 +363,7 @@ const Register: React.FC = () => {
                   </FormControl>
                   <FormControl sx={{ width: { xs: '100%', md: '45%' } }}>
                     <DesktopDatePicker
-                      label="Birthday"
+                      label="Birthday *"
                       inputFormat="DD/MM/YYYY"
                       value={birthday}
                       onChange={(newValue: Dayjs | null) =>
@@ -367,11 +372,14 @@ const Register: React.FC = () => {
                       renderInput={(params) => <TextField {...params} />}
                     />
                   </FormControl>
-                </FormGroup>
+                </Box>
                 <br />
+
                 <MuiTelInput
                   label="phone number"
                   required
+                  autoComplete="off"
+                  fullWidth
                   value={phoneNumber}
                   onChange={(newPhone: string) => setPhoneNumber(newPhone)}
                   defaultCountry="ID"
@@ -381,7 +389,10 @@ const Register: React.FC = () => {
                   }
                 />
                 <br />
+
+                {/* email */}
                 <TextField
+                  autoComplete="off"
                   id="email"
                   label="Email"
                   required
@@ -390,14 +401,18 @@ const Register: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   error={!validEmail}
+                  fullWidth
                   helperText={!validEmail ? 'email not valid' : ''}
+                  sx={{ mt: 2 }}
                 />
-                <FormControl sx={{ mt: '16px' }} variant="outlined">
-                  <InputLabel htmlFor="outlined-adornment-password">
-                    Password *
-                  </InputLabel>
+                {/* pasword */}
+                <FormControl
+                  sx={{ mt: '16px', width: '100%' }}
+                  variant="outlined"
+                >
+                  <InputLabel htmlFor="password">Password *</InputLabel>
                   <OutlinedInput
-                    id="outlined-adornment-password"
+                    id="password"
                     required
                     autoComplete="off"
                     name="password"
@@ -424,13 +439,18 @@ const Register: React.FC = () => {
                     </FormHelperText>
                   )}
                 </FormControl>
-                <FormControl sx={{ mt: '16px' }} variant="outlined">
+                <FormControl
+                  sx={{ mt: '16px', width: '100%' }}
+                  variant="outlined"
+                >
                   <InputLabel htmlFor="confirmPassword">
                     Confirm Password *
                   </InputLabel>
                   <OutlinedInput
                     id="confirmPassword"
                     required={true}
+                    autoComplete="off"
+                    fullWidth
                     name="confirmPassword"
                     type={showMatchPassword ? 'text' : 'password'}
                     value={matchPassword}
@@ -461,92 +481,8 @@ const Register: React.FC = () => {
                     </FormHelperText>
                   )}
                 </FormControl>
-              </FormGroup>
-              {/* <FormGroup sx={{ marginTop: 3 }}>
-                <Typography variant="h5">Address</Typography>
-                <TextField
-                  sx={{ mt: '16px' }}
-                  id="street"
-                  label="Street"
-                  required
-                  type="text"
-                  variant="outlined"
-                  name="street"
-                  value={street}
-                  onChange={(e) => setStreet(e.target.value)}
-                />
+              </Box>
 
-                <FormControl sx={{ mt: '16px' }}>
-                  <InputLabel id="countrySelect">Country</InputLabel>
-                  <Select
-                    labelId="countrySelect"
-                    label="Country"
-                    name="country"
-                    value={country}
-                    onChange={(e) => {
-                      setCountry(e.target.value);
-                      setState('');
-                      setCity('');
-                    }}
-                    required
-                  >
-                    {Country.getAllCountries().map((c) => (
-                      <MenuItem key={c.isoCode} value={c.isoCode}>
-                        {c.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <FormControl sx={{ mt: '16px' }}>
-                  <InputLabel id="stateSelect">State</InputLabel>
-                  <Select
-                    labelId="stateSelect"
-                    label="State"
-                    name="state"
-                    value={state}
-                    onChange={(e) => {
-                      setState(e.target.value);
-                      setCity('');
-                    }}
-                    required
-                  >
-                    {State.getStatesOfCountry(country).map((s) => (
-                      <MenuItem key={s.isoCode} value={s.isoCode}>
-                        {s.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <FormControl sx={{ mt: '16px' }}>
-                  <InputLabel id="citySelect">City</InputLabel>
-                  <Select
-                    labelId="citySelect"
-                    label="City"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    required
-                  >
-                    {City.getCitiesOfState(country, state).map((city) => (
-                      <MenuItem key={city.name} value={city.name}>
-                        {city.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <TextField
-                  sx={{ mt: '16px' }}
-                  id="zipCode"
-                  label="zip code"
-                  required
-                  type="number"
-                  inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-                  variant="outlined"
-                  name="zipCode"
-                  value={zipCode}
-                  onChange={(e) => setZipCode(e.target.value)}
-                />
-              </FormGroup> */}
               <Button
                 disabled={isLoading}
                 type="submit"

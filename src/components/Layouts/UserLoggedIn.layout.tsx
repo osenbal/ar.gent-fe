@@ -1,33 +1,43 @@
-import * as React from 'react';
+import React, { useState, useContext } from 'react';
+import { useLocation, NavLink, Outlet } from 'react-router-dom';
+import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
+import { asyncLogout } from '@/store/authSlice';
+import { ColorModeContext } from '@/Context/ColorMode.context';
 import { styled, useTheme } from '@mui/material/styles';
-import { useMediaQuery } from '@mui/material';
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import CssBaseline from '@mui/material/CssBaseline';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
+import {
+  Box,
+  Drawer,
+  useMediaQuery,
+  CssBaseline,
+  Typography,
+  List,
+  Divider,
+  Toolbar,
+  IconButton,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
+import MaterialUISwitch from '../Reusable/Switch';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import { useAppSelector } from '@/hooks/redux.hook';
-import { Outlet } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
-import { NavLink } from 'react-router-dom';
-import HomeIcon from '@mui/icons-material/Home';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
-import MaterialUISwitch from '../Reusable/Switch';
-import { ColorModeContext } from '@/Context/ColorMode.context';
+import HomeIcon from '@mui/icons-material/Home';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import HelpCenterIcon from '@mui/icons-material/HelpCenter';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 const drawerWidth = 240;
+interface AppBarProps extends MuiAppBarProps {
+  open?: boolean;
+  widthScreen?: number;
+}
+interface DrawerHeaderProps extends MuiAppBarProps {
+  uptab?: boolean;
+}
 
 const Main = styled('main')<{
   open?: boolean;
@@ -64,11 +74,6 @@ const Main = styled('main')<{
       }),
 }));
 
-interface AppBarProps extends MuiAppBarProps {
-  open?: boolean;
-  widthScreen?: number;
-}
-
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
 })<AppBarProps>(({ theme, open }) => ({
@@ -86,10 +91,6 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
-interface DrawerHeaderProps extends MuiAppBarProps {
-  uptab?: boolean;
-}
-
 const DrawerHeader = styled('div')<DrawerHeaderProps>(({ theme, uptab }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -104,11 +105,13 @@ const DrawerHeader = styled('div')<DrawerHeaderProps>(({ theme, uptab }) => ({
 
 export default function UserLoggedInLayout() {
   const theme = useTheme();
-  const colorMode = React.useContext(ColorModeContext);
-  const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
-  const [open, setOpen] = React.useState(upTabScreen);
-  const { userId } = useAppSelector((state) => state.auth);
   const location = useLocation();
+  const dispatch = useAppDispatch();
+  const colorMode = useContext(ColorModeContext);
+  const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
+
+  const { userId } = useAppSelector((state) => state.auth);
+  const [open, setOpen] = useState(upTabScreen);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -116,6 +119,10 @@ export default function UserLoggedInLayout() {
 
   const handleDrawerClose = () => {
     setOpen(false);
+  };
+
+  const handleLogout = () => {
+    dispatch(asyncLogout());
   };
 
   return (
@@ -214,7 +221,7 @@ export default function UserLoggedInLayout() {
           >
             <ListItemButton>
               <ListItemIcon>
-                <InboxIcon />
+                <AddBoxIcon />
               </ListItemIcon>
               <ListItemText primary="Create Job Free" />
             </ListItemButton>
@@ -226,10 +233,15 @@ export default function UserLoggedInLayout() {
             <Typography variant="body1">Account</Typography>
           </ListItem>
 
-          <ListItem disablePadding>
+          <ListItem
+            disablePadding
+            component={NavLink}
+            to="/help"
+            selected={'/help' === location.pathname}
+          >
             <ListItemButton>
               <ListItemIcon>
-                <InboxIcon />
+                <HelpCenterIcon />
               </ListItemIcon>
               <ListItemText primary="Help ?" />
             </ListItemButton>
@@ -237,10 +249,10 @@ export default function UserLoggedInLayout() {
           <Divider />
 
           {/* Sign out */}
-          <ListItem disablePadding>
+          <ListItem disablePadding onClick={() => handleLogout()}>
             <ListItemButton>
               <ListItemIcon>
-                <InboxIcon />
+                <ExitToAppIcon />
               </ListItemIcon>
               <ListItemText primary="Sign out" />
             </ListItemButton>

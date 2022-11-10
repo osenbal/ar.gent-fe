@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAppSelector } from '@/hooks/redux.hook';
+import { Edit } from '@mui/icons-material';
+import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import {
   Box,
   Card,
@@ -8,11 +10,10 @@ import {
   CardContent,
   TextField,
 } from '@mui/material';
-import { Edit } from '@mui/icons-material';
-import CustomizeModal from '@/components/Reusable/CustomizeModal';
+import { BACKEND_URL } from '@/config/config';
 
 const About: React.FC = () => {
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, userId } = useAppSelector((state) => state.auth);
   const [open, setOpen] = useState(false);
   const [about, setAbout] = useState<string>('');
 
@@ -20,6 +21,27 @@ const About: React.FC = () => {
 
   const handleSaveChanges = async (e: React.MouseEvent) => {
     e.preventDefault();
+
+    if (editAbout === about) {
+      setOpen(false);
+      return;
+    }
+
+    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        about: editAbout,
+      }),
+    });
+
+    if (response.status === 200) {
+      setAbout(editAbout);
+      setOpen(false);
+    }
   };
 
   const handleAboutChange = useCallback(() => {

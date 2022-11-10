@@ -1,7 +1,8 @@
 import React from 'react';
 import { Typography, Card, CardContent, IconButton } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import SettingsIcon from '@mui/icons-material/Settings';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { Link } from 'react-router-dom';
 
 const JobCard: React.FC = () => {
   return (
@@ -63,9 +64,11 @@ const JobCard: React.FC = () => {
           <DeleteForeverIcon />
         </IconButton>
 
-        <IconButton sx={{ position: 'absolute', bottom: 2, right: 2 }}>
-          <Edit />
-        </IconButton>
+        <Link to={'/job/control/:jobId'}>
+          <IconButton sx={{ position: 'absolute', bottom: 2, right: 2 }}>
+            <SettingsIcon />
+          </IconButton>
+        </Link>
       </Card>
     </>
   );

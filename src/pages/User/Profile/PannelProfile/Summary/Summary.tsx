@@ -127,6 +127,24 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     }
   };
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const formData = new FormData();
+    formData.append('image', file!);
+    const res = await fetch(
+      `${BACKEND_URL}/user/upload/${userId}?type=avatar`,
+      {
+        method: 'PUT',
+        credentials: 'include',
+        body: formData,
+      }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      setAvatar(data.data);
+    }
+  };
+
   const setDataSummary = useCallback(() => {
     if (user) {
       setFullName(user.fullName);
@@ -238,7 +256,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                     </Avatar>
                   </Box>
                   <Input
-                    // onChange={handleFileInput}
+                    onChange={handleAvatarChange}
                     type="file"
                     id="avatar_pic"
                     placeholder="avatar"

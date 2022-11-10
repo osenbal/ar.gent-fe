@@ -37,7 +37,8 @@ const initialState: AuthState = {
 export const asyncLogout = createAsyncThunk(
   'auth/asyncLogout',
   async (payload) => {
-    const res = await fetch('http://localhost:5000/api/auth/logout', {
+    const res = await fetch(`${BACKEND_URL}/auth/logout`, {
+      method: 'POST',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
@@ -112,49 +113,6 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-export const asyncUser = createAsyncThunk('auth/asyncUser', async (payload) => {
-  const res = await fetch('http://localhost:5000/api/auth/', {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'applications/json',
-    },
-  });
-  const data = await res.json();
-  if (res.ok) {
-    return { isAuth: true, user: data.user, details: data.details };
-  } else {
-    toast.error(`${data.message}`, {
-      position: 'bottom-left',
-      theme: 'dark',
-    });
-    return { isAuth: false, user: {}, details: {} };
-  }
-});
-
-export const asyncUserSingle = createAsyncThunk(
-  'auth/asyncUserSingle',
-  async ({ id }: { id: string }) => {
-    const res = await fetch(`${BACKEND_URL}/auth/user/${id}`, {
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'applications/json',
-      },
-    });
-    const data = await res.json();
-    if (res.ok) {
-      return { user: data.user, details: data.details };
-    } else {
-      toast.error(`${data.message}`, {
-        position: 'bottom-left',
-        theme: 'dark',
-      });
-      return { isAuth: false, user: {}, details: {} };
-    }
-  }
-);
-
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -180,18 +138,6 @@ export const authSlice = createSlice({
     },
   },
   extraReducers: {
-    [asyncUser.fulfilled.type]: (state, { payload }) => {
-      state.isAuth = payload.isAuth;
-      state.user = payload.user;
-      state.userDetails = payload.details;
-    },
-    [asyncUserSingle.fulfilled.type]: (state, { payload }) => {
-      state.isAuth = payload.isAuth;
-      state.user = payload.user;
-      state.userDetails = payload.details;
-      // state.visited_userDetails = payload.details;
-      // state.visited_user = payload.user;
-    },
     [registerUser.pending.type]: (state, { payload }) => {
       state.isLoading = true;
     },
@@ -213,6 +159,7 @@ export const authSlice = createSlice({
       state.isAuth = false;
       state.user = null;
       state.userDetails = null;
+      state.userId = null;
     },
   },
 });
