@@ -69,7 +69,26 @@ const EducationCard: React.FC<props> = ({
 
   useEffect(() => {
     setEducation(item);
+    setEducationTemp({
+      school: item.school,
+      degree: item.degree,
+      location: item.location,
+      startDate: item.startDate,
+      endDate: item.endDate,
+      currentEducation: item.currentEducation,
+    });
   }, [item]);
+
+  useEffect(() => {
+    setEducationTemp({
+      school: education.school,
+      degree: education.degree,
+      location: education.location,
+      startDate: education.startDate,
+      endDate: education.endDate,
+      currentEducation: education.currentEducation,
+    });
+  }, [openEdit]);
 
   return (
     <>

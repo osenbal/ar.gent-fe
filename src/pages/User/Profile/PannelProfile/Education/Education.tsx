@@ -43,7 +43,7 @@ const Education: React.FC = () => {
     setCurrentEducation(false);
   };
 
-  const handleOnAdd = async (e: React.MouseEvent) => {
+  const handleOnAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     if (
       school === '' ||
@@ -76,7 +76,7 @@ const Education: React.FC = () => {
     setOpenAdd(false);
   };
 
-  const handleOnEdit = async (index: number, item: IEducation) => {
+  const handleOnEdit = (index: number, item: IEducation) => {
     const educationTemp = [...educationList];
 
     educationTemp[index] = item;
@@ -84,7 +84,7 @@ const Education: React.FC = () => {
     dispatch(asyncUserEducation({ userId, payload: educationTemp }));
   };
 
-  const handleOnDelete = async (index: number) => {
+  const handleOnDelete = (index: number) => {
     const educationTemp = educationList.filter((item, ind) => ind !== index);
     dispatch(asyncUserEducation({ userId, payload: educationTemp }));
   };
@@ -104,7 +104,6 @@ const Education: React.FC = () => {
     setCurrentEducation(false);
   }, [openAdd]);
 
-  console.log('render', educationList);
   return (
     <>
       <Box sx={{ position: 'relative', marginTop: 2, width: '100%' }}>

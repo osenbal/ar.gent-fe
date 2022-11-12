@@ -4,6 +4,7 @@ import { RootState } from '.';
 import { BACKEND_URL } from '@/config/config';
 import {
   IEducation,
+  IExperience,
   IUser,
   IUserDetailsType,
   IUserLogin,
@@ -127,13 +128,36 @@ export const asyncUserEducation = createAsyncThunk(
     });
 
     const data = await response.json();
-    console.log(data);
     if (response.ok) {
       toast.success(`${data.message}`, {
         position: 'bottom-left',
         theme: 'dark',
       });
       return { education: payload };
+    }
+  }
+);
+
+export const asyncUserExperience = createAsyncThunk(
+  'auth/asyncUserExperience',
+  async ({ userId, payload }: { userId: string; payload: IExperience[] }) => {
+    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ experience: payload }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      toast.success(`${data.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+
+      return { experience: payload };
     }
   }
 );
@@ -189,8 +213,10 @@ export const authSlice = createSlice({
     },
     // user profile
     [asyncUserEducation.fulfilled.type]: (state, { payload }) => {
-      console.log(payload);
       state.user!.education = payload.education;
+    },
+    [asyncUserExperience.fulfilled.type]: (state, { payload }) => {
+      state.user!.experience = payload.experience;
     },
   },
 });

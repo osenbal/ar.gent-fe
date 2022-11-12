@@ -1,4 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useAppSelector, useAppDispatch } from '@hooks/redux.hook';
+import { asyncUserExperience } from '@/store/authSlice';
+import ExperienceCard from './ExperienceCard';
+import CustomizeModal from '@/components/Reusable/CustomizeModal';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import { Dayjs } from 'dayjs';
+import AddIcon from '@mui/icons-material/Add';
+import { IExperience } from '@/interfaces/user.interface';
 import {
   Card,
   CardContent,
@@ -10,21 +19,88 @@ import {
   FormControl,
   FormControlLabel,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import CustomizeModal from '@/components/Reusable/CustomizeModal';
-import { Dayjs } from 'dayjs';
-import CardExperience from './CardExperience';
 
 const Experience: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { userId, user } = useAppSelector((state) => state.auth);
+  const { id } = useParams<{ id: string }>();
+
   const [openAdd, setOpenAdd] = useState<boolean>(false);
+  const [experienceList, setExperienceList] = useState<IExperience[] | []>([]);
+
+  const [position, setPosition] = useState<string>('');
+  const [company, setCompany] = useState<string>('');
+  const [location, setLocation] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
-  const [current, setCurrent] = useState<boolean>(false);
+  const [isPresent, setIsPreset] = useState<boolean>(false);
 
-  const handleOnAdd = async (e: React.MouseEvent) => {
-    e.preventDefault();
+  const emptyState = () => {
+    setPosition('');
+    setCompany('');
+    setLocation('');
+    setDescription('');
+    setStartDate(null);
+    setEndDate(null);
+    setIsPreset(false);
   };
+
+  const handleOnAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (
+      position === '' ||
+      company === '' ||
+      location === '' ||
+      startDate === null
+    ) {
+      console.log('please fill the field required');
+      return;
+    }
+
+    if (endDate === null && !isPresent) {
+      console.log('please fill the field required');
+      return;
+    }
+
+    const newExperience: IExperience = {
+      position,
+      company,
+      location,
+      description,
+      startDate: startDate?.toDate(),
+      endDate: endDate?.toDate() || null,
+      isPresent,
+    };
+
+    const experienceTemp = [...experienceList, newExperience];
+
+    dispatch(asyncUserExperience({ userId, payload: experienceTemp }));
+
+    setOpenAdd(false);
+  };
+
+  const handleOnEdit = (index: number, item: IExperience) => {
+    const experienceTemp = [...experienceList];
+    experienceTemp[index] = item;
+
+    dispatch(asyncUserExperience({ userId, payload: experienceTemp }));
+  };
+
+  const handleOnDelete = (index: number) => {
+    const experienceTemp = experienceList.filter((item, ind) => ind !== index);
+    dispatch(asyncUserExperience({ userId, payload: experienceTemp }));
+  };
+
+  useEffect(() => {
+    if (user?.experience) {
+      setExperienceList(user?.experience);
+    }
+  }, [user?.experience]);
+
+  useEffect(() => {
+    emptyState();
+  }, [openAdd]);
 
   return (
     <>
@@ -46,9 +122,15 @@ const Experience: React.FC = () => {
               Experience
             </Typography>
             {/* list experience */}
-            <>
-              <CardExperience />
-            </>
+            {experienceList?.map((item: any, index: number) => (
+              <ExperienceCard
+                key={index}
+                item={item}
+                index={index}
+                handleOnEdit={handleOnEdit}
+                handleOnDelete={handleOnDelete}
+              />
+            ))}
           </CardContent>
         </Card>
       </Box>
@@ -69,10 +151,27 @@ const Experience: React.FC = () => {
               minWidth: { xs: '100%', lg: '350px' },
             }}
           >
-            <TextField size="small" label="Position" />
-            <TextField size="small" label="Company" />
-            <TextField size="small" label="Location" />
             <TextField
+              value={position}
+              onChange={(e) => setPosition(e.target.value)}
+              size="small"
+              label="Position"
+            />
+            <TextField
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              size="small"
+              label="Company"
+            />
+            <TextField
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              size="small"
+              label="Location"
+            />
+            <TextField
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               label="description"
               sx={{
                 minWidth: { xs: 'auto', md: '300px', lg: '400px' },
@@ -87,8 +186,11 @@ const Experience: React.FC = () => {
               label="Iam currently working in this role"
               control={
                 <Checkbox
-                  value={current}
-                  onChange={() => setCurrent(!current)}
+                  value={isPresent}
+                  onChange={() => {
+                    setEndDate(null);
+                    setIsPreset(!isPresent);
+                  }}
                 />
               }
             />
@@ -98,18 +200,27 @@ const Experience: React.FC = () => {
                 label="start date"
                 value={startDate}
                 inputFormat="DD/MM/YYYY"
-                onChange={(newValue: Dayjs | null) => setStartDate(newValue)}
+                onChange={(newValue: Dayjs | null) => {
+                  if (newValue) {
+                    setStartDate(newValue);
+                  }
+                }}
                 renderInput={(params) => <TextField {...params} />}
               />
             </FormControl>
 
             <FormControl size="small" fullWidth>
               <DesktopDatePicker
-                disabled={current}
+                disabled={isPresent}
                 label="end date"
                 value={endDate}
                 inputFormat="DD/MM/YYYY"
-                onChange={(newValue: Dayjs | null) => setEndDate(newValue)}
+                onChange={(newValue: Dayjs | null) => {
+                  if (newValue) {
+                    setEndDate(newValue);
+                    setIsPreset(false);
+                  }
+                }}
                 renderInput={(params) => <TextField {...params} />}
               />
             </FormControl>
