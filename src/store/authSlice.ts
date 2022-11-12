@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import { RootState } from '.';
 import { BACKEND_URL } from '@/config/config';
 import {
+  IEducation,
   IUser,
   IUserDetailsType,
   IUserLogin,
@@ -10,7 +11,7 @@ import {
 
 // Define a type for the slice state
 interface AuthState {
-  userId: string | null;
+  userId: string;
   isAuth: boolean;
   persist: boolean;
   isLoading: boolean;
@@ -27,7 +28,7 @@ const initialState: AuthState = {
   isAuth: false,
   persist: persistStorage !== null ? JSON.parse(persistStorage) : false,
   isLoading: false,
-  userId: null,
+  userId: '',
   user: null,
   userDetails: null,
   visited_user: {},
@@ -113,6 +114,30 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+export const asyncUserEducation = createAsyncThunk(
+  'auth/asyncUserEducation',
+  async ({ userId, payload }: { userId: string; payload: IEducation[] }) => {
+    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ education: payload }),
+    });
+
+    const data = await response.json();
+    console.log(data);
+    if (response.ok) {
+      toast.success(`${data.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      return { education: payload };
+    }
+  }
+);
+
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -120,9 +145,6 @@ export const authSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
       // state.userDetails = action.payload.userDetails;
-    },
-    setUserDetail: (state, action) => {
-      state.userDetails = action.payload;
     },
     setIsAuth: (state, action) => {
       state.isAuth = action.payload;
@@ -135,6 +157,10 @@ export const authSlice = createSlice({
     },
     setIsLoading: (state, action) => {
       state.isLoading = action.payload;
+    },
+    // user profile
+    setEducationUser: (state, action) => {
+      state.user!.education = action.payload;
     },
   },
   extraReducers: {
@@ -159,7 +185,12 @@ export const authSlice = createSlice({
       state.isAuth = false;
       state.user = null;
       state.userDetails = null;
-      state.userId = null;
+      state.userId = '';
+    },
+    // user profile
+    [asyncUserEducation.fulfilled.type]: (state, { payload }) => {
+      console.log(payload);
+      state.user!.education = payload.education;
     },
   },
 });
@@ -169,8 +200,8 @@ export const {
   setIsAuth,
   setPersist,
   setIsLoading,
-  setUserDetail,
   setUserId,
+  setEducationUser,
 } = authSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type

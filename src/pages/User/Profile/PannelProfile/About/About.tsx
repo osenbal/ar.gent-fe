@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/redux.hook';
 import { Edit } from '@mui/icons-material';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
@@ -13,6 +14,7 @@ import {
 import { BACKEND_URL } from '@/config/config';
 
 const About: React.FC = () => {
+  const { id } = useParams();
   const { user, userId } = useAppSelector((state) => state.auth);
   const [open, setOpen] = useState(false);
   const [about, setAbout] = useState<string>('');
@@ -62,17 +64,20 @@ const About: React.FC = () => {
     <>
       <Box sx={{ position: 'relative', marginTop: 2 }}>
         <Card>
-          <IconButton
-            onClick={() => setOpen(true)}
-            sx={{
-              background: 'inherit',
-              position: 'absolute',
-              top: 4,
-              right: 8,
-            }}
-          >
-            <Edit />
-          </IconButton>
+          {userId === id && (
+            <IconButton
+              onClick={() => setOpen(true)}
+              sx={{
+                background: 'inherit',
+                position: 'absolute',
+                top: 4,
+                right: 8,
+              }}
+            >
+              <Edit />
+            </IconButton>
+          )}
+
           <CardContent>
             <Typography variant="h6" sx={{ fontWeight: '700' }}>
               About

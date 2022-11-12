@@ -53,7 +53,7 @@ type props = {
   open: boolean;
   id: string;
   handleClose: () => void;
-  onSave: (e: React.MouseEvent) => Promise<void>;
+  onSave: (e: React.MouseEvent) => Promise<void> | void;
 };
 
 const CustomizeModal: React.FC<props> = ({

@@ -1,4 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import CustomizeModal from '@/components/Reusable/CustomizeModal';
+import EducationCard from './EducationCard';
+import { useParams } from 'react-router-dom';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import { Dayjs } from 'dayjs';
+import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
+import { asyncUserEducation } from '@/store/authSlice';
+import { IEducation } from '@/interfaces/user.interface';
+import AddIcon from '@mui/icons-material/Add';
 import {
   Card,
   CardContent,
@@ -10,27 +19,29 @@ import {
   FormControl,
   FormControlLabel,
 } from '@mui/material';
-import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import AddIcon from '@mui/icons-material/Add';
-import CustomizeModal from '@/components/Reusable/CustomizeModal';
-import { Dayjs } from 'dayjs';
-import EducationCard from './EducationCard';
-import { useAppSelector } from '@/hooks/redux.hook';
-import { IEducation } from '@/interfaces/user.interface';
-import { BACKEND_URL } from '@/config/config';
 
 const Education: React.FC = () => {
+  const { id } = useParams();
+  const dispatch = useAppDispatch();
   const { user, userId } = useAppSelector((state) => state.auth);
 
   const [educationList, setEducationList] = useState<IEducation[] | []>([]);
   const [openAdd, setOpenAdd] = useState<boolean>(false);
-
   const [school, setSchool] = useState<string>('');
   const [degree, setDegree] = useState<string>('');
   const [location, setLocation] = useState<string>('');
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [currentEducation, setCurrentEducation] = useState<boolean>(false);
+
+  const emptyState = () => {
+    setSchool('');
+    setDegree('');
+    setLocation('');
+    setStartDate(null);
+    setEndDate(null);
+    setCurrentEducation(false);
+  };
 
   const handleOnAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -40,6 +51,12 @@ const Education: React.FC = () => {
       location === '' ||
       startDate === null
     ) {
+      console.log('please fill the field required');
+      return;
+    }
+
+    if (endDate === null && !currentEducation) {
+      console.log('please fill the field required');
       return;
     }
 
@@ -52,31 +69,24 @@ const Education: React.FC = () => {
       currentEducation,
     };
 
-    const temp = [...educationList, newEducation];
+    const educationTemp = [...educationList, newEducation];
 
-    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ education: temp }),
-    });
-
-    if (response.ok) {
-      setEducationList(temp);
-      setOpenAdd(false);
-      setDegree('');
-      setSchool('');
-      setLocation('');
-      setStartDate(null);
-      setEndDate(null);
-      setCurrentEducation(false);
-    }
+    dispatch(asyncUserEducation({ userId, payload: educationTemp }));
+    emptyState();
+    setOpenAdd(false);
   };
 
-  const handleOnEdit = async (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleOnEdit = async (index: number, item: IEducation) => {
+    const educationTemp = [...educationList];
+
+    educationTemp[index] = item;
+
+    dispatch(asyncUserEducation({ userId, payload: educationTemp }));
+  };
+
+  const handleOnDelete = async (index: number) => {
+    const educationTemp = educationList.filter((item, ind) => ind !== index);
+    dispatch(asyncUserEducation({ userId, payload: educationTemp }));
   };
 
   useEffect(() => {
@@ -85,31 +95,45 @@ const Education: React.FC = () => {
     }
   }, [user?.education]);
 
+  useEffect(() => {
+    setDegree('');
+    setSchool('');
+    setLocation('');
+    setStartDate(null);
+    setEndDate(null);
+    setCurrentEducation(false);
+  }, [openAdd]);
+
+  console.log('render', educationList);
   return (
     <>
       <Box sx={{ position: 'relative', marginTop: 2, width: '100%' }}>
         <Card>
           <CardContent>
-            <IconButton
-              sx={{
-                backgroundColor: 'inherit',
-                position: 'absolute',
-                top: 4,
-                right: 8,
-              }}
-              onClick={() => setOpenAdd(true)}
-            >
-              <AddIcon />
-            </IconButton>
+            {userId === id && (
+              <IconButton
+                sx={{
+                  backgroundColor: 'inherit',
+                  position: 'absolute',
+                  top: 4,
+                  right: 8,
+                }}
+                onClick={() => setOpenAdd(true)}
+              >
+                <AddIcon />
+              </IconButton>
+            )}
+
             <Typography variant="h6" sx={{ fontWeight: '700' }}>
               Education
             </Typography>
             {educationList.map((item, index) => (
               <EducationCard
                 handleOnEdit={handleOnEdit}
+                handleOnDelete={handleOnDelete}
                 item={item}
                 key={index}
-                index={index.toString()}
+                index={index}
               />
             ))}
           </CardContent>
