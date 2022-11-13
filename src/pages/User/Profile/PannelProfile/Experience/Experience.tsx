@@ -64,10 +64,10 @@ const Experience: React.FC = () => {
     }
 
     const newExperience: IExperience = {
-      position,
-      company,
-      location,
-      description,
+      position: position.trim(),
+      company: company.trim(),
+      location: location.trim(),
+      description: description.trim(),
       startDate: startDate?.toDate(),
       endDate: endDate?.toDate() || null,
       isPresent,
@@ -107,17 +107,20 @@ const Experience: React.FC = () => {
       <Box sx={{ position: 'relative', marginTop: 2, width: '100%' }}>
         <Card>
           <CardContent>
-            <IconButton
-              onClick={() => setOpenAdd(true)}
-              sx={{
-                backgroundColor: 'inherit',
-                position: 'absolute',
-                top: 4,
-                right: 8,
-              }}
-            >
-              <AddIcon />
-            </IconButton>
+            {userId === id && (
+              <IconButton
+                onClick={() => setOpenAdd(true)}
+                sx={{
+                  backgroundColor: 'inherit',
+                  position: 'absolute',
+                  top: 4,
+                  right: 8,
+                }}
+              >
+                <AddIcon />
+              </IconButton>
+            )}
+
             <Typography variant="h6" sx={{ fontWeight: '700' }}>
               Experience
             </Typography>
@@ -134,99 +137,102 @@ const Experience: React.FC = () => {
           </CardContent>
         </Card>
       </Box>
-      <>
-        <CustomizeModal
-          title="Add Experience"
-          open={openAdd}
-          id="addExperience"
-          handleClose={() => setOpenAdd(false)}
-          onSave={handleOnAdd}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              gap: 3,
-              minWidth: { xs: '100%', lg: '350px' },
-            }}
+
+      {userId === id && (
+        <>
+          <CustomizeModal
+            title="Add Experience"
+            open={openAdd}
+            id="addExperience"
+            handleClose={() => setOpenAdd(false)}
+            onSave={handleOnAdd}
           >
-            <TextField
-              value={position}
-              onChange={(e) => setPosition(e.target.value)}
-              size="small"
-              label="Position"
-            />
-            <TextField
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              size="small"
-              label="Company"
-            />
-            <TextField
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              size="small"
-              label="Location"
-            />
-            <TextField
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              label="description"
+            <Box
               sx={{
-                minWidth: { xs: 'auto', md: '300px', lg: '400px' },
-                minHeight: '100px',
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                gap: 3,
+                minWidth: { xs: '100%', lg: '350px' },
               }}
-              placeholder="Ex: Hi there, I'm a software engineer..."
-              multiline
-              minRows={4}
-              maxRows={4}
-            />
-            <FormControlLabel
-              label="Iam currently working in this role"
-              control={
-                <Checkbox
-                  value={isPresent}
-                  onChange={() => {
-                    setEndDate(null);
-                    setIsPreset(!isPresent);
+            >
+              <TextField
+                value={position}
+                onChange={(e) => setPosition(e.target.value)}
+                size="small"
+                label="Position"
+              />
+              <TextField
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                size="small"
+                label="Company"
+              />
+              <TextField
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                size="small"
+                label="Location"
+              />
+              <TextField
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                label="description"
+                sx={{
+                  minWidth: { xs: 'auto', md: '300px', lg: '400px' },
+                  minHeight: '100px',
+                }}
+                placeholder="Ex: Hi there, I'm a software engineer..."
+                multiline
+                minRows={4}
+                maxRows={4}
+              />
+              <FormControlLabel
+                label="Iam currently working in this role"
+                control={
+                  <Checkbox
+                    value={isPresent}
+                    onChange={() => {
+                      setEndDate(null);
+                      setIsPreset(!isPresent);
+                    }}
+                  />
+                }
+              />
+
+              <FormControl size="small" fullWidth>
+                <DesktopDatePicker
+                  label="start date"
+                  value={startDate}
+                  inputFormat="DD/MM/YYYY"
+                  onChange={(newValue: Dayjs | null) => {
+                    if (newValue) {
+                      setStartDate(newValue);
+                    }
                   }}
+                  renderInput={(params) => <TextField {...params} />}
                 />
-              }
-            />
+              </FormControl>
 
-            <FormControl size="small" fullWidth>
-              <DesktopDatePicker
-                label="start date"
-                value={startDate}
-                inputFormat="DD/MM/YYYY"
-                onChange={(newValue: Dayjs | null) => {
-                  if (newValue) {
-                    setStartDate(newValue);
-                  }
-                }}
-                renderInput={(params) => <TextField {...params} />}
-              />
-            </FormControl>
-
-            <FormControl size="small" fullWidth>
-              <DesktopDatePicker
-                disabled={isPresent}
-                label="end date"
-                value={endDate}
-                inputFormat="DD/MM/YYYY"
-                onChange={(newValue: Dayjs | null) => {
-                  if (newValue) {
-                    setEndDate(newValue);
-                    setIsPreset(false);
-                  }
-                }}
-                renderInput={(params) => <TextField {...params} />}
-              />
-            </FormControl>
-          </Box>
-        </CustomizeModal>
-      </>
+              <FormControl size="small" fullWidth>
+                <DesktopDatePicker
+                  disabled={isPresent}
+                  label="end date"
+                  value={endDate}
+                  inputFormat="DD/MM/YYYY"
+                  onChange={(newValue: Dayjs | null) => {
+                    if (newValue) {
+                      setEndDate(newValue);
+                      setIsPreset(false);
+                    }
+                  }}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+              </FormControl>
+            </Box>
+          </CustomizeModal>
+        </>
+      )}
     </>
   );
 };

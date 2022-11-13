@@ -63,6 +63,13 @@ const EducationCard: React.FC<props> = ({
       return;
     }
 
+    setEducationTemp((prev) => ({
+      ...prev,
+      school: educationTemp.school.trim(),
+      degree: educationTemp.degree.trim(),
+      location: educationTemp.location.trim(),
+    }));
+
     handleOnEdit(index, educationTemp);
     setOpenEdit(false);
   };
@@ -126,11 +133,20 @@ const EducationCard: React.FC<props> = ({
             {education.location}
           </Typography>
           <Typography variant="body2" sx={{ fontWeight: '200' }}>
-            {new Date(education.startDate).toLocaleDateString()} -{' '}
+            {new Date(education.startDate).toLocaleDateString('en-GB', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })}{' '}
+            -{' '}
             {education.currentEducation && education.endDate === null
               ? 'Current'
               : education.endDate !== null
-              ? new Date(education.endDate).toLocaleDateString()
+              ? new Date(education.endDate).toLocaleDateString('en-GB', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })
               : 'Current'}
           </Typography>
         </CardContent>

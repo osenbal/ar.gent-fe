@@ -6,7 +6,7 @@ import { IExperience } from '@/interfaces/user.interface';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { Edit } from '@mui/icons-material';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 import {
   Card,
   CardContent,
@@ -64,6 +64,15 @@ const ExperienceCard: React.FC<props> = ({
       console.log('please fill the field required');
       return;
     }
+
+    setExperienceTemp((prev) => ({
+      ...prev,
+      position: prev.position.trim(),
+      company: prev.company.trim(),
+      location: prev.location.trim(),
+      description: prev.description.trim(),
+    }));
+
     handleOnEdit(index, experienceTemp);
     setOpenEdit(false);
   };
@@ -79,20 +88,28 @@ const ExperienceCard: React.FC<props> = ({
   return (
     <>
       <Card sx={{ marginTop: 2, position: 'relative' }}>
-        <Box>
-          <IconButton
-            onClick={() => setOpenEdit(true)}
-            sx={{ position: 'absolute', top: 4, right: 48 }}
-          >
-            <Edit />
-          </IconButton>
-          <IconButton
-            sx={{ position: 'absolute', top: 4, right: 8 }}
-            onClick={() => handleOnDelete(index)}
-          >
-            <DeleteForeverIcon />
-          </IconButton>
-        </Box>
+        {userId === id && (
+          <Box>
+            <IconButton
+              onClick={() => setOpenEdit(true)}
+              sx={{
+                position: 'absolute',
+                top: { xs: 'unset', md: 4 },
+                right: { xs: 4, md: 48 },
+                bottom: { xs: 4, md: 'unset' },
+              }}
+            >
+              <Edit />
+            </IconButton>
+            <IconButton
+              sx={{ position: 'absolute', top: 4, right: 8 }}
+              onClick={() => handleOnDelete(index)}
+            >
+              <DeleteForeverIcon />
+            </IconButton>
+          </Box>
+        )}
+
         <CardContent>
           <Typography variant="body1" sx={{ fontWeight: '500' }}>
             {experience.position}
@@ -101,138 +118,149 @@ const ExperienceCard: React.FC<props> = ({
             {experience.company} - {experience.location}
           </Typography>
           <Typography variant="body2" sx={{ fontWeight: '200' }}>
-            {new Date(experience.startDate).toLocaleDateString()} -{' '}
+            {new Date(experience.startDate).toLocaleDateString('en-GB', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })}{' '}
+            -{' '}
             {experience.isPresent && experience.endDate === null
               ? 'Current'
               : experience.endDate !== null
-              ? new Date(experience.endDate).toLocaleDateString()
+              ? new Date(experience.endDate).toLocaleDateString('en-GB', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })
               : 'Current'}
           </Typography>
         </CardContent>
       </Card>
 
-      <>
-        <CustomizeModal
-          title="Edit Experience"
-          open={openEdit}
-          id="editExperience"
-          handleClose={() => setOpenEdit(false)}
-          onSave={handleOnEditSave}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              gap: 3,
-              minWidth: { xs: '100%', lg: '350px' },
-            }}
+      {userId === id && (
+        <>
+          <CustomizeModal
+            title="Edit Experience"
+            open={openEdit}
+            id="editExperience"
+            handleClose={() => setOpenEdit(false)}
+            onSave={handleOnEditSave}
           >
-            <TextField
-              value={experienceTemp.position}
-              onChange={(e) =>
-                setExperienceTemp({
-                  ...experienceTemp,
-                  position: e.target.value,
-                })
-              }
-              size="small"
-              label="Position"
-            />
-            <TextField
-              value={experienceTemp.company}
-              onChange={(e) =>
-                setExperienceTemp({
-                  ...experienceTemp,
-                  company: e.target.value,
-                })
-              }
-              size="small"
-              label="Company"
-            />
-            <TextField
-              value={experienceTemp.location}
-              onChange={(e) =>
-                setExperienceTemp({
-                  ...experienceTemp,
-                  location: e.target.value,
-                })
-              }
-              size="small"
-              label="Location"
-            />
-            <TextField
-              value={experienceTemp.description}
-              onChange={(e) =>
-                setExperienceTemp({
-                  ...experienceTemp,
-                  description: e.target.value,
-                })
-              }
-              label="description"
+            <Box
               sx={{
-                minWidth: { xs: 'auto', md: '300px', lg: '400px' },
-                minHeight: '100px',
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                gap: 3,
+                minWidth: { xs: '100%', lg: '350px' },
               }}
-              placeholder="Ex: Hi there, I'm a software engineer..."
-              multiline
-              minRows={4}
-              maxRows={4}
-            />
-            <FormControlLabel
-              label="Iam currently working in this role"
-              control={
-                <Checkbox
-                  checked={experienceTemp.isPresent}
-                  onChange={() =>
-                    setExperienceTemp({
-                      ...experienceTemp,
-                      isPresent: !experienceTemp.isPresent,
-                      endDate: null,
-                    })
-                  }
+            >
+              <TextField
+                value={experienceTemp.position}
+                onChange={(e) =>
+                  setExperienceTemp({
+                    ...experienceTemp,
+                    position: e.target.value,
+                  })
+                }
+                size="small"
+                label="Position"
+              />
+              <TextField
+                value={experienceTemp.company}
+                onChange={(e) =>
+                  setExperienceTemp({
+                    ...experienceTemp,
+                    company: e.target.value,
+                  })
+                }
+                size="small"
+                label="Company"
+              />
+              <TextField
+                value={experienceTemp.location}
+                onChange={(e) =>
+                  setExperienceTemp({
+                    ...experienceTemp,
+                    location: e.target.value,
+                  })
+                }
+                size="small"
+                label="Location"
+              />
+              <TextField
+                value={experienceTemp.description}
+                onChange={(e) =>
+                  setExperienceTemp({
+                    ...experienceTemp,
+                    description: e.target.value,
+                  })
+                }
+                label="description"
+                sx={{
+                  minWidth: { xs: 'auto', md: '300px', lg: '400px' },
+                  minHeight: '100px',
+                }}
+                placeholder="Ex: Hi there, I'm a software engineer..."
+                multiline
+                minRows={4}
+                maxRows={4}
+              />
+              <FormControlLabel
+                label="Iam currently working in this role"
+                control={
+                  <Checkbox
+                    checked={experienceTemp.isPresent}
+                    onChange={() =>
+                      setExperienceTemp({
+                        ...experienceTemp,
+                        isPresent: !experienceTemp.isPresent,
+                        endDate: null,
+                      })
+                    }
+                  />
+                }
+              />
+
+              <FormControl size="small" fullWidth>
+                <DesktopDatePicker
+                  label="start date"
+                  value={experienceTemp.startDate}
+                  inputFormat="DD/MM/YYYY"
+                  onChange={(newValue: Dayjs | null) => {
+                    if (newValue) {
+                      setExperienceTemp({
+                        ...experienceTemp,
+                        startDate: newValue.toDate(),
+                      });
+                    }
+                  }}
+                  renderInput={(params) => <TextField {...params} />}
                 />
-              }
-            />
+              </FormControl>
 
-            <FormControl size="small" fullWidth>
-              <DesktopDatePicker
-                label="start date"
-                value={experienceTemp.startDate}
-                inputFormat="DD/MM/YYYY"
-                onChange={(newValue: Dayjs | null) => {
-                  if (newValue) {
-                    setExperienceTemp({
-                      ...experienceTemp,
-                      startDate: newValue.toDate(),
-                    });
-                  }
-                }}
-                renderInput={(params) => <TextField {...params} />}
-              />
-            </FormControl>
-
-            <FormControl size="small" fullWidth>
-              <DesktopDatePicker
-                disabled={experienceTemp.isPresent}
-                label="end date"
-                value={experienceTemp.endDate}
-                inputFormat="DD/MM/YYYY"
-                onChange={(newValue: Dayjs | null) => {
-                  if (newValue) {
-                    setExperienceTemp({
-                      ...experienceTemp,
-                      endDate: newValue.toDate(),
-                      isPresent: false,
-                    });
-                  }
-                }}
-                renderInput={(params) => <TextField {...params} />}
-              />
-            </FormControl>
-          </Box>
-        </CustomizeModal>
-      </>
+              <FormControl size="small" fullWidth>
+                <DesktopDatePicker
+                  disabled={experienceTemp.isPresent}
+                  label="end date"
+                  value={experienceTemp.endDate}
+                  inputFormat="DD/MM/YYYY"
+                  onChange={(newValue: Dayjs | null) => {
+                    if (newValue) {
+                      setExperienceTemp({
+                        ...experienceTemp,
+                        endDate: newValue.toDate(),
+                        isPresent: false,
+                      });
+                    }
+                  }}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+              </FormControl>
+            </Box>
+          </CustomizeModal>
+        </>
+      )}
     </>
   );
 };

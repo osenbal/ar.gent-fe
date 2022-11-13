@@ -95,6 +95,18 @@ export interface IUserLogin {
   password: string;
 }
 
+export interface IUserUpdate {
+  fullName: string;
+  gender: EGender;
+  phoneNumber: string;
+  birthday: Date;
+  street: string;
+  city: string;
+  state: string;
+  country: string;
+  zipCode: string;
+}
+
 export interface IUser {
   _id: string;
   avatar: string;
@@ -106,7 +118,7 @@ export interface IUser {
   phoneNumber: string;
   address: IAddress;
   cv: string;
-  portfolio_url: string[];
+  portfolioUrl: string[];
   experience: IExperience[];
   education: IEducation[];
   certificate: ICertificate[];

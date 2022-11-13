@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useAppSelector } from '@/hooks/redux.hook';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
@@ -64,6 +65,8 @@ const CustomizeModal: React.FC<props> = ({
   id,
   onSave,
 }) => {
+  const { isLoading } = useAppSelector((state) => state.auth);
+
   return (
     <div>
       <BootstrapDialog onClose={handleClose} aria-labelledby={id} open={open}>
@@ -72,7 +75,7 @@ const CustomizeModal: React.FC<props> = ({
         </BootstrapDialogTitle>
         <DialogContent dividers>{children}</DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={onSave}>
+          <Button disabled={isLoading} autoFocus onClick={onSave}>
             Save changes
           </Button>
         </DialogActions>

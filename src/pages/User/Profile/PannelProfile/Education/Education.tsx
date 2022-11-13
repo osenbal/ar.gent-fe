@@ -61,16 +61,14 @@ const Education: React.FC = () => {
     }
 
     const newEducation: IEducation = {
-      school,
-      degree,
-      location,
+      school: school.trim(),
+      degree: degree.trim(),
+      location: location.trim(),
       startDate: startDate.toDate(),
       endDate: endDate?.toDate() || null,
       currentEducation,
     };
-
     const educationTemp = [...educationList, newEducation];
-
     dispatch(asyncUserEducation({ userId, payload: educationTemp }));
     emptyState();
     setOpenAdd(false);
@@ -78,9 +76,7 @@ const Education: React.FC = () => {
 
   const handleOnEdit = (index: number, item: IEducation) => {
     const educationTemp = [...educationList];
-
     educationTemp[index] = item;
-
     dispatch(asyncUserEducation({ userId, payload: educationTemp }));
   };
 

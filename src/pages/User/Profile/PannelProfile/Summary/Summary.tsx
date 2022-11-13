@@ -1,13 +1,17 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
+import {
+  asyncUserSummary,
+  asyncUserAvatar,
+  asyncUserCv,
+} from '@/store/authSlice';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import { MuiTelInput } from 'mui-tel-input';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import { useAppSelector } from '@/hooks/redux.hook';
-import { EGender } from '@/interfaces/user.interface';
+import { EGender, IUserUpdate } from '@/interfaces/user.interface';
 import dayjs, { Dayjs } from 'dayjs';
 import { City, Country, State } from 'country-state-city';
 import { parseDate } from '@/utils/utils';
-import { BACKEND_URL } from '@/config/config';
 import { PHONE_NUMBER_REGEX } from '@/constant/_regex';
 import { styled } from '@mui/material/styles';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
@@ -33,7 +37,8 @@ import {
 } from '@mui/material';
 
 const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
-  const { userId, user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const { userId, user, isLoading } = useAppSelector((state) => state.auth);
   const [username, setUsername] = useState<string>('');
   const [fullName, setFullName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
@@ -86,63 +91,38 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
 
   const handleSaveChanges = async (e: React.MouseEvent) => {
     e.preventDefault();
-
     if (!validPhoneNumber) {
       toast.error('Phone number is not valid');
       return;
     }
-
-    const data = {
-      fullName: dataEdited.fullName,
+    const data: IUserUpdate = {
+      fullName: dataEdited.fullName.trim(),
       gender: dataEdited.gender,
       phoneNumber: dataEdited.phoneNumber,
       birthday: dataEdited.birthday,
-      street: dataEdited.street,
+      street: dataEdited.street.trim(),
       city: dataEdited.city,
       state: dataEdited.state,
       country: dataEdited.country,
       zipCode: dataEdited.zipCode,
     };
-
-    const res = await fetch(`${BACKEND_URL}/user/${userId}`, {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (res.ok) {
-      setOpen(false);
-      setFullName(dataEdited.fullName);
-      setGender(dataEdited.gender);
-      setPhoneNumber(dataEdited.phoneNumber);
-      setBirthday(dataEdited.birthday);
-      setStreet(dataEdited.street);
-      setCity(dataEdited.city);
-      setState(dataEdited.state);
-      setCountry(dataEdited.country);
-      setZipCode(dataEdited.zipCode);
-    }
+    dispatch(asyncUserSummary({ userId, payload: data }));
+    setOpen(false);
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     const formData = new FormData();
     formData.append('image', file!);
-    const res = await fetch(
-      `${BACKEND_URL}/user/upload/${userId}?type=avatar`,
-      {
-        method: 'PUT',
-        credentials: 'include',
-        body: formData,
-      }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      setAvatar(data.data);
-    }
+
+    dispatch(asyncUserAvatar({ userId, payload: formData }));
+  };
+
+  const handleCvChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const formData = new FormData();
+    formData.append('cv', file!);
+    dispatch(asyncUserCv({ userId, payload: formData }));
   };
 
   const setDataSummary = useCallback(() => {
@@ -152,6 +132,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
       setEmail(user.email);
       setGender(user.gender);
       setCv(user.cv);
+      setAvatar(user.avatar);
       setBirthday(dayjs(user.birthday));
       setPhoneNumber(user.phoneNumber);
       setStreet(user.address.street);
@@ -165,9 +146,11 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
   const handleEditChange = useCallback(() => {
     setDataEdited((prev: any) => ({
       ...prev,
+      avatar,
       fullName,
       gender,
       phoneNumber,
+      cv,
       birthday,
       street,
       city,
@@ -176,6 +159,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
       zipCode,
     }));
   }, [
+    cv,
     birthday,
     city,
     country,
@@ -185,6 +169,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     state,
     street,
     zipCode,
+    avatar,
   ]);
 
   useEffect(() => {
@@ -192,12 +177,12 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
   }, [setDataSummary]);
 
   useEffect(() => {
-    setValidPhoneNumber(PHONE_NUMBER_REGEX.test(phoneNumber));
-  }, [phoneNumber]);
-
-  useEffect(() => {
     handleEditChange();
   }, [handleEditChange, open]);
+
+  useEffect(() => {
+    setValidPhoneNumber(PHONE_NUMBER_REGEX.test(phoneNumber));
+  }, [phoneNumber]);
 
   useEffect(() => {
     setValidPhoneNumber(PHONE_NUMBER_REGEX.test(dataEdited.phoneNumber));
@@ -256,6 +241,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                     </Avatar>
                   </Box>
                   <Input
+                    disabled={isLoading}
                     onChange={handleAvatarChange}
                     type="file"
                     id="avatar_pic"
@@ -421,9 +407,6 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                               state: '',
                               city: '',
                             }));
-
-                            // setState('');
-                            // setCity('');
                           }}
                           required
                         >
@@ -449,15 +432,16 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                               state: e.target.value,
                               city: '',
                             }));
-                            // setCity('');
                           }}
                           required
                         >
-                          {State.getStatesOfCountry(country).map((s) => (
-                            <MenuItem key={s.isoCode} value={s.isoCode}>
-                              {s.name}
-                            </MenuItem>
-                          ))}
+                          {State.getStatesOfCountry(dataEdited.country).map(
+                            (s) => (
+                              <MenuItem key={s.isoCode} value={s.isoCode}>
+                                {s.name}
+                              </MenuItem>
+                            )
+                          )}
                         </Select>
                       </FormControl>
 
@@ -476,7 +460,10 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                           }
                           required
                         >
-                          {City.getCitiesOfState(country, state).map((city) => (
+                          {City.getCitiesOfState(
+                            dataEdited.country,
+                            dataEdited.state
+                          ).map((city) => (
                             <MenuItem key={city.name} value={city.name}>
                               {city.name}
                             </MenuItem>
@@ -634,14 +621,43 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                 </>
               </Box>
               {cv ? (
-                <Link
-                  color="neutral"
-                  underline="hover"
-                  variant="h6"
-                  sx={{ fontWeight: '500', cursor: 'pointer' }}
-                >
-                  Download CV
-                </Link>
+                isLoading ? (
+                  <p>Loading...</p>
+                ) : (
+                  <>
+                    <Link
+                      href={cv}
+                      target="_blank"
+                      color="neutral"
+                      underline="hover"
+                      variant="h6"
+                      sx={{ fontWeight: '500', cursor: 'pointer' }}
+                    >
+                      Download CV
+                    </Link>
+
+                    {userId === id && (
+                      <Button
+                        sx={{
+                          width: { sm: '100%', md: '25%', xl: '15%' },
+                          height: 32,
+                        }}
+                        variant="contained"
+                        component="label"
+                        endIcon={<FileUploadIcon />}
+                      >
+                        Update Cv
+                        <input
+                          hidden
+                          accept="application/pdf"
+                          multiple
+                          type="file"
+                          onChange={handleCvChange}
+                        />
+                      </Button>
+                    )}
+                  </>
+                )
               ) : userId === id ? (
                 <>
                   <Button
@@ -654,7 +670,14 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                     endIcon={<FileUploadIcon />}
                   >
                     Upload Cv
-                    <input hidden accept="image/*" multiple type="file" />
+                    <input
+                      disabled={isLoading}
+                      hidden
+                      accept="application/pdf"
+                      multiple
+                      type="file"
+                      onChange={handleCvChange}
+                    />
                   </Button>
                 </>
               ) : (

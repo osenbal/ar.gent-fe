@@ -8,6 +8,7 @@ import {
   IUser,
   IUserDetailsType,
   IUserLogin,
+  IUserUpdate,
 } from '@interfaces/user.interface';
 
 // Define a type for the slice state
@@ -162,6 +163,147 @@ export const asyncUserExperience = createAsyncThunk(
   }
 );
 
+export const asyncUserSkill = createAsyncThunk(
+  'auth/asyncUserSkill',
+  async ({ userId, payload }: { userId: string; payload: string[] }) => {
+    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ skill: payload }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      toast.success(`${data.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      return { skill: payload };
+    }
+  }
+);
+
+export const asyncUserPortfolioUrl = createAsyncThunk(
+  'auth/asyncUserPortfolioUrl',
+  async ({ userId, payload }: { userId: string; payload: string[] }) => {
+    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ portfolioUrl: payload }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      toast.success(`${data.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      return { portfolioUrl: payload };
+    }
+  }
+);
+
+export const asyncUserAbout = createAsyncThunk(
+  'auth/asyncUserAbout',
+  async ({ userId, payload }: { userId: string; payload: string }) => {
+    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ about: payload.trim() }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      toast.success(`${data.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      return { about: payload.trim() };
+    }
+  }
+);
+
+export const asyncUserSummary = createAsyncThunk(
+  'auth/asyncUserSummary',
+  async ({ userId, payload }: { userId: string; payload: IUserUpdate }) => {
+    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      toast.success(`${data.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+
+      return { summary: payload };
+    }
+  }
+);
+
+export const asyncUserAvatar = createAsyncThunk(
+  'auth/asyncUserAvatar',
+  async ({ userId, payload }: { userId: string; payload: FormData }) => {
+    const response = await fetch(
+      `${BACKEND_URL}/user/upload/${userId}?type=avatar`,
+      {
+        method: 'PUT',
+        credentials: 'include',
+        body: payload,
+      }
+    );
+
+    const data = await response.json();
+    if (response.ok) {
+      toast.success(`${data.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+
+      return { avatar: data.data };
+    }
+  }
+);
+
+export const asyncUserCv = createAsyncThunk(
+  'auth/asyncUserCv',
+  async ({ userId, payload }: { userId: string; payload: FormData }) => {
+    const response = await fetch(
+      `${BACKEND_URL}/user/uploadfile/${userId}?type=cv`,
+      {
+        method: 'PUT',
+        credentials: 'include',
+        body: payload,
+      }
+    );
+
+    const data = await response.json();
+    if (response.ok) {
+      toast.success(`${data.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+
+      return { cv: data.data };
+    }
+  }
+);
+
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -212,11 +354,70 @@ export const authSlice = createSlice({
       state.userId = '';
     },
     // user profile
+    [asyncUserEducation.pending.type]: (state, { payload }) => {
+      state.isLoading = true;
+    },
     [asyncUserEducation.fulfilled.type]: (state, { payload }) => {
       state.user!.education = payload.education;
+      state.isLoading = false;
+    },
+    [asyncUserExperience.pending.type]: (state, { payload }) => {
+      state.isLoading = true;
     },
     [asyncUserExperience.fulfilled.type]: (state, { payload }) => {
       state.user!.experience = payload.experience;
+      state.isLoading = false;
+    },
+    [asyncUserSkill.pending.type]: (state, { payload }) => {
+      state.isLoading = true;
+    },
+    [asyncUserSkill.fulfilled.type]: (state, { payload }) => {
+      state.user!.skill = payload.skill;
+      state.isLoading = false;
+    },
+    [asyncUserPortfolioUrl.pending.type]: (state, { payload }) => {
+      state.isLoading = true;
+    },
+    [asyncUserPortfolioUrl.fulfilled.type]: (state, { payload }) => {
+      state.user!.portfolioUrl = payload.portfolioUrl;
+      state.isLoading = false;
+    },
+    [asyncUserAbout.pending.type]: (state, { payload }) => {
+      state.isLoading = true;
+    },
+    [asyncUserAbout.fulfilled.type]: (state, { payload }) => {
+      state.user!.about = payload.about;
+      state.isLoading = false;
+    },
+    [asyncUserSummary.pending.type]: (state, { payload }) => {
+      state.isLoading = true;
+    },
+    [asyncUserSummary.fulfilled.type]: (state, { payload }) => {
+      console.log(payload);
+      state.user!.fullName = payload.summary.fullName;
+      state.user!.gender = payload.summary.gender;
+      state.user!.phoneNumber = payload.summary.phoneNumber;
+      state.user!.birthday = payload.summary.birthday;
+      state.user!.address.street = payload.summary.street;
+      state.user!.address.city = payload.summary.city;
+      state.user!.address.state = payload.summary.state;
+      state.user!.address.country = payload.summary.country;
+      state.user!.address.zipCode = payload.summary.zipCode;
+      state.isLoading = false;
+    },
+    [asyncUserAvatar.pending.type]: (state, { payload }) => {
+      state.isLoading = true;
+    },
+    [asyncUserAvatar.fulfilled.type]: (state, { payload }) => {
+      state.user!.avatar = payload.avatar;
+      state.isLoading = false;
+    },
+    [asyncUserCv.pending.type]: (state, { payload }) => {
+      state.isLoading = true;
+    },
+    [asyncUserCv.fulfilled.type]: (state, { payload }) => {
+      state.user!.cv = payload.cv;
+      state.isLoading = false;
     },
   },
 });
