@@ -13,55 +13,64 @@ import ApartmentTwoToneIcon from '@mui/icons-material/ApartmentTwoTone';
 import DialpadIcon from '@mui/icons-material/Dialpad';
 import { Link } from 'react-router-dom';
 import LaunchIcon from '@mui/icons-material/Launch';
+import { IJobDetails } from '@/interfaces/job.interface';
+import { useAppSelector } from '@/hooks/redux.hook';
+import parse from 'html-react-parser';
 
-const JobDetails: React.FC = () => {
+type props = {
+  data: IJobDetails;
+};
+
+const JobDetails: React.FC<props> = ({ data }) => {
+  const { userId } = useAppSelector((state) => state.auth);
+  console.log(data);
   return (
     <>
       <Card sx={{ minWidth: '100%', padding: 3 }}>
         <Typography variant="h5" fontWeight={'500'}>
-          JOB TITLE
+          {data.title}
         </Typography>
         <Typography variant="body2" fontWeight={'400'}>
-          Company Name | Location - 10 applicants
+          {data.username} | {data.location} - 10 applicants
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
           <WorkTwoToneIcon sx={{ mr: 1 }} />
           <Typography variant="body2" fontWeight={'400'}>
-            Full Time | project | internship
+            {data.type}
           </Typography>
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
           <ApartmentTwoToneIcon sx={{ mr: 1 }} />
           <Typography variant="body2" fontWeight={'400'}>
-            Remote | Onsite
+            {data.workPlace}
           </Typography>
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
           <DialpadIcon sx={{ mr: 1 }} />
           <Typography variant="body2" fontWeight={'400'}>
-            Beginner | mid senior | senior
+            {data.level}
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-          <Button variant="contained" sx={{ mr: 1 }} endIcon={<LaunchIcon />}>
-            Apply
-          </Button>
-        </Box>
+        {userId !== data.userId && (
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+            <Button variant="contained" sx={{ mr: 1 }} endIcon={<LaunchIcon />}>
+              Apply
+            </Button>
+          </Box>
+        )}
 
         <Typography variant="body2" fontWeight={'500'} mt={3}>
           Post by{' '}
         </Typography>
         <Link to={'/profile/user:id'}>
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-            <Avatar>
-              <img src="https://picsum.photos/200" alt="user" />
-            </Avatar>
+            <Avatar src={data.avatarUser} alt="user" />
             <Typography variant="body2" fontWeight={'500'} ml={2}>
-              Jhon Doe
+              {data.username}
             </Typography>
           </Box>
         </Link>
@@ -70,17 +79,8 @@ const JobDetails: React.FC = () => {
           Description
         </Typography>
 
-        <Typography variant="body2" fontWeight={'400'} mt={1}>
-          Requirements: 3-5+ years developing production JavaScript code and
-          strong knowledge of Vue/React. Understanding of state-management
-          patterns such as Redux, Flux or similar. Proven track record of
-          delivering projects with high quality UI. Bachelor’s/Master’s degree
-          in computer science, engineering or equivalent industry experience.
-          Experience in developing responsive web sites for diverse clients from
-          high powered desktop computers to small footprint mobile devices.
-          Experience with modern front end technologies (styled system, webpack,
-          etc).
-        </Typography>
+        <div dangerouslySetInnerHTML={{ __html: data.description }}></div>
+        {/* {parse(data.description)} */}
       </Card>
     </>
   );

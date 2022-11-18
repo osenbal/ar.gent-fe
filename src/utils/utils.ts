@@ -42,3 +42,12 @@ export const parseDate = (date: string | undefined) => {
 
   return formattedToday;
 };
+
+export const DateToDMY = (date: Date) => {
+  const dateObj = new Date(date);
+  return dateObj.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+};

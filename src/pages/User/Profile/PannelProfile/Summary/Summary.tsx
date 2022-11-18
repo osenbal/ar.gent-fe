@@ -4,6 +4,7 @@ import {
   asyncUserSummary,
   asyncUserAvatar,
   asyncUserCv,
+  asyncUserBanner,
 } from '@/store/authSlice';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import { MuiTelInput } from 'mui-tel-input';
@@ -51,8 +52,8 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
   const [gender, setGender] = useState<string>('');
   const [birthday, setBirthday] = useState<Dayjs | null>(null);
 
-  const [avatar, setAvatar] = useState<string | undefined>(user?.avatar);
-  const [banner, setBanner] = useState<string | undefined>(user?.banner);
+  const [avatar, setAvatar] = useState<string | undefined>('');
+  const [banner, setBanner] = useState<string | undefined>('');
 
   const [street, setStreet] = useState<string>('');
   const [city, setCity] = useState<string>('');
@@ -74,17 +75,6 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
 
   const [open, setOpen] = useState(false);
   const [openInfo, setOpenInfo] = useState(false);
-
-  const Banner = styled('img')({
-    width: '100%',
-    height: '300px',
-    objectFit: 'cover',
-  });
-
-  const style = {
-    width: 400,
-    p: 4,
-  };
 
   const handleOpenEditSummary = () => setOpen(true);
   const handleCloseEditSummary = () => setOpen(false);
@@ -118,6 +108,14 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     dispatch(asyncUserAvatar({ userId, payload: formData }));
   };
 
+  const handleBannerChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const formData = new FormData();
+    formData.append('image', file!);
+
+    dispatch(asyncUserBanner({ userId, payload: formData }));
+  };
+
   const handleCvChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     const formData = new FormData();
@@ -125,28 +123,36 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     dispatch(asyncUserCv({ userId, payload: formData }));
   };
 
-  const setDataSummary = useCallback(() => {
-    if (user) {
-      setFullName(user.fullName);
-      setUsername(user.username);
-      setEmail(user.email);
-      setGender(user.gender);
-      setCv(user.cv);
-      setAvatar(user.avatar);
-      setBirthday(dayjs(user.birthday));
-      setPhoneNumber(user.phoneNumber);
-      setStreet(user.address.street);
-      setCountry(user.address.country);
-      setState(user.address.state);
-      setCity(user.address.city);
-      setZipCode(Number(user.address.zipCode));
-    }
-  }, [user]);
+  // const setDataSummary = useCallback(() => {
+  //   if (user) {
+  //     setFullName(user.fullName);
+  //     setUsername(user.username);
+  //     setEmail(user.email);
+  //     setGender(user.gender);
+  //     setCv(user.cv);
+  //     setBirthday(dayjs(user.birthday));
+  //     setPhoneNumber(user.phoneNumber);
+  //     setStreet(user.address.street);
+  //     setCountry(user.address.country);
+  //     setState(user.address.state);
+  //     setCity(user.address.city);
+  //     setZipCode(Number(user.address.zipCode));
+  //     setAvatar(user.avatar);
+  //     setBanner(user.banner);
+  //   }
+  // }, [
+  //   user?.address,
+  //   user?.avatar,
+  //   user?.banner,
+  //   user?.birthday,
+  //   user?.cv,
+  //   user?.email,
+  //   user?.fullName,
+  // ]);
 
   const handleEditChange = useCallback(() => {
     setDataEdited((prev: any) => ({
       ...prev,
-      avatar,
       fullName,
       gender,
       phoneNumber,
@@ -169,12 +175,57 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     state,
     street,
     zipCode,
-    avatar,
   ]);
 
   useEffect(() => {
-    setDataSummary();
-  }, [setDataSummary]);
+    setFullName(user?.fullName || '');
+  }, [user?.fullName]);
+
+  useEffect(() => {
+    setGender(user?.gender || '');
+  }, [user?.gender]);
+
+  useEffect(() => {
+    setEmail(user?.email || '');
+  }, [user?.email]);
+
+  useEffect(() => {
+    setUsername(user?.username || '');
+  }, [user?.username]);
+
+  useEffect(() => {
+    setCv(user?.cv || '');
+  }, [user?.cv]);
+
+  useEffect(() => {
+    setBirthday(dayjs(user?.birthday) || null);
+  }, [user?.birthday]);
+
+  useEffect(() => {
+    setPhoneNumber(user?.phoneNumber || '');
+  }, [user?.phoneNumber]);
+
+  useEffect(() => {
+    setStreet(user?.address.street || '');
+    setCountry(user?.address.country || '');
+    setState(user?.address.state || '');
+    setCity(user?.address.city || '');
+    if (user?.address.zipCode) {
+      setZipCode(Number(user?.address.zipCode));
+    }
+  }, [user?.address]);
+
+  useEffect(() => {
+    setAvatar(user?.avatar || '');
+  }, [user?.avatar]);
+
+  useEffect(() => {
+    setBanner(user?.banner || '');
+  }, [user?.banner]);
+
+  // useEffect(() => {
+  //   setDataSummary();
+  // }, [setDataSummary]);
 
   useEffect(() => {
     handleEditChange();
@@ -188,14 +239,58 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     setValidPhoneNumber(PHONE_NUMBER_REGEX.test(dataEdited.phoneNumber));
   }, [dataEdited.phoneNumber]);
 
+  const Banner = styled('img')({
+    width: '100%',
+    height: '300px',
+    objectFit: 'cover',
+  });
+
+  const Skeleton = styled('div')({
+    width: '100%',
+    height: '300px',
+    backgroundColor: '#e0e0e0',
+    animation: '$skeleton 1s infinite',
+    '@keyframes skeleton': {
+      '0%': {
+        backgroundColor: '#e0e0e0',
+      },
+      '50%': {
+        backgroundColor: '#bdbdbd',
+      },
+      '100%': {
+        backgroundColor: '#e0e0e0',
+      },
+    },
+  });
+
   return (
     <>
       <ToastContainer />
       <Box sx={{ position: 'relative', width: '100%' }}>
-        <Banner src={banner} alt="banner" />
-        <IconButton sx={{ position: 'absolute', top: '0', right: '0' }}>
-          <CameraAlt />
-        </IconButton>
+        {banner ? <Banner src={banner} alt="banner" /> : <Skeleton />}
+
+        {userId === id && (
+          <IconButton sx={{ position: 'absolute', top: 0, right: 0 }}>
+            <label
+              style={{
+                cursor: 'pointer',
+              }}
+              htmlFor="banner_pic"
+            >
+              <CameraAlt />
+              <input
+                style={{ display: 'none' }}
+                id="banner_pic"
+                disabled={isLoading}
+                type="file"
+                accept="image/*"
+                hidden
+                name="banner_pic"
+                onChange={handleBannerChange}
+              />
+            </label>
+          </IconButton>
+        )}
 
         <Box
           sx={{
@@ -225,7 +320,6 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                         marginTop: -8,
                         border: '1px solid #333333',
                       }}
-                      // style={{ marginBottom: '1.25rem' }}
                     />
 
                     <Avatar
@@ -521,7 +615,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                     <DialogTitle id="contact info">Contact Info</DialogTitle>
 
                     <Fade in={openInfo}>
-                      <Box sx={style}>
+                      <Box sx={{ width: 400, p: 4 }}>
                         <Box>
                           <Typography
                             variant="body1"

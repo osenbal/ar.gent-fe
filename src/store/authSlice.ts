@@ -6,7 +6,6 @@ import {
   IEducation,
   IExperience,
   IUser,
-  IUserDetailsType,
   IUserLogin,
   IUserUpdate,
 } from '@interfaces/user.interface';
@@ -18,7 +17,6 @@ interface AuthState {
   persist: boolean;
   isLoading: boolean;
   user: IUser | null;
-  userDetails: IUserDetailsType | null;
   visited_user: object;
   visited_userDetails: object;
 }
@@ -32,7 +30,6 @@ const initialState: AuthState = {
   isLoading: false,
   userId: '',
   user: null,
-  userDetails: null,
   visited_user: {},
   visited_userDetails: {},
 };
@@ -280,6 +277,30 @@ export const asyncUserAvatar = createAsyncThunk(
   }
 );
 
+export const asyncUserBanner = createAsyncThunk(
+  'auth/asyncUserBanner',
+  async ({ userId, payload }: { userId: string; payload: FormData }) => {
+    const response = await fetch(
+      `${BACKEND_URL}/user/upload/${userId}?type=banner`,
+      {
+        method: 'PUT',
+        credentials: 'include',
+        body: payload,
+      }
+    );
+
+    const data = await response.json();
+    if (response.ok) {
+      toast.success(`${data.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+
+      return { banner: data.data };
+    }
+  }
+);
+
 export const asyncUserCv = createAsyncThunk(
   'auth/asyncUserCv',
   async ({ userId, payload }: { userId: string; payload: FormData }) => {
@@ -350,7 +371,6 @@ export const authSlice = createSlice({
       state.isLoading = false;
       state.isAuth = false;
       state.user = null;
-      state.userDetails = null;
       state.userId = '';
     },
     // user profile
@@ -410,6 +430,13 @@ export const authSlice = createSlice({
     },
     [asyncUserAvatar.fulfilled.type]: (state, { payload }) => {
       state.user!.avatar = payload.avatar;
+      state.isLoading = false;
+    },
+    [asyncUserBanner.pending.type]: (state, { payload }) => {
+      state.isLoading = true;
+    },
+    [asyncUserBanner.fulfilled.type]: (state, { payload }) => {
+      state.user!.banner = payload.banner;
       state.isLoading = false;
     },
     [asyncUserCv.pending.type]: (state, { payload }) => {

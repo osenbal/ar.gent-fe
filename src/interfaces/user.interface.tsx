@@ -38,17 +38,6 @@ export interface IExperience {
   location: string;
 }
 
-export interface ICertificate {
-  title: string; // required
-  urlImage: string; // required
-  licenseNumber: string; //required
-  issueAt: Date;
-  expireAt: Date;
-  description: string;
-  createdAt: Date;
-  updatedAt: Date | null;
-}
-
 /// user interface
 export interface IUserType {
   _id: string;
@@ -63,20 +52,6 @@ export interface IUserType {
   birthday: string;
   verified: boolean;
   role: string;
-}
-
-export interface IUserDetailsType {
-  userId: string;
-  address: IAddress;
-  experience: IExperience[];
-  education: IEducation[];
-  skill: string[];
-  cv: string;
-  portfolio_url: string[];
-  certificate: ICertificate[];
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string;
 }
 
 export default interface IUserRegister {
@@ -121,7 +96,6 @@ export interface IUser {
   portfolioUrl: string[];
   experience: IExperience[];
   education: IEducation[];
-  certificate: ICertificate[];
   skill: string[];
   birthday: Date;
   gender: EGender;

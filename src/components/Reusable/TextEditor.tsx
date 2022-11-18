@@ -11,8 +11,9 @@ import {
   ContentState,
 } from 'draft-js';
 import 'draft-js/dist/Draft.css';
-import { Button, styled } from '@mui/material';
+import { Button, Card, CardContent, styled } from '@mui/material';
 import { stateToHTML } from 'draft-js-export-html';
+import { Box } from '@mui/system';
 
 const TEXT_EDITOR_ITEM = 'draft-js-example-item';
 
@@ -73,22 +74,12 @@ const linkDecorator = new CompositeDecorator([
   },
 ]);
 
-const TextEditor: React.FC = () => {
-  const data = localStorage.getItem(TEXT_EDITOR_ITEM);
-  const initialState = data
-    ? EditorState.createWithContent(
-        convertFromRaw(JSON.parse(data)),
-        linkDecorator
-      )
-    : EditorState.createEmpty(linkDecorator);
-  const [editorState, setEditorState] =
-    React.useState<EditorState>(initialState);
+type props = {
+  editorState: EditorState;
+  setEditorState: (editorState: EditorState) => void;
+};
 
-  const handleSave = () => {
-    const data = JSON.stringify(convertToRaw(editorState.getCurrentContent()));
-    localStorage.setItem(TEXT_EDITOR_ITEM, data);
-  };
-
+const TextEditor: React.FC<props> = ({ editorState, setEditorState }) => {
   const handleAddLink = () => {
     const selection = editorState.getSelection();
     const link = prompt('Please enter the URL of your link');
@@ -173,60 +164,73 @@ const TextEditor: React.FC = () => {
     },
   }));
 
-  console.log(stateToHTML(editorState.getCurrentContent()));
   return (
     <div className="texteditor">
-      <Button onMouseDown={(e) => handleBlockClick(e, 'header-three')}>
-        H3
-      </Button>
-      <Button onMouseDown={(e) => handleBlockClick(e, 'unstyled')}>
-        Normal
-      </Button>
-      <Button onMouseDown={(e) => handleTogggleClick(e, 'BOLD')}>bold</Button>
-      <Button onMouseDown={(e) => handleTogggleClick(e, 'UNDERLINE')}>
-        underline
-      </Button>
-      <Button onMouseDown={(e) => handleTogggleClick(e, 'ITALIC')}>
-        italic
-      </Button>
-      <Button onMouseDown={(e) => handleTogggleClick(e, 'STRIKETHROUGH')}>
-        strikthrough
-      </Button>
-      <Button onMouseDown={(e) => handleBlockClick(e, 'ordered-list-item')}>
-        Ordered List
-      </Button>
-      <Button onMouseDown={(e) => handleBlockClick(e, 'unordered-list-item')}>
-        Unordered List
-      </Button>
-
-      <Button
-        disabled={editorState.getSelection().isCollapsed()}
-        onMouseDown={(e) => {
-          e.preventDefault();
-          handleAddLink();
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          overflow: { xs: 'scroll', md: 'hidden' },
         }}
       >
-        link
-      </Button>
-      <Button
-        disabled={editorState.getUndoStack().size <= 0}
-        onMouseDown={() => setEditorState(EditorState.undo(editorState))}
-      >
-        Undo
-      </Button>
-      <Button
-        disabled={editorState.getRedoStack().size <= 0}
-        onMouseDown={() => setEditorState(EditorState.redo(editorState))}
-      >
-        Redo
-      </Button>
-      <EditorText
-        editorState={editorState}
-        onChange={setEditorState}
-        handleKeyCommand={handleKeyCommand}
-        blockRendererFn={mediaBlockRenderer}
-        placeholder="Description of the job"
-      />
+        <Button onMouseDown={(e) => handleBlockClick(e, 'header-three')}>
+          H3
+        </Button>
+        <Button onMouseDown={(e) => handleBlockClick(e, 'unstyled')}>
+          Normal
+        </Button>
+        <Button onMouseDown={(e) => handleTogggleClick(e, 'BOLD')}>bold</Button>
+        <Button onMouseDown={(e) => handleTogggleClick(e, 'UNDERLINE')}>
+          underline
+        </Button>
+        <Button onMouseDown={(e) => handleTogggleClick(e, 'ITALIC')}>
+          italic
+        </Button>
+        <Button onMouseDown={(e) => handleTogggleClick(e, 'STRIKETHROUGH')}>
+          strikthrough
+        </Button>
+        <Button onMouseDown={(e) => handleBlockClick(e, 'ordered-list-item')}>
+          Ordered List
+        </Button>
+        <Button onMouseDown={(e) => handleBlockClick(e, 'unordered-list-item')}>
+          Unordered List
+        </Button>
+
+        <Button
+          disabled={editorState.getSelection().isCollapsed()}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            handleAddLink();
+          }}
+        >
+          link
+        </Button>
+        <Button
+          disabled={editorState.getUndoStack().size <= 0}
+          onMouseDown={() => setEditorState(EditorState.undo(editorState))}
+        >
+          Undo
+        </Button>
+        <Button
+          disabled={editorState.getRedoStack().size <= 0}
+          onMouseDown={() => setEditorState(EditorState.redo(editorState))}
+        >
+          Redo
+        </Button>
+      </Box>
+
+      <Card sx={{ minHeight: '200px', mt: 3 }}>
+        <CardContent>
+          <EditorText
+            editorState={editorState}
+            onChange={setEditorState}
+            handleKeyCommand={handleKeyCommand}
+            blockRendererFn={mediaBlockRenderer}
+            placeholder="Description of the job"
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 };

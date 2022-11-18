@@ -124,7 +124,7 @@ export default function UserLoggedInLayout() {
   const handleLogout = () => {
     dispatch(asyncLogout());
   };
-
+  console.log(location.pathname);
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -199,10 +199,10 @@ export default function UserLoggedInLayout() {
           </ListItem>
           <ListItem
             component={NavLink}
-            to={`/profile/${userId}`}
+            to={`user/${userId}/profile`}
             disablePadding
             selected={
-              `/profile/${userId}` === location.pathname &&
+              `/user/${userId}/profile` === location.pathname &&
               `${userId}` === location.pathname.split('/')[2]
             }
           >
