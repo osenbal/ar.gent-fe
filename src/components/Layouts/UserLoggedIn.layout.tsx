@@ -45,6 +45,7 @@ const Main = styled('main')<{
 }>(({ theme, open, uptab }) => ({
   flexGrow: 1,
   maxWidth: '1980px',
+  width: uptab ? `calc(100% - ${drawerWidth}px)` : '100%',
   padding: theme.spacing(3),
   ...(!uptab && {
     padding: `${theme.spacing(3)} 8px`,

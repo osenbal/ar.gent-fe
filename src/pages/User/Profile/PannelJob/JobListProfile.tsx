@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import JobCard from './JobCard';
+import JobCard from '../../Jobs/JobCard';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import IJob, { IJobDetails } from '@/interfaces/job.interface';
 import { BACKEND_URL } from '@/config/config';
@@ -18,6 +18,24 @@ const JobListProfile: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const jobIdParam = queryParams.get('jobId');
+
+  const handleDelete = async (jobId: string) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/job/${jobId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        const updatedJobs = jobs.filter((job) => job._id !== jobId);
+        setJobs(updatedJobs);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -79,7 +97,7 @@ const JobListProfile: React.FC = () => {
           <Box
             sx={{
               display: 'flex',
-              justifyContent: 'space-between',
+              justifyContent: 'start',
               alignItems: 'start',
               flexDirection: 'row',
               gap: 2,
@@ -95,8 +113,18 @@ const JobListProfile: React.FC = () => {
                   overflow: 'auto',
                 }}
               >
-                {jobs.length > 0 ? (
-                  jobs.map((job) => <JobCard key={job._id} job={job} />)
+                {jobs ? (
+                  jobs.length > 0 ? (
+                    jobs.map((job) => (
+                      <JobCard
+                        handleDelete={handleDelete}
+                        key={job._id}
+                        job={job}
+                      />
+                    ))
+                  ) : (
+                    <Typography variant="h6">Empty Job</Typography>
+                  )
                 ) : (
                   <Typography variant="h6">No jobs found</Typography>
                 )}
@@ -107,11 +135,12 @@ const JobListProfile: React.FC = () => {
               sx={
                 upTabScreen
                   ? {
-                      width: '65%',
+                      maxWidth: '65%',
                       minHeight: '100vh',
                       overflow: 'auto',
                     }
                   : {
+                      width: '100%',
                       minHeight: '100vh',
                       overflow: 'auto',
                     }
@@ -127,8 +156,14 @@ const JobListProfile: React.FC = () => {
         </>
       ) : (
         <Box>
-          {jobs.length > 0 ? (
-            jobs.map((job) => <JobCard key={job._id} job={job} />)
+          {jobs ? (
+            jobs.length > 0 ? (
+              jobs.map((job) => (
+                <JobCard handleDelete={handleDelete} key={job._id} job={job} />
+              ))
+            ) : (
+              <Typography variant="h6">Empty Job</Typography>
+            )
           ) : (
             <Typography variant="h6">No jobs found</Typography>
           )}

@@ -17,22 +17,140 @@ import { NumericFormat } from 'react-number-format';
 import { useAppSelector } from '@/hooks/redux.hook';
 import { useParams } from 'react-router-dom';
 import { BACKEND_URL } from '@/config/config';
-import IJob from '@/interfaces/job.interface';
+import IJob, { IJobDetails } from '@/interfaces/job.interface';
+import { EJobLevel, EJobType, EJobWorkPlace } from '@/interfaces/job.interface';
+import {
+  EditorState,
+  convertFromRaw,
+  CompositeDecorator,
+  convertFromHTML,
+  ContentState,
+} from 'draft-js';
+import { stateToHTML } from 'draft-js-export-html';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { ICreateJob } from '@/interfaces/job.interface';
+
+const TEXT_EDITOR_ITEM = 'draft-js-example-item';
+
+export const Link = (props: any) => {
+  const { url } = props.contentState.getEntity(props.entityKey).getData();
+  return (
+    <a rel="noopener noreferrer" target="_blank" href={url}>
+      {props.children}
+    </a>
+  );
+};
+
+const linkDecorator = new CompositeDecorator([
+  {
+    strategy: (contentBlock, callback, contentState) => {
+      contentBlock.findEntityRanges((character) => {
+        const entityKey = character.getEntity();
+        return (
+          entityKey !== null &&
+          contentState.getEntity(entityKey).getType() === 'LINK'
+        );
+      }, callback);
+    },
+    component: Link,
+  },
+]);
 
 const JobControl: React.FC = () => {
   const { userId } = useAppSelector((state) => state.auth);
   const { jobId } = useParams();
-  const [job, setJob] = useState<IJob | null>(null);
+
+  const [job, setJob] = useState<IJobDetails>({
+    _id: '',
+    userId: '',
+    username: '',
+    title: '',
+    description: '',
+    location: '',
+    salary: 0,
+    type: '',
+    level: '',
+    workPlace: '',
+    avatarUser: '',
+    totalApplicants: 0,
+    createdAt: new Date(),
+    updatedAt: null,
+    deletedAt: null,
+  });
+  const [jobTemp, setJobTemp] = useState<IJobDetails>({
+    _id: '',
+    userId: '',
+    username: '',
+    title: '',
+    description: '',
+    location: '',
+    salary: 0,
+    type: '',
+    level: '',
+    workPlace: '',
+    avatarUser: '',
+    totalApplicants: 0,
+    createdAt: new Date(),
+    updatedAt: null,
+    deletedAt: null,
+  });
+
+  const [editorState, setEditorState] = useState<EditorState | null>(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [jobType, setJobType] = useState<string>('');
-  const [category, setCategory] = useState<string>('');
-  const [level, setLevel] = useState<string>('');
-  const [workplace, setWorkplace] = useState<string>('');
-  const [salary, setSalary] = useState<number | null>(null);
 
-  const handleChangeJobType = (event: SelectChangeEvent) => {
-    setJobType(event.target.value);
+  const optionTypes = Object.values(EJobType).map((value: string) => value);
+  const optionLevels = Object.values(EJobLevel).map((value: string) => value);
+  const optionWorkPlace = Object.values(EJobWorkPlace).map(
+    (value: string) => value
+  );
+
+  const handleEditJob = async () => {
+    if (
+      jobTemp.title === job.title &&
+      jobTemp.description === job.description &&
+      jobTemp.location === job.location &&
+      jobTemp.salary === job.salary &&
+      jobTemp.type === job.type &&
+      jobTemp.level === job.level &&
+      jobTemp.workPlace === job.workPlace
+    ) {
+      return;
+    }
+
+    if (
+      !editorState ||
+      !job.title ||
+      !job.location ||
+      !job.type ||
+      !job.level ||
+      !job.workPlace ||
+      !job.salary
+    ) {
+      return;
+    }
+
+    const editedData: ICreateJob = {
+      title: job.title,
+      description: stateToHTML(editorState.getCurrentContent()),
+      location: job.location,
+      salary: job.salary,
+      type: job.type,
+      level: job.level,
+      workPlace: job.workPlace,
+    };
+
+    const response = await fetch(`${BACKEND_URL}/job/${jobId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(editedData),
+    });
+
+    const data = await response.json();
+    console.log(data);
   };
 
   useEffect(() => {
@@ -50,6 +168,18 @@ const JobControl: React.FC = () => {
         .then((data) => {
           console.log(data);
           setJob(data.data);
+          setJobTemp(data.data);
+          const blocksHtmlDescription = convertFromHTML(data.data.description);
+          const initialState = data.data.description
+            ? EditorState.createWithContent(
+                ContentState.createFromBlockArray(
+                  blocksHtmlDescription.contentBlocks,
+                  blocksHtmlDescription.entityMap
+                ),
+                linkDecorator
+              )
+            : EditorState.createEmpty(linkDecorator);
+          setEditorState(initialState);
           setIsLoading(false);
         })
         .catch((error) => {
@@ -65,6 +195,13 @@ const JobControl: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (editorState) {
+      const htmlDescription = stateToHTML(editorState.getCurrentContent());
+      setJob({ ...job, description: htmlDescription });
+    }
+  }, [editorState]);
+
   return (
     <>
       {isLoading ? (
@@ -75,100 +212,104 @@ const JobControl: React.FC = () => {
             <CardContent>
               <Typography variant="h5">Job Edit</Typography>
               <TextField
+                value={job?.title}
+                onChange={(e) => setJob({ ...job, title: e.target.value })}
                 label="Job Title"
                 variant="outlined"
                 fullWidth
                 margin="normal"
               />
               <TextField
+                value={job?.location}
+                onChange={(e) => setJob({ ...job, location: e.target.value })}
                 label="Location"
                 variant="outlined"
                 fullWidth
                 margin="normal"
-                sx={{ mt: 1 }}
+                sx={{ mt: 2 }}
               />
-              <FormControl sx={{ m: 1, ml: 0, minWidth: 120 }} size="small">
-                <InputLabel id="filterJobType">Job Type</InputLabel>
-                <Select
-                  labelId="filterJobType"
-                  id="filterJobType"
-                  value={jobType}
-                  label="Job Type"
-                  onChange={handleChangeJobType}
-                >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={1}>Full Time</MenuItem>
-                  <MenuItem value={2}>Part Time</MenuItem>
-                  <MenuItem value={3}>Internship</MenuItem>
-                  <MenuItem value={3}>Internship</MenuItem>
-                  <MenuItem value={30}>Contract</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                <InputLabel id="filterCategory">Category</InputLabel>
-                <Select
-                  labelId="filterCategory"
-                  id="filterCategory"
-                  value={category}
-                  label="Category"
-                  onChange={(event: SelectChangeEvent) =>
-                    setCategory(event.target.value)
-                  }
-                >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={1}>Developer</MenuItem>
-                  <MenuItem value={2}>Task</MenuItem>
-                  <MenuItem value={2}>Front End</MenuItem>
-                  <MenuItem value={2}>Back End</MenuItem>
-                  <MenuItem value={2}>Full Stack</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                <InputLabel id="filterLevel">Level</InputLabel>
-                <Select
-                  labelId="filterLevel"
-                  id="filterLevel"
-                  value={level}
-                  label="Level"
-                  onChange={(event: SelectChangeEvent) =>
-                    setLevel(event.target.value)
-                  }
-                >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={1}>Beginer</MenuItem>
-                  <MenuItem value={2}>Mid Senior</MenuItem>
-                  <MenuItem value={2}>Senior</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                <InputLabel id="filterWorkPlace">Workplace</InputLabel>
-                <Select
-                  labelId="filterWorkPlace"
-                  id="filterWorkPlace"
-                  value={workplace}
-                  label="Workplace"
-                  onChange={(event: SelectChangeEvent) =>
-                    setWorkplace(event.target.value)
-                  }
-                >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={1}>Remote</MenuItem>
-                  <MenuItem value={2}>Onsite</MenuItem>
-                  <MenuItem value={3}>Hybrith</MenuItem>
-                </Select>
-              </FormControl>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 2,
+                  mt: 2,
+                  flexDirection: { xs: 'column', md: 'row' },
+                }}
+              >
+                <FormControl sx={{ minWidth: 120 }} size="small">
+                  <InputLabel id="filterJobType">Job Type</InputLabel>
+                  <Select
+                    labelId="filterJobType"
+                    id="filterJobType"
+                    value={job?.type}
+                    onChange={(e) => {
+                      let val: EJobType = e.target.value as EJobType;
+                      setJob((prev) => ({ ...prev, type: val }));
+                    }}
+                    label="Job Type"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {optionTypes.map((option) => (
+                      <MenuItem key={option} value={option}>
+                        {option}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl sx={{ minWidth: 120 }} size="small">
+                  <InputLabel id="filterLevel">Level</InputLabel>
+                  <Select
+                    labelId="filterLevel"
+                    id="filterLevel"
+                    value={job?.level}
+                    label="Level"
+                    onChange={(e) => {
+                      let val: EJobLevel = e.target.value as EJobLevel;
+                      setJob((prev) => ({ ...prev, level: val }));
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {optionLevels.map((option) => (
+                      <MenuItem key={option} value={option}>
+                        {option}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ minWidth: 120 }} size="small">
+                  <InputLabel id="filterWorkPlace">Workplace</InputLabel>
+                  <Select
+                    labelId="filterWorkPlace"
+                    id="filterWorkPlace"
+                    value={job?.workPlace}
+                    label="Workplace"
+                    onChange={(e) => {
+                      let val: EJobWorkPlace = e.target.value as EJobWorkPlace;
+                      setJob((prev) => ({ ...prev, workPlace: val }));
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {optionWorkPlace.map((option) => (
+                      <MenuItem key={option} value={option}>
+                        {option}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+
               <NumericFormat
                 fullWidth
-                sx={{ display: 'block', width: '100%', mt: 1 }}
-                value={salary}
+                sx={{ display: 'block', width: '100%', mt: 3 }}
+                value={job?.salary}
                 customInput={TextField}
                 decimalSeparator=","
                 thousandSeparator="."
@@ -177,16 +318,56 @@ const JobControl: React.FC = () => {
                 prefix="Rp. "
                 type="text"
                 onChange={(e) => {
-                  setSalary(
-                    Number(e.target.value.replace(/[A-Za-z\.\s]/g, ''))
-                  );
+                  setJob((prev) => ({
+                    ...prev,
+                    salary: Number(e.target.value.replace(/[A-Za-z\.\s]/g, '')),
+                  }));
                 }}
               />
-              <Card>
-                <CardContent></CardContent>
-              </Card>
             </CardContent>
           </Card>
+
+          <Card sx={{ mt: 4 }}>
+            <CardContent>
+              {/* Job Description */}
+              {editorState && (
+                <TextEditor
+                  editorState={editorState}
+                  setEditorState={setEditorState}
+                />
+              )}
+            </CardContent>
+          </Card>
+          <Box
+            sx={{
+              mt: 4,
+              display: 'flex',
+              flex: 1,
+              flexDirection: 'column',
+              alignItems: 'end',
+            }}
+          >
+            {isLoading ? (
+              <LoadingButton
+                sx={{ mr: 0, width: { xs: '100%', md: '150px' } }}
+                loading
+                loadingIndicator="Loading…"
+                variant="outlined"
+              >
+                loading...
+              </LoadingButton>
+            ) : (
+              <Button
+                disabled={isLoading}
+                sx={{ mr: 0, width: { xs: '100%', md: '150px' } }}
+                variant="contained"
+                color="success"
+                onClick={handleEditJob}
+              >
+                Save
+              </Button>
+            )}
+          </Box>
 
           <Card sx={{ mt: 2 }}>
             <CardContent>

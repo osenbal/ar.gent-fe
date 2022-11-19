@@ -7,12 +7,14 @@ import IJob from '@/interfaces/job.interface';
 import { DateToDMY } from '@/utils/utils';
 import { NumericFormat } from 'react-number-format';
 import { useAppSelector } from '@/hooks/redux.hook';
+import { BACKEND_URL } from '@/config/config';
 
 type props = {
   job: IJob;
+  handleDelete: (id: string) => void;
 };
 
-const JobCard: React.FC<props> = ({ job }) => {
+const JobCard: React.FC<props> = ({ job, handleDelete }) => {
   const navigate = useNavigate();
   const { userId } = useAppSelector((state) => state.auth);
 
@@ -100,7 +102,10 @@ const JobCard: React.FC<props> = ({ job }) => {
 
         {userId === job.userId && (
           <>
-            <IconButton sx={{ position: 'absolute', top: 2, right: 2 }}>
+            <IconButton
+              onClick={() => handleDelete(job._id)}
+              sx={{ position: 'absolute', top: 2, right: 2 }}
+            >
               <DeleteForeverIcon />
             </IconButton>
             <Link to={`/job/edit/${job._id}`}>

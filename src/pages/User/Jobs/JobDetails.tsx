@@ -16,6 +16,7 @@ import LaunchIcon from '@mui/icons-material/Launch';
 import { IJobDetails } from '@/interfaces/job.interface';
 import { useAppSelector } from '@/hooks/redux.hook';
 import parse from 'html-react-parser';
+import DOMPurify from 'dompurify';
 
 type props = {
   data: IJobDetails;
@@ -23,10 +24,9 @@ type props = {
 
 const JobDetails: React.FC<props> = ({ data }) => {
   const { userId } = useAppSelector((state) => state.auth);
-  console.log(data);
   return (
     <>
-      <Card sx={{ minWidth: '100%', padding: 3 }}>
+      <Card sx={{ padding: 3 }}>
         <Typography variant="h5" fontWeight={'500'}>
           {data.title}
         </Typography>
@@ -66,7 +66,7 @@ const JobDetails: React.FC<props> = ({ data }) => {
         <Typography variant="body2" fontWeight={'500'} mt={3}>
           Post by{' '}
         </Typography>
-        <Link to={'/profile/user:id'}>
+        <Link to={`/user/${data.userId}/profile`}>
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
             <Avatar src={data.avatarUser} alt="user" />
             <Typography variant="body2" fontWeight={'500'} ml={2}>
@@ -79,7 +79,27 @@ const JobDetails: React.FC<props> = ({ data }) => {
           Description
         </Typography>
 
-        <div dangerouslySetInnerHTML={{ __html: data.description }}></div>
+        <div>
+          <p>
+            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eum et
+            fugiat animi consectetur sapiente voluptatem vitae natus dolore,
+            quibusdam recusandae, consequatur, soluta voluptas perspiciatis
+            earum? Dignissimos perspiciatis asperiores voluptates mollitia!
+          </p>
+        </div>
+        <div>
+          <span
+            style={{
+              overflowWrap: 'break-word',
+              wordWrap: 'break-word',
+              hyphens: 'auto',
+              maxWidth: '100%',
+            }}
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(data.description),
+            }}
+          />
+        </div>
         {/* {parse(data.description)} */}
       </Card>
     </>

@@ -5,7 +5,7 @@ import { Outlet } from 'react-router-dom';
 
 const PersistLogin: React.FC = () => {
   const { persist, isAuth } = useAppSelector((state) => state.auth);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const refresh = useRefreshToken();
 
   // Check access token from cookie
