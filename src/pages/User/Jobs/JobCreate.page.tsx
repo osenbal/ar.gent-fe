@@ -108,6 +108,17 @@ const JobCreate: React.FC = () => {
         hideProgressBar: false,
         closeOnClick: true,
       });
+      setJobData({
+        title: '',
+        description: '',
+        location: '',
+        salary: 0,
+        type: '',
+        level: '',
+        workPlace: '',
+      });
+      setEditorState(EditorState.createEmpty(linkDecorator));
+      setIsLoading(false);
     } else {
       toast.error('Something went wrong', {
         position: 'top-right',
@@ -115,9 +126,8 @@ const JobCreate: React.FC = () => {
         hideProgressBar: false,
         closeOnClick: true,
       });
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   useEffect(() => {

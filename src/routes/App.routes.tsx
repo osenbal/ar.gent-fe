@@ -40,18 +40,14 @@ const AppRoutes: React.FC = () => {
         <Route element={<PersistLogin />}>
           <Route element={<ProtectedRoute />}>
             <Route element={<UserLoggedInLayout />}>
-              <Route path="home" element={<HomeLoggedIn />} />
-
+              <Route path="jobs" element={<HomeLoggedIn />} />
               <Route element={<ProfileLayout />}>
                 <Route path="user/:id/profile" element={<Profile />} />
                 <Route path="user/:id/job" element={<JobListProfile />} />
               </Route>
-
-              <Route path="help" element={<HelpPage />} />
-
               <Route path="job/create" element={<JobCreate />} />
               <Route path="job/edit/:jobId" element={<JobControl />} />
-
+              <Route path="help" element={<HelpPage />} />
               {/* <Route path="job/search/" element={<JobLayout />}>
                 <Route index element={<JobDetails />} />
               </Route> */}

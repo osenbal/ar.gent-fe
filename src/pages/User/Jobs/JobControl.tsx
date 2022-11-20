@@ -21,7 +21,6 @@ import IJob, { IJobDetails } from '@/interfaces/job.interface';
 import { EJobLevel, EJobType, EJobWorkPlace } from '@/interfaces/job.interface';
 import {
   EditorState,
-  convertFromRaw,
   CompositeDecorator,
   convertFromHTML,
   ContentState,
@@ -29,6 +28,7 @@ import {
 import { stateToHTML } from 'draft-js-export-html';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { ICreateJob } from '@/interfaces/job.interface';
+import { ToastContainer, toast } from 'react-toastify';
 
 const TEXT_EDITOR_ITEM = 'draft-js-example-item';
 
@@ -149,8 +149,24 @@ const JobControl: React.FC = () => {
       body: JSON.stringify(editedData),
     });
 
-    const data = await response.json();
-    console.log(data);
+    if (response.ok) {
+      const data = await response.json();
+      setJobTemp(job);
+      toast.success(data.data, {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
+    } else {
+      const data = await response.json();
+      toast.error(data.message, {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
+    }
   };
 
   useEffect(() => {
@@ -204,6 +220,7 @@ const JobControl: React.FC = () => {
 
   return (
     <>
+      <ToastContainer />
       {isLoading ? (
         <Typography variant="h6">Loading...</Typography>
       ) : userId === job?.userId ? (

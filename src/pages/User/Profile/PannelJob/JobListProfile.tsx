@@ -6,6 +6,7 @@ import { BACKEND_URL } from '@/config/config';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/redux.hook';
 import JobDetails from '../../Jobs/JobDetails';
+import { ToastContainer, toast } from 'react-toastify';
 
 const JobListProfile: React.FC = () => {
   const { id } = useParams();
@@ -31,6 +32,9 @@ const JobListProfile: React.FC = () => {
       if (response.ok) {
         const updatedJobs = jobs.filter((job) => job._id !== jobId);
         setJobs(updatedJobs);
+        toast.success('Job deleted successfully');
+      } else {
+        toast.error('Error deleting job');
       }
     } catch (error) {
       console.log(error);
@@ -90,8 +94,10 @@ const JobListProfile: React.FC = () => {
       };
     }
   }, [jobIdParam]);
+
   return (
     <>
+      <ToastContainer />
       {jobIdParam ? (
         <>
           <Box
@@ -111,12 +117,14 @@ const JobListProfile: React.FC = () => {
                   width: '33%',
                   maxHeight: '100vh',
                   overflow: 'auto',
+                  pr: 2,
                 }}
               >
                 {jobs ? (
                   jobs.length > 0 ? (
                     jobs.map((job) => (
                       <JobCard
+                        path="profile"
                         handleDelete={handleDelete}
                         key={job._id}
                         job={job}
@@ -135,6 +143,7 @@ const JobListProfile: React.FC = () => {
               sx={
                 upTabScreen
                   ? {
+                      width: '65%',
                       maxWidth: '65%',
                       minHeight: '100vh',
                       overflow: 'auto',
@@ -159,7 +168,12 @@ const JobListProfile: React.FC = () => {
           {jobs ? (
             jobs.length > 0 ? (
               jobs.map((job) => (
-                <JobCard handleDelete={handleDelete} key={job._id} job={job} />
+                <JobCard
+                  path="profile"
+                  handleDelete={handleDelete}
+                  key={job._id}
+                  job={job}
+                />
               ))
             ) : (
               <Typography variant="h6">Empty Job</Typography>

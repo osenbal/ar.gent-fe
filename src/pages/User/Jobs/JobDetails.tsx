@@ -78,15 +78,6 @@ const JobDetails: React.FC<props> = ({ data }) => {
         <Typography variant="body2" fontWeight={'500'} mt={3}>
           Description
         </Typography>
-
-        <div>
-          <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eum et
-            fugiat animi consectetur sapiente voluptatem vitae natus dolore,
-            quibusdam recusandae, consequatur, soluta voluptas perspiciatis
-            earum? Dignissimos perspiciatis asperiores voluptates mollitia!
-          </p>
-        </div>
         <div>
           <span
             style={{
