@@ -60,7 +60,7 @@ const Login: React.FC = () => {
     dispatch(loginUser({ email, password }));
 
     if (isLoading === false && isAuth) {
-      navigate(location.state?.from?.pathname || '/home', { replace: true });
+      navigate(location.state?.from?.pathname || '/jobs', { replace: true });
     }
   };
 
