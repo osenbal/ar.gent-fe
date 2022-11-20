@@ -18,4 +18,7 @@ module.exports = {
       '^@(.+)': '<rootDir>/src/$1',
     },
   },
+  typescript: {
+    enableTypeChecking: true /* (default value) */,
+  },
 };

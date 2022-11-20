@@ -38,7 +38,7 @@ const GuestRoute: React.FC = () => {
   ) : isLoading ? (
     <p>Loading ...</p>
   ) : (
-    <Navigate to="/home" />
+    <Navigate to="/jobs" />
   );
 };
 
