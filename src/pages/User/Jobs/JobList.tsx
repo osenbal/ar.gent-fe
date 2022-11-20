@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Box, Button, useMediaQuery, useTheme } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { styled } from '@mui/material/styles';
-import { useSearchParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import IJob from '@/interfaces/job.interface';
-import { BACKEND_URL } from '@/config/config';
 import JobCard from './JobCard';
+import { SyncLoader } from 'react-spinners';
+import { Box, Button, useMediaQuery, useTheme } from '@mui/material';
+import { useSearchParams } from 'react-router-dom';
+import { BACKEND_URL } from '@/config/config';
 
 const JobList: React.FC = () => {
   const theme = useTheme();
@@ -18,25 +17,6 @@ const JobList: React.FC = () => {
   const [limitPerPage] = useState<number>(4);
   const [noData, setNoData] = useState<boolean>(false);
   const [jobs, setJobs] = useState<IJob[] | []>([]);
-
-  // window.onscroll = () => {
-  //   console.log(
-  //     Math.round(window.innerHeight + document.documentElement.scrollTop)
-  //   );
-  //   console.log(Math.round(document.documentElement.offsetHeight - 25));
-  //   if (
-  //     Math.round(window.innerHeight + document.documentElement.scrollTop) >=
-  //     Math.round(document.documentElement.offsetHeight - 25)
-  //   ) {
-  //     if (!noData) {
-  //       console.log("You're at the bottom of the page");
-
-  //       console.log(window.innerHeight + document.documentElement.scrollTop);
-  //       console.log(document.documentElement.offsetHeight);
-  //       loadJobs(page);
-  //     }
-  //   }
-  // };
 
   const loadJobs = (page: number) => {
     setIsLoading(true);
@@ -54,7 +34,9 @@ const JobList: React.FC = () => {
           const newList = jobs.concat(data.data);
           setJobs(newList);
           setPage(newPage);
-          if (data.data.length === 0) setNoData(true);
+          console.log(data);
+          if (data.data.length === 0 || jobs.length === data.total)
+            setNoData(true);
           setIsLoading(false);
         })
         .catch((error) => {
@@ -82,7 +64,16 @@ const JobList: React.FC = () => {
           />
         ))}
         {isLoading ? (
-          <div className="text-center">loading data ...</div>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: '80vh',
+            }}
+          >
+            <SyncLoader color="#3f51b5" loading={isLoading} size={15} />
+          </Box>
         ) : !noData ? (
           <Button
             onClick={() => loadJobs(page)}
@@ -94,7 +85,11 @@ const JobList: React.FC = () => {
         ) : (
           ''
         )}
-        {noData ? <div className="text-center">no data anymore ...</div> : ''}
+        {noData ? (
+          <Box sx={{ textAlign: 'center', mt: 3 }}>no data anymore ...</Box>
+        ) : (
+          ''
+        )}
       </Box>
     </>
   );

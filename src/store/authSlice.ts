@@ -82,7 +82,7 @@ export const registerUser = createAsyncThunk(
         position: 'bottom-left',
         theme: 'dark',
       });
-      return { isAuth: false };
+      return { isAuth: false, userId: '' };
     }
   }
 );
@@ -316,6 +316,13 @@ export const asyncUserCv = createAsyncThunk(
     const data = await response.json();
     if (response.ok) {
       toast.success(`${data.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+
+      return { cv: data.data };
+    } else {
+      toast.error(`${data.message}`, {
         position: 'bottom-left',
         theme: 'dark',
       });

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useAppSelector } from '@/hooks/redux.hook';
 import { Outlet, Navigate } from 'react-router-dom';
 import useRefreshToken from '@/hooks/refreshToken.hook';
+import { Box } from '@mui/material';
+import { HashLoader } from 'react-spinners';
 
 const GuestRoute: React.FC = () => {
   const { isAuth, persist } = useAppSelector((state) => state.auth);
@@ -36,7 +38,16 @@ const GuestRoute: React.FC = () => {
   return !isAuth ? (
     <Outlet />
   ) : isLoading ? (
-    <p>Loading ...</p>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+      }}
+    >
+      <HashLoader color="#36d7b7" loading={isLoading} size={50} />
+    </Box>
   ) : (
     <Navigate to="/jobs" />
   );

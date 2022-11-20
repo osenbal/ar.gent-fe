@@ -42,8 +42,8 @@ const JobCard: React.FC<props> = ({ job, handleDelete, path }) => {
           }}
           to={
             path === 'profile'
-              ? `?jobId=${job._id}`
-              : `/jobs?search&jobId=${job._id}`
+              ? `?jobId=${job?._id}`
+              : `/jobs?search&jobId=${job?._id}`
           }
           id="jobDetailLink"
         >

@@ -1,7 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useAppSelector } from '@/hooks/redux.hook';
+import React, { useState, useEffect, CSSProperties } from 'react';
 import useRefreshToken from '@/hooks/refreshToken.hook';
+import { HashLoader } from 'react-spinners';
+import { useAppSelector } from '@/hooks/redux.hook';
 import { Outlet } from 'react-router-dom';
+import { Box } from '@mui/material';
+
+const override: CSSProperties = {
+  display: 'block',
+  margin: '0 auto',
+};
 
 const PersistLogin: React.FC = () => {
   const { persist, isAuth } = useAppSelector((state) => state.auth);
@@ -39,7 +46,16 @@ const PersistLogin: React.FC = () => {
       ) : isAuth ? (
         <Outlet />
       ) : isLoading ? (
-        <div>Loading...</div>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+          }}
+        >
+          <HashLoader color="#36d7b7" loading={isLoading} size={50} />
+        </Box>
       ) : (
         <Outlet />
       )}

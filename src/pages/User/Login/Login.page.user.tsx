@@ -8,6 +8,7 @@ import { setPersist } from '@store/authSlice';
 import { ToastContainer, toast } from 'react-toastify';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { VisibilityOff, Visibility } from '@mui/icons-material';
+import { LoadingButton } from '@mui/lab';
 import {
   Grid,
   TextField,
@@ -27,20 +28,14 @@ import {
 
 const Login: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { persist, isLoading, isAuth } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const location = useLocation();
+  const { persist, isLoading, isAuth } = useAppSelector((state) => state.auth);
 
   const [email, setEmail] = useState<string>('');
   const [validEmail, setValidEmail] = useState<boolean>(false);
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
-
-  const handleMouseDownPassword = (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    event.preventDefault();
-  };
 
   const handleCheckPersist = () => {
     dispatch(setPersist(!persist));
@@ -54,6 +49,7 @@ const Login: React.FC = () => {
         position: 'bottom-left',
         theme: 'dark',
       });
+
       return;
     }
 
@@ -107,36 +103,22 @@ const Login: React.FC = () => {
             <FormGroup sx={{ marginTop: '3rem' }}>
               <TextField
                 required
-                sx={{ width: '100%' }}
-                id="outlined-email-input"
+                id="email"
                 label="Email"
                 type="email"
                 name="email"
                 value={email}
+                autoComplete="off"
                 onChange={(e) => setEmail(e.target.value)}
+                sx={{ width: '100%' }}
               />
 
-              <br />
-
-              {/* <TextField
-                required
-                sx={{ width: '100%' }}
-                type="password"
-                name="password"
-                id="outlined-password-input"
-                label="Password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              /> */}
-              <FormControl sx={{ width: '100%' }} variant="outlined">
-                <InputLabel htmlFor="outlined-adornment-password">
-                  Password
-                </InputLabel>
+              <FormControl variant="outlined" sx={{ width: '100%', mt: 3 }}>
+                <InputLabel htmlFor="password">Password</InputLabel>
                 <OutlinedInput
-                  autoComplete="current-password"
-                  id="outlined-adornment-password"
                   required
+                  autoComplete="off"
+                  id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -146,7 +128,6 @@ const Login: React.FC = () => {
                       <IconButton
                         aria-label="toggle password visibility"
                         onClick={(e) => setShowPassword(!showPassword)}
-                        onMouseDown={handleMouseDownPassword}
                         edge="end"
                       >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
@@ -158,11 +139,11 @@ const Login: React.FC = () => {
               </FormControl>
               <Link
                 href="/forgot-password"
-                sx={{ marginTop: '1rem', display: 'block', width: 'auto' }}
+                sx={{ mt: 3, display: 'block', width: 'auto' }}
               >
                 Forgot Password?
               </Link>
-              <br />
+
               <FormControlLabel
                 control={
                   <Checkbox
@@ -174,17 +155,26 @@ const Login: React.FC = () => {
                   />
                 }
                 label="Save Login ?"
+                sx={{ mt: 3 }}
               />
-
-              <br />
-
-              <Button
-                disabled={isLoading}
-                variant="contained"
-                onClick={handleLogin}
-              >
-                Login
-              </Button>
+              {isLoading ? (
+                <LoadingButton
+                  loading
+                  variant="outlined"
+                  sx={{ width: '100%', mt: '24px' }}
+                >
+                  Register
+                </LoadingButton>
+              ) : (
+                <Button
+                  sx={{ mt: 3 }}
+                  disabled={isLoading}
+                  variant="contained"
+                  onClick={handleLogin}
+                >
+                  Login
+                </Button>
+              )}
             </FormGroup>
           </Container>
         </Grid>

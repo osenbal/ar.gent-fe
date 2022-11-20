@@ -1,4 +1,23 @@
 import React, { useEffect, useState } from 'react';
+import Select from '@mui/material/Select';
+import TextEditor from '@/components/Reusable/TextEditor';
+import { NumericFormat } from 'react-number-format';
+import { useAppSelector } from '@/hooks/redux.hook';
+import { useParams } from 'react-router-dom';
+import { BACKEND_URL } from '@/config/config';
+import { IJobDetails } from '@/interfaces/job.interface';
+import { EJobLevel, EJobType, EJobWorkPlace } from '@/interfaces/job.interface';
+import { stateToHTML } from 'draft-js-export-html';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { ICreateJob } from '@/interfaces/job.interface';
+import { ToastContainer, toast } from 'react-toastify';
+import { SyncLoader } from 'react-spinners';
+import {
+  EditorState,
+  CompositeDecorator,
+  convertFromHTML,
+  ContentState,
+} from 'draft-js';
 import {
   Card,
   CardContent,
@@ -11,24 +30,6 @@ import {
   Avatar,
   Button,
 } from '@mui/material';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import TextEditor from '@/components/Reusable/TextEditor';
-import { NumericFormat } from 'react-number-format';
-import { useAppSelector } from '@/hooks/redux.hook';
-import { useParams } from 'react-router-dom';
-import { BACKEND_URL } from '@/config/config';
-import IJob, { IJobDetails } from '@/interfaces/job.interface';
-import { EJobLevel, EJobType, EJobWorkPlace } from '@/interfaces/job.interface';
-import {
-  EditorState,
-  CompositeDecorator,
-  convertFromHTML,
-  ContentState,
-} from 'draft-js';
-import { stateToHTML } from 'draft-js-export-html';
-import LoadingButton from '@mui/lab/LoadingButton';
-import { ICreateJob } from '@/interfaces/job.interface';
-import { ToastContainer, toast } from 'react-toastify';
 
 const TEXT_EDITOR_ITEM = 'draft-js-example-item';
 
@@ -222,7 +223,16 @@ const JobControl: React.FC = () => {
     <>
       <ToastContainer />
       {isLoading ? (
-        <Typography variant="h6">Loading...</Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '80vh',
+          }}
+        >
+          <SyncLoader color="#3f51b5" loading={isLoading} size={15} />
+        </Box>
       ) : userId === job?.userId ? (
         <Box>
           <Card>

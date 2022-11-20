@@ -5,6 +5,15 @@ import { asyncLogout } from '@/store/authSlice';
 import { ColorModeContext } from '@/Context/ColorMode.context';
 import { styled, useTheme } from '@mui/material/styles';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
+import MaterialUISwitch from '../Reusable/Switch';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import HomeIcon from '@mui/icons-material/Home';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import HelpCenterIcon from '@mui/icons-material/HelpCenter';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import {
   Box,
   Drawer,
@@ -20,15 +29,6 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material';
-import MaterialUISwitch from '../Reusable/Switch';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import AccountBoxIcon from '@mui/icons-material/AccountBox';
-import HomeIcon from '@mui/icons-material/Home';
-import AddBoxIcon from '@mui/icons-material/AddBox';
-import HelpCenterIcon from '@mui/icons-material/HelpCenter';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 const drawerWidth = 240;
 interface AppBarProps extends MuiAppBarProps {
@@ -125,6 +125,7 @@ export default function UserLoggedInLayout() {
   const handleLogout = () => {
     dispatch(asyncLogout());
   };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
