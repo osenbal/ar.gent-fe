@@ -57,14 +57,22 @@ const Slider: React.FC<props> = ({ openNav, onClosedNav }) => {
   const renderContent = (
     <>
       {/* <DrawerHeader /> */}
-      <div>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: 3,
+          marginTop: 2,
+        }}
+      >
         <AdminPanelSettingsIcon sx={{ width: 52, height: 52 }} />
       </div>
 
       <Card
         sx={{
           boxShadow: 'none',
-          backgroundColor: '#f5f5f5',
+          backgroundColor: 'inherit',
           mx: 1,
           mt: 1,
           borderRadius: 2,

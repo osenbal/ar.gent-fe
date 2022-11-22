@@ -112,7 +112,7 @@ const AccountPopover = () => {
 
 const StyledRoot = styled(AppBar)(({ theme }) => ({
   boxShadow: 'none',
-  backgroundColor: theme.palette.grey[50],
+  backgroundColor: 'inherit',
   [theme.breakpoints.up('md')]: {
     width: `calc(100% - ${drawerWidth + 1}px)`,
   },
@@ -129,6 +129,8 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 type props = {
   onOpenNav: () => void;
 };
+
+// --------------------------------------------------
 
 const Header: React.FC<props> = ({ onOpenNav }) => {
   return (
