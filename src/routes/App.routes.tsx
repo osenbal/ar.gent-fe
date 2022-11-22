@@ -5,21 +5,19 @@ import Login from '@pages/User/Login/Login.page.user';
 import Register from '@pages/User/Register/Register.page.user';
 import SuccessRegister from '@/pages/User/Register/SuccessRegister.page';
 import Profile from '@pages/User/Profile/PannelProfile/Profile';
-import HomeLoggedIn from '@pages/User/Home/HomeLoggedIn.page';
 import ProtectedRoute from '@/middleware/protectedRoute';
 import GuestRoute from '@/middleware/guestRoute';
 import PersistLogin from '@/middleware/persistLogin';
 import ForgotPassword from '@pages/User/ForgotPassword/ForgotPassword.page';
 import UserLoggedInLayout from '@/components/Layouts/UserLoggedIn.layout';
 import JobDetails from '@/pages/User/Jobs/JobDetails';
-import JobLayout from '@/components/Layouts/JobLayout';
 import JobCreate from '@/pages/User/Jobs/JobCreate.page';
 import JobControl from '@/pages/User/Jobs/JobControl';
 import HelpPage from '@/pages/User/Help/Help.page';
 import AuthPolicy from '@/middleware/authPolicy';
-import JobList from '@/pages/User/Jobs/JobList';
 import JobListProfile from '@/pages/User/Profile/PannelJob/JobListProfile';
 import ProfileLayout from '@/components/Layouts/ProfileLayout';
+import Dashboard from '@/pages/User/Home/Dashboard.Page';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -40,7 +38,7 @@ const AppRoutes: React.FC = () => {
         <Route element={<PersistLogin />}>
           <Route element={<ProtectedRoute />}>
             <Route element={<UserLoggedInLayout />}>
-              <Route path="jobs" element={<HomeLoggedIn />} />
+              <Route path="jobs" element={<Dashboard />} />
               <Route element={<ProfileLayout />}>
                 <Route path="user/:id/profile" element={<Profile />} />
                 <Route path="user/:id/job" element={<JobListProfile />} />

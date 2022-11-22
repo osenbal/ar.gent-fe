@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography, Card, CardContent, IconButton } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import IJob from '@/interfaces/job.interface';
 import { DateToDMY } from '@/utils/utils';
 import { NumericFormat } from 'react-number-format';
@@ -15,7 +15,6 @@ type props = {
 };
 
 const JobCard: React.FC<props> = ({ job, handleDelete, path }) => {
-  const navigate = useNavigate();
   const { userId } = useAppSelector((state) => state.auth);
 
   return (

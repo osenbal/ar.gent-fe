@@ -183,7 +183,6 @@ const JobControl: React.FC = () => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
           setJob(data.data);
           setJobTemp(data.data);
           const blocksHtmlDescription = convertFromHTML(data.data.description);

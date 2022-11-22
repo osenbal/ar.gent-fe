@@ -4,21 +4,38 @@ import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import IJob, { IJobDetails } from '@/interfaces/job.interface';
 import { BACKEND_URL } from '@/config/config';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { useAppSelector } from '@/hooks/redux.hook';
 import JobDetails from '../../Jobs/JobDetails';
 import { ToastContainer, toast } from 'react-toastify';
+import { SyncLoader } from 'react-spinners';
+import { useNavigate } from 'react-router-dom';
+
+const Loader = () => {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+      }}
+    >
+      <SyncLoader color="#3f51b5" />
+    </Box>
+  );
+};
 
 const JobListProfile: React.FC = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [queryParams] = useSearchParams();
+  const jobIdParam = queryParams.get('jobId');
   const theme = useTheme();
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
 
   const [jobs, setJobs] = useState<IJob[] | []>([]);
   const [jobDetails, setJobDetails] = useState<IJobDetails | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const jobIdParam = queryParams.get('jobId');
+  const [isLoadingJobs, setIsLoadingJobs] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleDelete = async (jobId: string) => {
     try {
@@ -33,6 +50,7 @@ const JobListProfile: React.FC = () => {
         const updatedJobs = jobs.filter((job) => job._id !== jobId);
         setJobs(updatedJobs);
         toast.success('Job deleted successfully');
+        navigate(`/user/${id}/job`);
       } else {
         toast.error('Error deleting job');
       }
@@ -42,57 +60,55 @@ const JobListProfile: React.FC = () => {
   };
 
   useEffect(() => {
-    const controller = new AbortController();
-    fetch(`${BACKEND_URL}/job/${id}`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      signal: controller.signal,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setJobs(data.data);
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') {
-          console.log('abort');
-        }
-      });
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (jobIdParam) {
-      setIsLoading(true);
-      const controller = new AbortController();
-      fetch(`${BACKEND_URL}/job/id/${jobIdParam}`, {
+    setTimeout(() => {
+      fetch(`${BACKEND_URL}/job/${id}`, {
         method: 'GET',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
-        signal: controller.signal,
       })
         .then((res) => res.json())
         .then((data) => {
-          setJobDetails(data.data);
-          setIsLoading(false);
+          setJobs(data.data);
         })
         .catch((error) => {
-          if (error.name === 'AbortError') {
-            console.log('abort');
-          }
-          setIsLoading(false);
+          console.log('abort');
+        })
+        .finally(() => {
+          setIsLoadingJobs(false);
         });
-      return () => {
-        controller.abort();
-      };
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    if (jobIdParam) {
+      setIsLoading(true);
+      setTimeout(() => {
+        fetch(`${BACKEND_URL}/job/id/${jobIdParam}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            setJobDetails(data.data);
+          })
+          .catch((error) => {
+            console.log(error);
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+      }, 1000);
     }
+  }, [jobIdParam]);
+
+  useEffect(() => {
+    setJobDetails(null);
+    setIsLoading(true);
   }, [jobIdParam]);
 
   return (
@@ -120,21 +136,23 @@ const JobListProfile: React.FC = () => {
                   pr: 2,
                 }}
               >
-                {jobs ? (
-                  jobs.length > 0 ? (
-                    jobs.map((job) => (
-                      <JobCard
-                        path="profile"
-                        handleDelete={handleDelete}
-                        key={job._id}
-                        job={job}
-                      />
-                    ))
-                  ) : (
-                    <Typography variant="h6">Empty Job</Typography>
-                  )
+                {isLoadingJobs ? (
+                  <>
+                    <Loader />
+                  </>
+                ) : jobs.length > 0 ? (
+                  jobs.map((job) => (
+                    <JobCard
+                      path={`profile`}
+                      key={job._id}
+                      job={job}
+                      handleDelete={handleDelete}
+                    />
+                  ))
                 ) : (
-                  <Typography variant="h6">No jobs found</Typography>
+                  <Typography variant="h6" color="textSecondary">
+                    No jobs found
+                  </Typography>
                 )}
               </Box>
             )}
@@ -156,30 +174,34 @@ const JobListProfile: React.FC = () => {
               }
             >
               {isLoading ? (
-                <p>loading</p>
+                <Loader />
+              ) : jobDetails ? (
+                <JobDetails data={jobDetails} />
               ) : (
-                jobDetails && <JobDetails data={jobDetails} />
+                <Typography variant="h6" color="textSecondary">
+                  Not Found
+                </Typography>
               )}
             </Box>
           </Box>
         </>
       ) : (
         <Box>
-          {jobs ? (
-            jobs.length > 0 ? (
-              jobs.map((job) => (
-                <JobCard
-                  path="profile"
-                  handleDelete={handleDelete}
-                  key={job._id}
-                  job={job}
-                />
-              ))
-            ) : (
-              <Typography variant="h6">Empty Job</Typography>
-            )
+          {isLoadingJobs ? (
+            <Loader />
+          ) : jobs.length > 0 && !isLoadingJobs ? (
+            jobs.map((job) => (
+              <JobCard
+                path="profile"
+                handleDelete={handleDelete}
+                key={job._id}
+                job={job}
+              />
+            ))
           ) : (
-            <Typography variant="h6">No jobs found</Typography>
+            <Typography variant="h6" color="textSecondary">
+              No jobs found
+            </Typography>
           )}
         </Box>
       )}
