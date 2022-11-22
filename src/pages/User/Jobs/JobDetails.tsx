@@ -68,7 +68,7 @@ const JobDetails: React.FC<props> = ({ data }) => {
         </Typography>
         <Link to={`/user/${data.userId}/profile`}>
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-            <Avatar src={data.avatarUser} alt="user" />
+            <Avatar src={data.avatarUser} alt="avatar" />
             <Typography variant="body2" fontWeight={'500'} ml={2}>
               {data.username}
             </Typography>

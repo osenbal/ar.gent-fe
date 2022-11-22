@@ -1,5 +1,11 @@
 import React from 'react';
-import { Typography, Card, CardContent, IconButton } from '@mui/material';
+import {
+  Typography,
+  Card,
+  CardContent,
+  IconButton,
+  styled,
+} from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { Link } from 'react-router-dom';
@@ -7,6 +13,7 @@ import IJob from '@/interfaces/job.interface';
 import { DateToDMY } from '@/utils/utils';
 import { NumericFormat } from 'react-number-format';
 import { useAppSelector } from '@/hooks/redux.hook';
+import { useSearchParams } from 'react-router-dom';
 
 type props = {
   job: IJob;
@@ -16,11 +23,24 @@ type props = {
 
 const JobCard: React.FC<props> = ({ job, handleDelete, path }) => {
   const { userId } = useAppSelector((state) => state.auth);
+  const [queryParams] = useSearchParams();
+  const jobIdParam = queryParams.get('jobId');
 
   return (
     <>
       <Card
         sx={{
+          ...(jobIdParam === job._id
+            ? localStorage.getItem('theme') === 'dark'
+              ? {
+                  backgroundColor: '#3f51b5',
+                }
+              : {
+                  backgroundColor: '#e8eaf6',
+                }
+            : {
+                backgroundColor: 'inherit',
+              }),
           marginTop: 2,
           position: 'relative',
           padding: 1,
@@ -28,9 +48,6 @@ const JobCard: React.FC<props> = ({ job, handleDelete, path }) => {
           border: `1px solid ${
             localStorage.getItem('theme') === 'dark' ? '#fff' : '#e0e0e0'
           }`,
-          ':hover': {
-            backgroundColor: 'inherit',
-          },
         }}
       >
         <Link

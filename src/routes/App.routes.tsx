@@ -9,7 +9,7 @@ import ProtectedRoute from '@/middleware/protectedRoute';
 import GuestRoute from '@/middleware/guestRoute';
 import PersistLogin from '@/middleware/persistLogin';
 import ForgotPassword from '@pages/User/ForgotPassword/ForgotPassword.page';
-import UserLoggedInLayout from '@/components/Layouts/UserLoggedIn.layout';
+import UserLoggedInLayout from '@/components/Layouts/UserDahboard/UserLoggedIn.layout';
 import JobDetails from '@/pages/User/Jobs/JobDetails';
 import JobCreate from '@/pages/User/Jobs/JobCreate.page';
 import JobControl from '@/pages/User/Jobs/JobControl';
@@ -18,14 +18,25 @@ import AuthPolicy from '@/middleware/authPolicy';
 import JobListProfile from '@/pages/User/Profile/PannelJob/JobListProfile';
 import ProfileLayout from '@/components/Layouts/ProfileLayout';
 import Dashboard from '@/pages/User/Home/Dashboard.Page';
+import LoginAdmin from '@/pages/Admin/Login/LoginAdmin.page';
+import DashboardAdmin from '@/pages/Admin/Dashboard/DashboardAdmin.page';
+import AdminLayout from '@/components/Layouts/AdminDashboard/Admin.layout';
+import UserList from '@/pages/Admin/Users/UserList.page';
 
 const AppRoutes: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+        {/* Admin */}
+        <Route path="/login/admin" element={<LoginAdmin />} />
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/dashboard" element={<DashboardAdmin />} />
+          <Route path="/admin/users" element={<UserList />} />
+        </Route>
 
+        {/* User */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route element={<GuestRoute />}>
           <Route path="login" element={<Login />} />
           <Route path="signup" element={<Register />} />
@@ -34,7 +45,6 @@ const AppRoutes: React.FC = () => {
             element={<SuccessRegister />}
           />
         </Route>
-
         <Route element={<PersistLogin />}>
           <Route element={<ProtectedRoute />}>
             <Route element={<UserLoggedInLayout />}>
@@ -46,9 +56,6 @@ const AppRoutes: React.FC = () => {
               <Route path="job/create" element={<JobCreate />} />
               <Route path="job/edit/:jobId" element={<JobControl />} />
               <Route path="help" element={<HelpPage />} />
-              {/* <Route path="job/search/" element={<JobLayout />}>
-                <Route index element={<JobDetails />} />
-              </Route> */}
             </Route>
           </Route>
         </Route>

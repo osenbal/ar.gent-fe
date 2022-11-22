@@ -25,11 +25,11 @@ const Loader = () => {
 };
 
 const JobListProfile: React.FC = () => {
-  const { id } = useParams();
+  const theme = useTheme();
   const navigate = useNavigate();
+  const { id } = useParams();
   const [queryParams] = useSearchParams();
   const jobIdParam = queryParams.get('jobId');
-  const theme = useTheme();
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
 
   const [jobs, setJobs] = useState<IJob[] | []>([]);
@@ -59,26 +59,26 @@ const JobListProfile: React.FC = () => {
     }
   };
 
+  const getJobsByUserId = async () => {
+    const response = await fetch(`${BACKEND_URL}/job/${id}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      const jobData = await response.json();
+      setJobs(jobData.data);
+      setIsLoadingJobs(false);
+    } else {
+      setIsLoadingJobs(false);
+    }
+  };
+
   useEffect(() => {
-    setTimeout(() => {
-      fetch(`${BACKEND_URL}/job/${id}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setJobs(data.data);
-        })
-        .catch((error) => {
-          console.log('abort');
-        })
-        .finally(() => {
-          setIsLoadingJobs(false);
-        });
-    }, 1000);
+    getJobsByUserId();
   }, []);
 
   useEffect(() => {
