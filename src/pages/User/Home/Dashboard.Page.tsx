@@ -110,9 +110,6 @@ const Dashboard: React.FC = () => {
     setIsLoading(true);
   }, [jobIdParam]);
 
-  console.log('isLoading : ', isLoading);
-  console.log('render');
-
   return (
     <>
       <Helmet>

@@ -23,7 +23,7 @@ const FilterSearch = () => {
 
   return (
     <>
-      <ContainerFilterSearch sx={{ width: { xs: '90vw', md: '100%' } }}>
+      <ContainerFilterSearch sx={{ width: '100%' }}>
         <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
           <InputLabel id="filterJobType">Job Type</InputLabel>
           <Select
