@@ -6,18 +6,18 @@ import {
   asyncUserCv,
   asyncUserBanner,
 } from '@/store/authSlice';
-import CustomizeModal from '@/components/Reusable/CustomizeModal';
-import { MuiTelInput } from 'mui-tel-input';
-import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import { EGender, IUserUpdate } from '@/interfaces/user.interface';
-import dayjs, { Dayjs } from 'dayjs';
+import { ToastContainer, toast } from 'react-toastify';
 import { City, Country, State } from 'country-state-city';
-import { parseDate } from '@/utils/utils';
+import { MuiTelInput } from 'mui-tel-input';
+import dayjs, { Dayjs } from 'dayjs';
+import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import { PHONE_NUMBER_REGEX } from '@/constant/_regex';
+import { parseDate } from '@/utils/utils';
+import { EGender, IUserUpdate } from '@/interfaces/user.interface';
 import { styled } from '@mui/material/styles';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { Edit, CameraAlt } from '@mui/icons-material';
-import { ToastContainer, toast } from 'react-toastify';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import {
   Avatar,
@@ -35,6 +35,7 @@ import {
   Dialog,
   Input,
   Button,
+  Skeleton,
 } from '@mui/material';
 
 const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
@@ -123,33 +124,6 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     dispatch(asyncUserCv({ userId, payload: formData }));
   };
 
-  // const setDataSummary = useCallback(() => {
-  //   if (user) {
-  //     setFullName(user.fullName);
-  //     setUsername(user.username);
-  //     setEmail(user.email);
-  //     setGender(user.gender);
-  //     setCv(user.cv);
-  //     setBirthday(dayjs(user.birthday));
-  //     setPhoneNumber(user.phoneNumber);
-  //     setStreet(user.address.street);
-  //     setCountry(user.address.country);
-  //     setState(user.address.state);
-  //     setCity(user.address.city);
-  //     setZipCode(Number(user.address.zipCode));
-  //     setAvatar(user.avatar);
-  //     setBanner(user.banner);
-  //   }
-  // }, [
-  //   user?.address,
-  //   user?.avatar,
-  //   user?.banner,
-  //   user?.birthday,
-  //   user?.cv,
-  //   user?.email,
-  //   user?.fullName,
-  // ]);
-
   const handleEditChange = useCallback(() => {
     setDataEdited((prev: any) => ({
       ...prev,
@@ -223,10 +197,6 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     setBanner(user?.banner || '');
   }, [user?.banner]);
 
-  // useEffect(() => {
-  //   setDataSummary();
-  // }, [setDataSummary]);
-
   useEffect(() => {
     handleEditChange();
   }, [handleEditChange, open]);
@@ -245,29 +215,15 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     objectFit: 'cover',
   });
 
-  const Skeleton = styled('div')({
-    width: '100%',
-    height: '300px',
-    backgroundColor: '#e0e0e0',
-    animation: '$skeleton 1s infinite',
-    '@keyframes skeleton': {
-      '0%': {
-        backgroundColor: '#e0e0e0',
-      },
-      '50%': {
-        backgroundColor: '#bdbdbd',
-      },
-      '100%': {
-        backgroundColor: '#e0e0e0',
-      },
-    },
-  });
-
   return (
     <>
       <ToastContainer />
       <Box sx={{ position: 'relative', width: '100%' }}>
-        {banner ? <Banner src={banner} alt="banner" /> : <Skeleton />}
+        {banner ? (
+          <Banner src={banner} alt="banner" />
+        ) : (
+          <Skeleton variant="rectangular" height={300} />
+        )}
 
         {userId === id && (
           <IconButton sx={{ position: 'absolute', top: 0, right: 0 }}>

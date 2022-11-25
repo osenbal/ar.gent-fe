@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { styled } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
 import { alpha } from '@mui/material/styles';
+import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
+import { asyncLogoutAdmin } from '@/store/authAdminSlice';
 import {
   Box,
   Stack,
@@ -28,14 +30,22 @@ const drawerWidth = 240;
 const HEADER_MOBILE = 64;
 const HEADER_DESKTOP = 92;
 
-const AccountPopover = () => {
+const AccountPopover = ({
+  username,
+  email,
+}: {
+  username: string;
+  email: string;
+}) => {
+  const dispatch = useAppDispatch();
   const [open, setOpen] = useState(false);
 
   const handleOpen = (event: any) => {
     setOpen(true);
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
+    dispatch(asyncLogoutAdmin());
     setOpen(false);
   };
 
@@ -83,10 +93,10 @@ const AccountPopover = () => {
       >
         <Box sx={{ my: 1.5, px: 2.5 }}>
           <Typography variant="subtitle2" noWrap>
-            Jhon Doe
+            {username}
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            admin@gmail.com
+            {email}
           </Typography>
         </Box>
 
@@ -112,7 +122,6 @@ const AccountPopover = () => {
 
 const StyledRoot = styled(AppBar)(({ theme }) => ({
   boxShadow: 'none',
-  backgroundColor: 'inherit',
   [theme.breakpoints.up('md')]: {
     width: `calc(100% - ${drawerWidth + 1}px)`,
   },
@@ -133,6 +142,8 @@ type props = {
 // --------------------------------------------------
 
 const Header: React.FC<props> = ({ onOpenNav }) => {
+  const { userAdmin } = useAppSelector((state) => state.authAdmin);
+
   return (
     <>
       <StyledRoot>
@@ -158,7 +169,10 @@ const Header: React.FC<props> = ({ onOpenNav }) => {
               sm: 1,
             }}
           >
-            <AccountPopover />
+            <AccountPopover
+              username={userAdmin ? userAdmin.username : ''}
+              email={userAdmin ? userAdmin.email : ''}
+            />
           </Stack>
         </StyledToolbar>
       </StyledRoot>

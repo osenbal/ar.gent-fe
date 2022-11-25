@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
 import { asyncUserAbout } from '@/store/authSlice';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
-import { BACKEND_URL } from '@/config/config';
 import { Edit } from '@mui/icons-material';
 import {
   Box,

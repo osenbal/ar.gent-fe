@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux.hook';
+import { useParams } from 'react-router-dom';
 import { asyncUserSkill } from '@/store/authSlice';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';

@@ -10,18 +10,17 @@ import GuestRoute from '@/middleware/guestRoute';
 import PersistLogin from '@/middleware/persistLogin';
 import ForgotPassword from '@pages/User/ForgotPassword/ForgotPassword.page';
 import UserLoggedInLayout from '@/components/Layouts/UserDahboard/UserLoggedIn.layout';
-import JobDetails from '@/pages/User/Jobs/JobDetails';
 import JobCreate from '@/pages/User/Jobs/JobCreate.page';
 import JobControl from '@/pages/User/Jobs/JobControl';
 import HelpPage from '@/pages/User/Help/Help.page';
-import AuthPolicy from '@/middleware/authPolicy';
 import JobListProfile from '@/pages/User/Profile/PannelJob/JobListProfile';
 import ProfileLayout from '@/components/Layouts/ProfileLayout';
-import Dashboard from '@/pages/User/Home/Dashboard.Page';
+import Dashboard from '@/pages/User/Home/Dashboard.page';
 import LoginAdmin from '@/pages/Admin/Login/LoginAdmin.page';
 import DashboardAdmin from '@/pages/Admin/Dashboard/DashboardAdmin.page';
 import AdminLayout from '@/components/Layouts/AdminDashboard/Admin.layout';
 import UserList from '@/pages/Admin/Users/UserList.page';
+import ProtectedAdmin from '@/middleware/Admin/protectedAdmin';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -29,10 +28,13 @@ const AppRoutes: React.FC = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         {/* Admin */}
-        <Route path="/login/admin" element={<LoginAdmin />} />
-        <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<DashboardAdmin />} />
-          <Route path="/admin/users" element={<UserList />} />
+        <Route path="/admin/login" element={<LoginAdmin />} />
+
+        <Route element={<ProtectedAdmin />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<DashboardAdmin />} />
+            <Route path="/admin/users" element={<UserList />} />
+          </Route>
         </Route>
 
         {/* User */}

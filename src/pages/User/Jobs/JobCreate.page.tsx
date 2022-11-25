@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import TextEditor from '@/components/Reusable/TextEditor';
+import { EditorState, convertFromRaw, CompositeDecorator } from 'draft-js';
 import { ToastContainer, toast } from 'react-toastify';
 import { NumericFormat } from 'react-number-format';
 import { stateToHTML } from 'draft-js-export-html';
-import { EditorState, convertFromRaw, CompositeDecorator } from 'draft-js';
+import TextEditor from '@/components/Reusable/TextEditor';
 import { BACKEND_URL } from '@/config/config';
 import {
   ICreateJob,
@@ -12,6 +11,7 @@ import {
   EJobType,
   EJobWorkPlace,
 } from '@/interfaces/job.interface';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 import {
   Card,
   CardContent,

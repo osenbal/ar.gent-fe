@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import Select from '@mui/material/Select';
-import TextEditor from '@/components/Reusable/TextEditor';
 import { NumericFormat } from 'react-number-format';
-import { useAppSelector } from '@/hooks/redux.hook';
 import { useParams } from 'react-router-dom';
-import { BACKEND_URL } from '@/config/config';
-import { IJobDetails } from '@/interfaces/job.interface';
-import { EJobLevel, EJobType, EJobWorkPlace } from '@/interfaces/job.interface';
-import { stateToHTML } from 'draft-js-export-html';
-import LoadingButton from '@mui/lab/LoadingButton';
-import { ICreateJob } from '@/interfaces/job.interface';
-import { ToastContainer, toast } from 'react-toastify';
 import { SyncLoader } from 'react-spinners';
+import { stateToHTML } from 'draft-js-export-html';
+import { ToastContainer, toast } from 'react-toastify';
 import {
   EditorState,
   CompositeDecorator,
   convertFromHTML,
   ContentState,
 } from 'draft-js';
+import TextEditor from '@/components/Reusable/TextEditor';
+import { useAppSelector } from '@/hooks/redux.hook';
+import { BACKEND_URL } from '@/config/config';
+import { IJobDetails } from '@/interfaces/job.interface';
+import { EJobLevel, EJobType, EJobWorkPlace } from '@/interfaces/job.interface';
+import { ICreateJob } from '@/interfaces/job.interface';
+import LoadingButton from '@mui/lab/LoadingButton';
+import Select from '@mui/material/Select';
 import {
   Card,
   CardContent,
@@ -30,8 +30,6 @@ import {
   Avatar,
   Button,
 } from '@mui/material';
-
-const TEXT_EDITOR_ITEM = 'draft-js-example-item';
 
 export const Link = (props: any) => {
   const { url } = props.contentState.getEntity(props.entityKey).getData();

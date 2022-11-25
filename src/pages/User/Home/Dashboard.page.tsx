@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSearchParams } from 'react-router-dom';
+import { SyncLoader } from 'react-spinners';
+import { ToastContainer } from 'react-toastify';
 import JobCard from '@/pages/User/Jobs/JobCard';
+import JobDetails from '@/pages/User/Jobs/JobDetails';
+import SearchApp from '@/components/Reusable/SearchApp';
+import FilterSearch from '@/components/Reusable/FilterSearch';
+import { BACKEND_URL } from '@/config/config';
+import IJob, { IJobDetails } from '@/interfaces/job.interface';
 import {
   Box,
   Button,
@@ -7,17 +16,8 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import IJob, { IJobDetails } from '@/interfaces/job.interface';
-import { BACKEND_URL } from '@/config/config';
-import { useParams, useSearchParams } from 'react-router-dom';
-import { SyncLoader } from 'react-spinners';
-import JobDetails from '@/pages/User/Jobs/JobDetails';
-import { ToastContainer, toast } from 'react-toastify';
-import { Helmet } from 'react-helmet-async';
-import SearchApp from '@/components/Reusable/SearchApp';
-import FilterSearch from '@/components/Reusable/FilterSearch';
 
-const Loader = () => {
+const Loader: React.FC = () => {
   return (
     <Box
       sx={{
@@ -33,7 +33,6 @@ const Loader = () => {
 };
 
 const Dashboard: React.FC = () => {
-  const { id } = useParams();
   const [queryParams] = useSearchParams();
   const theme = useTheme();
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
@@ -122,7 +121,7 @@ const Dashboard: React.FC = () => {
       <Box sx={{ mt: 2, display: 'flex', overflow: 'hidden', width: '100%' }}>
         <FilterSearch />
       </Box>
-      {/* Job Details */}
+
       {jobIdParam ? (
         <>
           <Box

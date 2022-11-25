@@ -5,6 +5,7 @@ import PersonPinIcon from '@mui/icons-material/PersonPin';
 import WorkIcon from '@mui/icons-material/Work';
 import ReportIcon from '@mui/icons-material/Report';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import { useAppSelector } from '@/hooks/redux.hook';
 import {
   useMediaQuery,
   useTheme,
@@ -52,6 +53,7 @@ type props = {
 
 const Slider: React.FC<props> = ({ openNav, onClosedNav }) => {
   const theme = useTheme();
+  const { userAdmin } = useAppSelector((state) => state.authAdmin);
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
 
   const renderContent = (
@@ -95,7 +97,7 @@ const Slider: React.FC<props> = ({ openNav, onClosedNav }) => {
           <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
 
           <Typography sx={{ mb: 0 }} variant="body1" gutterBottom>
-            Admin Jhon
+            {userAdmin?.username}
           </Typography>
         </CardContent>
       </Card>

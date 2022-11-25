@@ -101,6 +101,7 @@ export interface IUser {
   gender: EGender;
   role: ERole;
   verified: boolean;
+  status: boolean;
   createdAt: Date;
   deletedAt: Date | null;
   updatedAt: Date | null;

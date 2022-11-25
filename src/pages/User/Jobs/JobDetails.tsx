@@ -1,22 +1,23 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import DOMPurify from 'dompurify';
+import { Link } from 'react-router-dom';
+import { useAppSelector } from '@/hooks/redux.hook';
+import { IJobDetails } from '@/interfaces/job.interface';
+import DialpadIcon from '@mui/icons-material/Dialpad';
+import WorkTwoToneIcon from '@mui/icons-material/WorkTwoTone';
+import LaunchIcon from '@mui/icons-material/Launch';
+import ApartmentTwoToneIcon from '@mui/icons-material/ApartmentTwoTone';
 import {
   Typography,
   Box,
   Card,
   Avatar,
   Button,
-  useMediaQuery,
-  useTheme,
+  IconButton,
 } from '@mui/material';
-import WorkTwoToneIcon from '@mui/icons-material/WorkTwoTone';
-import ApartmentTwoToneIcon from '@mui/icons-material/ApartmentTwoTone';
-import DialpadIcon from '@mui/icons-material/Dialpad';
-import { Link } from 'react-router-dom';
-import LaunchIcon from '@mui/icons-material/Launch';
-import { IJobDetails } from '@/interfaces/job.interface';
-import { useAppSelector } from '@/hooks/redux.hook';
-import parse from 'html-react-parser';
-import DOMPurify from 'dompurify';
+import { BACKEND_URL } from '@/config/config';
+import CustomizeModal from '@/components/Reusable/CustomizeModal';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 type props = {
   data: IJobDetails;
@@ -24,6 +25,81 @@ type props = {
 
 const JobDetails: React.FC<props> = ({ data }) => {
   const { userId } = useAppSelector((state) => state.auth);
+  const [isApplied, setIsApplied] = useState<boolean>(false);
+  const [openUploadCv, setOpenUploadCv] = useState<boolean>(false);
+  const [cvFile, setCvFile] = useState<File | null>(null);
+
+  const handleInputCv = async () => {
+    if (!cvFile) return;
+    if (cvFile) {
+      console.log(cvFile);
+      const formData = new FormData();
+      formData.append('cv', cvFile);
+
+      const res = await fetch(
+        `${BACKEND_URL}/user/uploadfile/${userId}?type=cv`,
+        {
+          method: 'PUT',
+          body: formData,
+          credentials: 'include',
+        }
+      );
+
+      if (res.ok) {
+        setCvFile(null);
+        setOpenUploadCv(false);
+      } else {
+        console.log('error');
+        setOpenUploadCv(false);
+      }
+    }
+  };
+
+  const handleApplyJob = async () => {
+    const response = await fetch(`${BACKEND_URL}/job/apply/${data._id}`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
+    });
+
+    const resData = await response.json();
+    if (response.ok) {
+      setIsApplied(resData.data);
+    } else if (response.status === 400) {
+      if (resData?.data?.isExist === false) {
+        setOpenUploadCv(true);
+      }
+    } else {
+      console.log(resData.message);
+    }
+  };
+
+  const checkIsApply = async () => {
+    const response = await fetch(`${BACKEND_URL}/job/check-apply/${data._id}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const resData = await response.json();
+    if (response.ok) {
+      setIsApplied(resData.data);
+    } else {
+      console.log(resData.message);
+      setIsApplied(false);
+    }
+  };
+
+  useEffect(() => {
+    checkIsApply();
+  }, []);
+
+  console.log(openUploadCv);
   return (
     <>
       <Card sx={{ padding: 3 }}>
@@ -57,8 +133,13 @@ const JobDetails: React.FC<props> = ({ data }) => {
 
         {userId !== data.userId && (
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-            <Button variant="contained" sx={{ mr: 1 }} endIcon={<LaunchIcon />}>
-              Apply
+            <Button
+              onClick={handleApplyJob}
+              variant="contained"
+              sx={{ mr: 1 }}
+              endIcon={isApplied ? '' : <LaunchIcon />}
+            >
+              {isApplied ? 'Applied' : 'Apply'}
             </Button>
           </Box>
         )}
@@ -93,6 +174,62 @@ const JobDetails: React.FC<props> = ({ data }) => {
         </div>
         {/* {parse(data.description)} */}
       </Card>
+
+      <CustomizeModal
+        id="addCv"
+        title="Upload Your CV"
+        open={openUploadCv}
+        handleClose={() => setOpenUploadCv(false)}
+        onSave={handleInputCv}
+      >
+        <Box sx={{ minWidth: '250px', minHeight: '100px' }}>
+          <label
+            htmlFor="input_cv"
+            style={{
+              cursor: 'pointer',
+              width: '250px',
+              height: '100px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {cvFile !== null ? (
+              <>
+                <Typography variant="body2" fontWeight={'500'}>
+                  {cvFile.name}
+                </Typography>
+                <input
+                  onChange={(e) =>
+                    e.target.files && setCvFile(e.target.files?.[0])
+                  }
+                  accept="application/pdf"
+                  id="input_cv"
+                  type="file"
+                  hidden
+                  name="input_cv"
+                  style={{ display: 'none' }}
+                />
+              </>
+            ) : (
+              <>
+                <CloudUploadIcon />
+                <input
+                  onChange={(e) =>
+                    e.target.files && setCvFile(e.target.files[0])
+                  }
+                  name="input_cv"
+                  accept="application/pdf"
+                  id="input_cv"
+                  type="file"
+                  hidden
+                  style={{ display: 'none' }}
+                />
+              </>
+            )}
+          </label>
+        </Box>
+      </CustomizeModal>
     </>
   );
 };

@@ -1,5 +1,9 @@
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { styled } from '@mui/material/styles';
+import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { loginAdmin } from '@/store/authAdminSlice';
+import { BACKEND_URL } from '@/config/config';
 import {
   Link,
   Container,
@@ -11,6 +15,31 @@ import {
 } from '@mui/material';
 
 const LoginAdmin: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { isLoading, isAuth } = useAppSelector((state) => state.authAdmin);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+
+  const handleLogin = (e: any) => {
+    e.preventDefault();
+    if (email === '' || password === '') {
+      return;
+    }
+    dispatch(loginAdmin({ email, password }));
+  };
+
+  useEffect(() => {
+    if (isLoading === false && isAuth) {
+      console.log('login success');
+      navigate('/admin/dashboard', {
+        replace: true,
+      });
+    }
+  }, [isAuth]);
+
   return (
     <>
       <Helmet>
@@ -33,6 +62,8 @@ const LoginAdmin: React.FC = () => {
             label="Email"
             variant="outlined"
             sx={{ width: '100%' }}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
 
           <TextField
@@ -41,8 +72,15 @@ const LoginAdmin: React.FC = () => {
             autoComplete="off"
             variant="outlined"
             sx={{ width: '100%', mt: 3 }}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
-          <Button variant="contained" sx={{ width: '100%', mt: 3 }}>
+          <Button
+            disabled={isLoading}
+            onClick={handleLogin}
+            variant="contained"
+            sx={{ width: '100%', mt: 3 }}
+          >
             Login
           </Button>
         </Stack>

@@ -8,8 +8,8 @@ import Experience from './Experience/Experience';
 import About from './About/About';
 import Skills from './Skills/Skills';
 import PortfolioUrl from './PortfolioUrl/PortfolioUrl';
-import { Box, Skeleton } from '@mui/material';
 import { BACKEND_URL } from '@/config/config';
+import { Box, Skeleton } from '@mui/material';
 
 const Profile: React.FC = () => {
   const { id } = useParams();
@@ -18,49 +18,33 @@ const Profile: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const getUser = async (controller: any) => {
+  const getUser = async () => {
     // fetch user from server
-    fetch(`${BACKEND_URL}/user/${id}`, {
+    const response = await fetch(`${BACKEND_URL}/user/${id}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
-      signal: controller.signal,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        dispatch(setUser(data.data));
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') {
-          console.log('abort');
-        }
-      });
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+      dispatch(setUser(userData.data));
+      setIsLoading(false);
+    } else {
+      dispatch(setUser(null));
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    const controller = new AbortController();
-    getUser(controller);
-    return () => {
-      controller.abort();
-    };
+    getUser();
   }, [id]);
 
   return (
     <>
       <Box sx={{ mt: 4 }}>
-        {/* {userId === user?._id ? (
-          <Typography sx={{ fontSize: { xs: '18px', md: '24px' } }}>
-            My Profile
-          </Typography>
-        ) : (
-          <Typography sx={{ fontSize: { xs: '18px', md: '24px' } }}>
-            Profile
-          </Typography>
-        )} */}
-
         <Box sx={{ mt: 3 }}>
           {isLoading ? (
             <>

@@ -23,6 +23,7 @@ const StyledRoot = styled('div')({
   minHeight: '100%',
   overflow: 'hidden',
   maxWidth: '1980px',
+  margin: '0 auto',
 });
 
 const Main = styled('main')(({ theme }) => ({

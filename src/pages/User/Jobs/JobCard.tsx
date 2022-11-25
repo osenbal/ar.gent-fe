@@ -1,19 +1,13 @@
 import React from 'react';
-import {
-  Typography,
-  Card,
-  CardContent,
-  IconButton,
-  styled,
-} from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import IJob from '@/interfaces/job.interface';
-import { DateToDMY } from '@/utils/utils';
 import { NumericFormat } from 'react-number-format';
 import { useAppSelector } from '@/hooks/redux.hook';
-import { useSearchParams } from 'react-router-dom';
+import { DateToDMY } from '@/utils/utils';
+import IJob from '@/interfaces/job.interface';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { Typography, Card, CardContent, IconButton } from '@mui/material';
 
 type props = {
   job: IJob;
