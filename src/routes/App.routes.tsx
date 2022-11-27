@@ -21,6 +21,7 @@ import DashboardAdmin from '@/pages/Admin/Dashboard/DashboardAdmin.page';
 import AdminLayout from '@/components/Layouts/AdminDashboard/Admin.layout';
 import UserList from '@/pages/Admin/Users/UserList.page';
 import ProtectedAdmin from '@/middleware/Admin/protectedAdmin';
+import FormNewPassword from '@/pages/User/ForgotPassword/FormNewPassword.page';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -39,6 +40,11 @@ const AppRoutes: React.FC = () => {
 
         {/* User */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route
+          path="/reset-password/:uniqueString"
+          element={<FormNewPassword />}
+        />
+
         <Route element={<GuestRoute />}>
           <Route path="login" element={<Login />} />
           <Route path="signup" element={<Register />} />

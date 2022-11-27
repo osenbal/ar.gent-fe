@@ -4,12 +4,6 @@ import { useParams } from 'react-router-dom';
 import { SyncLoader } from 'react-spinners';
 import { stateToHTML } from 'draft-js-export-html';
 import { ToastContainer, toast } from 'react-toastify';
-import {
-  EditorState,
-  CompositeDecorator,
-  convertFromHTML,
-  ContentState,
-} from 'draft-js';
 import TextEditor from '@/components/Reusable/TextEditor';
 import { useAppSelector } from '@/hooks/redux.hook';
 import { BACKEND_URL } from '@/config/config';
@@ -18,6 +12,12 @@ import { EJobLevel, EJobType, EJobWorkPlace } from '@/interfaces/job.interface';
 import { ICreateJob } from '@/interfaces/job.interface';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Select from '@mui/material/Select';
+import {
+  EditorState,
+  CompositeDecorator,
+  convertFromHTML,
+  ContentState,
+} from 'draft-js';
 import {
   Card,
   CardContent,
@@ -76,6 +76,7 @@ const JobControl: React.FC = () => {
     updatedAt: null,
     deletedAt: null,
   });
+
   const [jobTemp, setJobTemp] = useState<IJobDetails>({
     _id: '',
     userId: '',
@@ -95,6 +96,8 @@ const JobControl: React.FC = () => {
   });
 
   const [editorState, setEditorState] = useState<EditorState | null>(null);
+
+  const [appliciants, setAppliciants] = useState<any[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -168,6 +171,23 @@ const JobControl: React.FC = () => {
     }
   };
 
+  const getAppliciants = async () => {
+    const response = await fetch(`${BACKEND_URL}/job/${jobId}/appliciants`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      setAppliciants(data.data);
+    } else {
+      console.log('error');
+    }
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     if (jobId) {
@@ -207,6 +227,10 @@ const JobControl: React.FC = () => {
     return () => {
       controller.abort();
     };
+  }, []);
+
+  useEffect(() => {
+    getAppliciants();
   }, []);
 
   useEffect(() => {
@@ -362,6 +386,7 @@ const JobControl: React.FC = () => {
               )}
             </CardContent>
           </Card>
+
           <Box
             sx={{
               mt: 4,
@@ -398,108 +423,62 @@ const JobControl: React.FC = () => {
               <Typography variant="h5" sx={{ mb: 3 }}>
                 Appliciants
               </Typography>
-              <Card>
-                <CardContent
-                  sx={{
-                    display: 'flex',
-                    flexDir: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDir: 'row',
-                      columnGap: 2,
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Avatar
-                      alt="Remy Sharp"
-                      src={'https://dummyimage.com/400x400/000/eebbbb'}
-                    />
-                    <Typography variant="body1">user appliciant</Typography>
-                  </Box>
+              {appliciants.length > 0
+                ? appliciants.map((item, index) => (
+                    <Card key={index}>
+                      <CardContent
+                        sx={{
+                          display: 'flex',
+                          flexDir: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDir: 'row',
+                            columnGap: 2,
+                            alignItems: 'center',
+                          }}
+                        >
+                          <Avatar
+                            alt="Remy Sharp"
+                            src={'https://dummyimage.com/400x400/000/eebbbb'}
+                          />
+                          <Typography variant="body1">
+                            {item.username}
+                          </Typography>
+                          <Typography
+                            component={'a'}
+                            variant="body2"
+                            sx={{ color: 'grey.500', cursor: 'pointer' }}
+                            href={item.cv}
+                          >
+                            Download CV
+                          </Typography>
+                        </Box>
 
-                  <div>
-                    <Button variant="contained" color="success" sx={{ ml: 2 }}>
-                      Accept
-                    </Button>
-                    <Button variant="contained" color="error" sx={{ ml: 2 }}>
-                      Reject
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent
-                  sx={{
-                    display: 'flex',
-                    flexDir: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDir: 'row',
-                      columnGap: 2,
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Avatar
-                      alt="Remy Sharp"
-                      src={'https://dummyimage.com/400x400/000/eebbbb'}
-                    />
-                    <Typography variant="body1">user appliciant</Typography>
-                  </Box>
-
-                  <div>
-                    <Button variant="contained" color="success" sx={{ ml: 2 }}>
-                      Accept
-                    </Button>
-                    <Button variant="contained" color="error" sx={{ ml: 2 }}>
-                      Reject
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent
-                  sx={{
-                    display: 'flex',
-                    flexDir: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDir: 'row',
-                      columnGap: 2,
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Avatar
-                      alt="Remy Sharp"
-                      src={'https://dummyimage.com/400x400/000/eebbbb'}
-                    />
-                    <Typography variant="body1">user appliciant</Typography>
-                  </Box>
-
-                  <div>
-                    <Button variant="contained" color="success" sx={{ ml: 2 }}>
-                      Accept
-                    </Button>
-                    <Button variant="contained" color="error" sx={{ ml: 2 }}>
-                      Reject
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                        <div>
+                          <Button
+                            variant="contained"
+                            color="success"
+                            sx={{ ml: 2 }}
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            variant="contained"
+                            color="error"
+                            sx={{ ml: 2 }}
+                          >
+                            Reject
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                : ''}
             </CardContent>
           </Card>
         </Box>
