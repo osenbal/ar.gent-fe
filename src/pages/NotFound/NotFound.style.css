@@ -1,0 +1,41 @@
+.container_notFound {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 0 1rem;
+}
+
+.img_notFound {
+  width: 400px;
+  height: 350px;
+}
+
+.text_notFound {
+  margin-top: 16px;
+  font-weight: 500;
+  font-size: 32px;
+}
+
+.text_notFound_404 {
+  font-size: 100px;
+  font-weight: 700;
+}
+
+@media screen and (max-width: 564px) {
+  .text_notFound_404 {
+    font-size: 70px;
+    font-weight: 700;
+  }
+
+  .text_notFound {
+    font-weight: 500;
+    font-size: 24px;
+  }
+
+  .img_notFound {
+    width: 200px;
+    height: 150px;
+  }
+}

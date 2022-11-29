@@ -22,6 +22,9 @@ import AdminLayout from '@/components/Layouts/AdminDashboard/Admin.layout';
 import UserList from '@/pages/Admin/Users/UserList.page';
 import ProtectedAdmin from '@/middleware/Admin/protectedAdmin';
 import FormNewPassword from '@/pages/User/ForgotPassword/FormNewPassword.page';
+import NotFound from '@/pages/NotFound/NotFound.page';
+import VerifyEmailPage from '@/pages/User/VerifyEmail/VerifyEmail.page';
+import SuccessResetPassword from '@/pages/User/ForgotPassword/SuccessResetPassword';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -44,6 +47,11 @@ const AppRoutes: React.FC = () => {
           path="/reset-password/:uniqueString"
           element={<FormNewPassword />}
         />
+        <Route
+          path="/success-reset-password"
+          element={<SuccessResetPassword />}
+        />
+        <Route path="/verify/:userId" element={<VerifyEmailPage />} />
 
         <Route element={<GuestRoute />}>
           <Route path="login" element={<Login />} />
@@ -68,7 +76,7 @@ const AppRoutes: React.FC = () => {
           </Route>
         </Route>
         {/* Catch  All Route */}
-        <Route path="*" element={<h1>404</h1>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

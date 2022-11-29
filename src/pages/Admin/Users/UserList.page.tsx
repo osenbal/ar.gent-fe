@@ -4,6 +4,9 @@ import { Helmet } from 'react-helmet-async';
 import UserListToolbar from './UserListToolbar';
 import UserListHead from './UserListHead';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import ReactPaginate from 'react-paginate';
+import { BACKEND_URL } from '@/config/config';
+import { IUser } from '@/interfaces/user.interface';
 import {
   Card,
   Table,
@@ -21,10 +24,8 @@ import {
   Typography,
   IconButton,
   TableContainer,
-  TablePagination,
 } from '@mui/material';
-import { BACKEND_URL } from '@/config/config';
-import { IUser } from '@/interfaces/user.interface';
+import './UserList.style.css';
 
 // ----------------------------------------------------------------------
 
@@ -72,16 +73,22 @@ function applySortFilter(array: any, comparator: any, query: any) {
   return stabilizedThis.map((el: any) => el[0]);
 }
 
+// ----------------------------------------------------------------------
+
 const UserList: React.FC = () => {
   const [open, setOpen] = useState<HTMLButtonElement | null>(null);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState<number>(0);
+  const [limit, setLimit] = useState<number>(10);
+  const [pages, setPages] = useState<number>(0);
+  const [rows, setRows] = useState<number>(0);
+  const [search, setSearch] = useState<string>('');
+  const [query, setQuery] = useState<string>('');
+  const [msg, setMsg] = useState<string>('');
   const [order, setOrder] = useState('asc');
   const [selected, setSelected] = useState([]);
-  const [orderBy, setOrderBy] = useState('fullName');
-  const [filterName, setFilterName] = useState('');
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [orderBy, setOrderBy] = useState<string>('fullName');
+  const [filterName, setFilterName] = useState<string>('');
   const [users, setUsers] = useState<IUser[] | []>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   const handleOpenMenu = (event: any) => {
     setOpen(event.currentTarget);
@@ -95,6 +102,7 @@ const UserList: React.FC = () => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
+    console.log('order by', orderBy);
   };
 
   const handleSelectAllClick = (event: any, users: any) => {
@@ -124,50 +132,39 @@ const UserList: React.FC = () => {
     setSelected(newSelected);
   };
 
-  const handleChangePage = (event: any, newPage: any) => {
-    setPage(newPage);
+  const handleChangePage = ({ selected }: { selected: any }) => {
+    setPage(selected);
+    if (selected === 9) {
+      setMsg(
+        'If data not found, please search by username or name or email in search bar'
+      );
+    } else {
+      setMsg('');
+    }
   };
 
-  const handleChangeRowsPerPage = (event: any) => {
-    setPage(0);
-    setRowsPerPage(parseInt(event.target.value, 10));
-  };
+  // const handleChangeRowsPerPage = (event: any) => {
+  //   setPage(0);
+  //   setLimit(parseInt(event.target.value, 10));
+  // };
+
+  // const emptyRows =
+  //   page > 0 ? Math.max(0, (1 + page) * limit - users.length) : 0;
 
   const handleFilterByName = (event: any) => {
+    event.preventDefault();
     setPage(0);
-    setFilterName(event.target.value);
+    setSearch(query);
   };
-
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - users.length) : 0;
 
   const filteredUsers = applySortFilter(
     users,
     getComparator(order, orderBy),
     filterName
   );
+  console.log('filteredUsers', filteredUsers);
 
   const isNotFound = !filteredUsers.length && !!filterName;
-
-  const getUserList = async (page: number) => {
-    setIsLoading(true);
-    const response = await fetch(`${BACKEND_URL}/admin/get/users`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
-    if (response.ok) {
-      const data = await response.json();
-      setUsers(data.data);
-      setIsLoading(false);
-    } else {
-      console.log('error');
-      setUsers([]);
-      setIsLoading(false);
-    }
-  };
 
   const handleBannedUser = async (userId: string) => {
     const response = await fetch(`${BACKEND_URL}/admin/banned/${userId}`, {
@@ -193,7 +190,6 @@ const UserList: React.FC = () => {
   };
 
   const handleDeleteUsers = async () => {
-    console.log(selected);
     const response = await fetch(`${BACKEND_URL}/admin/delete/users`, {
       method: 'DELETE',
       credentials: 'include',
@@ -202,10 +198,8 @@ const UserList: React.FC = () => {
       },
       body: JSON.stringify({ usersId: selected }),
     });
-    console.log(response);
     if (response.ok) {
-      const data = await response.json();
-      setUsers(data.data);
+      setPage(0);
       setSelected([]);
       setOpen(null);
     } else {
@@ -237,9 +231,37 @@ const UserList: React.FC = () => {
     }
   };
 
+  const getUserList = async () => {
+    const response = await fetch(
+      `${BACKEND_URL}/admin/get/users?page=${page}&limit=${limit}&search=${search}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      }
+    );
+    if (response.ok) {
+      const data = await response.json();
+      setUsers(data.data);
+      setPage(data.page);
+      setLimit(data.limit);
+      setPages(data.totalPage);
+      setRows(data.totalRows);
+    } else {
+      console.log('error');
+      setUsers([]);
+    }
+  };
+
   useEffect(() => {
-    getUserList(page);
-  }, []);
+    getUserList();
+  }, [page, search]);
+
+  useEffect(() => {
+    setSelected([]);
+  }, [page]);
 
   return (
     <>
@@ -247,170 +269,171 @@ const UserList: React.FC = () => {
         <title>Users | admin</title>
       </Helmet>
 
-      {isLoading ? (
-        <p>loading...</p>
-      ) : (
-        <Container maxWidth="lg">
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            mb={5}
-          >
-            <Typography variant="h4" gutterBottom>
-              User
-            </Typography>
-            <Button variant="contained">New User</Button>
-          </Stack>
+      <Container maxWidth="lg">
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={5}
+        >
+          <Typography variant="h4" gutterBottom>
+            Users
+          </Typography>
+        </Stack>
 
-          <Card>
-            <UserListToolbar
-              numSelected={selected.length}
-              filterName={filterName}
-              onFilterName={handleFilterByName}
-              handleDeleteUsers={handleDeleteUsers}
-            />
-            <Paper sx={{ width: '100%', mb: 2, overflow: 'auto' }}>
-              <TableContainer sx={{ minWidth: 800 }}>
-                <Table>
-                  <UserListHead
-                    order={order}
-                    orderBy={orderBy}
-                    headLabel={TABLE_HEAD}
-                    rowCount={users.length}
-                    numSelected={selected.length}
-                    onRequestSort={handleRequestSort}
-                    onSelectAllClick={(e) => handleSelectAllClick(e, users)}
-                  />
-                  <TableBody>
-                    {filteredUsers
-                      .slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      )
-                      .map((row: any) => {
-                        const {
-                          _id,
-                          fullName,
-                          username,
-                          email,
-                          avatar,
-                          status,
-                          isVerified,
-                        }: {
-                          _id: never;
-                          fullName: never;
-                          username: any;
-                          email: any;
-                          status: any;
-                          avatar: any;
-                          isVerified: any;
-                        } = row;
-                        const selectedUser = selected.indexOf(_id) !== -1;
+        <Card>
+          <UserListToolbar
+            numSelected={selected.length}
+            filterName={query}
+            onChangeQuery={(e: any) => setQuery(e.target.value)}
+            onFilterName={handleFilterByName}
+            handleDeleteUsers={handleDeleteUsers}
+          />
+          <Paper sx={{ width: '100%', mb: 2, overflow: 'auto' }}>
+            <TableContainer sx={{ minWidth: 800 }}>
+              <Table>
+                <UserListHead
+                  order={order}
+                  orderBy={orderBy}
+                  headLabel={TABLE_HEAD}
+                  rowCount={users.length}
+                  numSelected={selected.length}
+                  onRequestSort={handleRequestSort}
+                  onSelectAllClick={(e) => handleSelectAllClick(e, users)}
+                />
+                <TableBody>
+                  {filteredUsers.map((row: any) => {
+                    const {
+                      _id,
+                      fullName,
+                      username,
+                      email,
+                      avatar,
+                      status,
+                      verified,
+                    }: {
+                      _id: never;
+                      fullName: never;
+                      username: any;
+                      email: any;
+                      status: any;
+                      avatar: any;
+                      verified: any;
+                    } = row;
+                    const selectedUser = selected.indexOf(_id) !== -1;
 
-                        return (
-                          <TableRow
-                            hover
-                            key={_id}
-                            tabIndex={-1}
-                            role="checkbox"
-                            selected={selectedUser}
+                    return (
+                      <TableRow
+                        hover
+                        key={_id}
+                        tabIndex={-1}
+                        role="checkbox"
+                        selected={selectedUser}
+                      >
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            checked={selectedUser}
+                            onChange={(event) => handleClick(event, _id)}
+                          />
+                        </TableCell>
+
+                        <TableCell component="th" scope="row" padding="none">
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={2}
                           >
-                            <TableCell padding="checkbox">
-                              <Checkbox
-                                checked={selectedUser}
-                                onChange={(event) => handleClick(event, _id)}
-                              />
-                            </TableCell>
+                            <Avatar alt={fullName} src={avatar} />
+                            <Typography variant="subtitle2" noWrap>
+                              {fullName}
+                            </Typography>
+                          </Stack>
+                        </TableCell>
 
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              padding="none"
-                            >
-                              <Stack
-                                direction="row"
-                                alignItems="center"
-                                spacing={2}
-                              >
-                                <Avatar alt={fullName} src={avatar} />
-                                <Typography variant="subtitle2" noWrap>
-                                  {fullName}
-                                </Typography>
-                              </Stack>
-                            </TableCell>
+                        <TableCell align="left">{username}</TableCell>
 
-                            <TableCell align="left">{username}</TableCell>
+                        <TableCell align="left">{email}</TableCell>
 
-                            <TableCell align="left">{email}</TableCell>
+                        <TableCell align="left">
+                          {verified ? 'Yes' : 'No'}
+                        </TableCell>
 
-                            <TableCell align="left">
-                              {isVerified ? 'Yes' : 'No'}
-                            </TableCell>
+                        <TableCell align="left">
+                          <Button>{status ? 'Active' : 'Banned'}</Button>
+                        </TableCell>
 
-                            <TableCell align="left">
-                              <Button>{status ? 'Active' : 'Banned'}</Button>
-                            </TableCell>
-
-                            <TableCell align="right">
-                              <IconButton
-                                id={_id}
-                                size="large"
-                                color="inherit"
-                                onClick={handleOpenMenu}
-                              >
-                                <MoreVertIcon />
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    {emptyRows > 0 && (
-                      <TableRow style={{ height: 53 * emptyRows }}>
-                        <TableCell colSpan={6} />
-                      </TableRow>
-                    )}
-                  </TableBody>
-
-                  {isNotFound && (
-                    <TableBody>
-                      <TableRow>
-                        <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                          <Paper
-                            sx={{
-                              textAlign: 'center',
-                            }}
+                        <TableCell align="right">
+                          <IconButton
+                            id={_id}
+                            size="large"
+                            color="inherit"
+                            onClick={handleOpenMenu}
                           >
-                            <Typography variant="h6" paragraph>
-                              Not found
-                            </Typography>
-
-                            <Typography variant="body2">
-                              No results found for &nbsp;
-                              <strong>&quot;{filterName}&quot;</strong>.
-                              <br /> Try checking for typos or using complete
-                              words.
-                            </Typography>
-                          </Paper>
+                            <MoreVertIcon />
+                          </IconButton>
                         </TableCell>
                       </TableRow>
-                    </TableBody>
-                  )}
-                </Table>
-              </TableContainer>
-            </Paper>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={users.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </Card>
-        </Container>
-      )}
+                    );
+                  })}
+                </TableBody>
+
+                {isNotFound && (
+                  <TableBody>
+                    <TableRow>
+                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                        <Paper
+                          sx={{
+                            textAlign: 'center',
+                          }}
+                        >
+                          <Typography variant="h6" paragraph>
+                            Not found
+                          </Typography>
+
+                          <Typography variant="body2">
+                            No results found for &nbsp;
+                            <strong>&quot;{filterName}&quot;</strong>.
+                            <br /> Try checking for typos or using complete
+                            words.
+                          </Typography>
+                        </Paper>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                )}
+              </Table>
+            </TableContainer>
+            <div>
+              <p className="pagginatiin-data">
+                Total Rows: {rows} | Total Pages: {rows ? page + 1 : 0} of
+                {pages}
+              </p>
+              <Typography
+                variant="body1"
+                paragraph
+                sx={{ color: 'red', textAlign: 'center' }}
+              >
+                {msg}
+              </Typography>
+            </div>
+            <nav key={rows}>
+              <ReactPaginate
+                previousLabel={'< '}
+                nextLabel={'>'}
+                breakLabel={'...'}
+                containerClassName={'pagination-list'}
+                pageLinkClassName={'pagination-link'}
+                previousLinkClassName={'pagination-previous'}
+                nextLinkClassName={'pagination-next'}
+                activeLinkClassName={'pagination-link is-current'}
+                disabledLinkClassName={'pagination-link is-disabled'}
+                pageCount={Math.min(10, pages)}
+                onPageChange={handleChangePage}
+              />
+            </nav>
+          </Paper>
+        </Card>
+      </Container>
 
       <Popover
         open={Boolean(open)}

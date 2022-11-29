@@ -20,9 +20,11 @@ import {
 const MENU_OPTIONS = [
   {
     label: 'Home',
+    linkTo: '/admin/dashboard',
   },
   {
     label: 'Profile',
+    linkTO: '/admin/profile',
   },
 ];
 
@@ -38,15 +40,18 @@ const AccountPopover = ({
   email: string;
 }) => {
   const dispatch = useAppDispatch();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(null);
 
   const handleOpen = (event: any) => {
-    setOpen(true);
+    setOpen(event.currentTarget);
   };
 
-  const handleClose = async () => {
+  const handleClose = () => {
+    setOpen(null);
+  };
+
+  const handleLogout = () => {
     dispatch(asyncLogoutAdmin());
-    setOpen(false);
   };
 
   return (
@@ -55,7 +60,7 @@ const AccountPopover = ({
         onClick={handleOpen}
         sx={{
           p: 0,
-          ...(open && {
+          ...(Boolean(open) && {
             '&:before': {
               zIndex: 1,
               content: "''",
@@ -73,7 +78,7 @@ const AccountPopover = ({
 
       <Popover
         open={Boolean(open)}
-        // anchorEl={open}
+        anchorEl={open}
         onClose={handleClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
@@ -104,7 +109,12 @@ const AccountPopover = ({
 
         <Stack sx={{ p: 1 }}>
           {MENU_OPTIONS.map((option) => (
-            <MenuItem key={option.label} onClick={handleClose}>
+            <MenuItem
+              href={option.linkTo}
+              component={'a'}
+              key={option.label}
+              onClick={handleClose}
+            >
               {option.label}
             </MenuItem>
           ))}
@@ -112,13 +122,15 @@ const AccountPopover = ({
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <MenuItem onClick={handleClose} sx={{ m: 1 }}>
+        <MenuItem onClick={handleLogout} sx={{ m: 1 }}>
           Logout
         </MenuItem>
       </Popover>
     </>
   );
 };
+
+// ----------------------------------------------------------------------
 
 const StyledRoot = styled(AppBar)(({ theme }) => ({
   boxShadow: 'none',

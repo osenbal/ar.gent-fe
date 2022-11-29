@@ -1,13 +1,41 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { TextField, Container, FormGroup, Button } from '@mui/material';
+import {
+  TextField,
+  Container,
+  FormGroup,
+  Button,
+  Modal,
+  Typography,
+  Box,
+} from '@mui/material';
 import { BACKEND_URL } from '@/config/config';
+
+const styleContainerModal = {
+  borderRadius: '10px',
+  position: 'absolute' as 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '1px solid inherit',
+  boxShadow: 24,
+  p: 4,
+};
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
+  const [msg, setMsg] = useState<string>('');
+  const [isError, setIsError] = useState<boolean>(false);
 
   const handleSendRequestChangePassword = async () => {
+    if (email === '') {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     const response = await fetch(`${BACKEND_URL}/auth/reset-password`, {
       method: 'POST',
@@ -17,9 +45,18 @@ const ForgotPassword: React.FC = () => {
       body: JSON.stringify({ email }),
     });
 
-    setIsLoading(false);
     const data = await response.json();
     console.log(data);
+
+    if (response.ok) {
+      setIsError(false);
+    } else {
+      setIsError(true);
+    }
+
+    setMsg(data.message);
+    setOpen(true);
+    setIsLoading(false);
   };
 
   return (
@@ -40,6 +77,7 @@ const ForgotPassword: React.FC = () => {
       >
         <FormGroup sx={{ width: '100%' }}>
           <TextField
+            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             id="standard-email-input"
@@ -57,6 +95,50 @@ const ForgotPassword: React.FC = () => {
           </Button>
         </FormGroup>
       </Container>
+
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={styleContainerModal}>
+          {isError ? (
+            <img
+              style={{
+                width: '100px',
+                height: '100px',
+                display: 'block',
+                margin: '0 auto',
+              }}
+              alt="failed"
+              src={`${process.env.PUBLIC_URL}/assets/img/icons/img_icon_failed.png`}
+            />
+          ) : (
+            <img
+              style={{
+                width: '100px',
+                height: '100px',
+                display: 'block',
+                margin: '0 auto',
+              }}
+              alt="success"
+              src={
+                process.env.PUBLIC_URL +
+                '/assets/img/icons/img_icon_checked.png'
+              }
+            />
+          )}
+          <Typography
+            sx={{ textAlign: 'center', mt: 2 }}
+            id="modal-modal-title"
+            variant="h6"
+            component="h2"
+          >
+            {msg}
+          </Typography>
+        </Box>
+      </Modal>
     </>
   );
 };

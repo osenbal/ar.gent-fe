@@ -10,6 +10,7 @@ import {
   Typography,
   OutlinedInput,
   InputAdornment,
+  Button,
 } from '@mui/material';
 // component
 
@@ -51,11 +52,13 @@ export default function UserListToolbar({
   numSelected,
   filterName,
   onFilterName,
+  onChangeQuery,
   handleDeleteUsers,
 }: {
   numSelected: number;
   filterName: string;
   onFilterName: any;
+  onChangeQuery: any;
   handleDeleteUsers: any;
 }) {
   return (
@@ -72,12 +75,22 @@ export default function UserListToolbar({
           {numSelected} selected
         </Typography>
       ) : (
-        <StyledSearch
-          value={filterName}
-          onChange={onFilterName}
-          placeholder="Search user..."
-          startAdornment={<InputAdornment position="start"></InputAdornment>}
-        />
+        <form onSubmit={onFilterName}>
+          <StyledSearch
+            onChange={onChangeQuery}
+            value={filterName}
+            placeholder="Search user..."
+            startAdornment={<InputAdornment position="start"></InputAdornment>}
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            sx={{ ml: 1 }}
+          >
+            Search
+          </Button>
+        </form>
       )}
 
       {numSelected > 0 ? (
