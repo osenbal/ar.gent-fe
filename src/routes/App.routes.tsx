@@ -25,6 +25,8 @@ import FormNewPassword from '@/pages/User/ForgotPassword/FormNewPassword.page';
 import NotFound from '@/pages/NotFound/NotFound.page';
 import VerifyEmailPage from '@/pages/User/VerifyEmail/VerifyEmail.page';
 import SuccessResetPassword from '@/pages/User/ForgotPassword/SuccessResetPassword';
+import UserApplication from '@/pages/User/Profile/PanelUserApplication/UserApplication';
+import JobDetailsPage from '@/pages/User/Jobs/JobDetails.page';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -68,9 +70,14 @@ const AppRoutes: React.FC = () => {
               <Route element={<ProfileLayout />}>
                 <Route path="user/:id/profile" element={<Profile />} />
                 <Route path="user/:id/job" element={<JobListProfile />} />
+                <Route
+                  path="user/:id/applications"
+                  element={<UserApplication />}
+                />
               </Route>
               <Route path="job/create" element={<JobCreate />} />
               <Route path="job/edit/:jobId" element={<JobControl />} />
+              <Route path="job/detail/:jobId" element={<JobDetailsPage />} />
               <Route path="help" element={<HelpPage />} />
             </Route>
           </Route>

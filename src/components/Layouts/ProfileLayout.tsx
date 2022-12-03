@@ -53,6 +53,24 @@ const ProfileLayout: React.FC = () => {
             Job
           </Button>
         </NavLink>
+        <NavLink
+          style={{ textDecoration: 'none' }}
+          to={`/user/${id}/applications`}
+        >
+          <Button
+            sx={
+              location.pathname === `/user/${id}/applications`
+                ? {
+                    fontWeight: 700,
+                    fontSize: '16px',
+                    textDecoration: 'underline',
+                  }
+                : { fontWeight: 400, fontSize: '16px', textDecoration: 'none' }
+            }
+          >
+            Applications
+          </Button>
+        </NavLink>
       </Box>
 
       <Outlet />

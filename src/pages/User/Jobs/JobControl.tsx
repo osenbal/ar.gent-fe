@@ -31,6 +31,9 @@ import {
   InputLabel,
   Avatar,
   Button,
+  Dialog,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   City,
@@ -64,6 +67,60 @@ const linkDecorator = new CompositeDecorator([
     component: Link,
   },
 ]);
+
+const DialogApproveAppliciant = ({
+  open,
+  handleApprove,
+  handleClose,
+}: {
+  open: boolean;
+  handleApprove: any;
+  handleClose: any;
+}) => {
+  return (
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      aria-labelledby="dialog-content-approve-appliciant"
+      aria-describedby="dialog-content-approve-appliciant"
+    >
+      <DialogContent id="dialog-content-approve-appliciant">
+        Are You Sure Approve This User for this Job ?
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleApprove}>Yes</Button>
+        <Button onClick={handleClose}>No</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+const DialogRejectAppliciant = ({
+  open,
+  handleReject,
+  handleClose,
+}: {
+  open: boolean;
+  handleReject: any;
+  handleClose: any;
+}) => {
+  return (
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      aria-labelledby="dialog-content-reject-appliciant"
+      aria-describedby="dialog-content-reject-appliciant"
+    >
+      <DialogContent id="dialog-content-reject-appliciant">
+        Are You Sure Reject This User for this Job ?
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleReject}>Yes</Button>
+        <Button onClick={handleClose}>No</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
 
 const JobControl: React.FC = () => {
   const { userId } = useAppSelector((state) => state.auth);
@@ -119,6 +176,14 @@ const JobControl: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [isLoadingAppliciant, setIsLoadingAppliciant] = useState<boolean>(true);
+
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [openModalReject, setOpenModalReject] = useState<boolean>(false);
+
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [selectedUserReject, setSelectedUserReject] = useState<string | null>(
+    null
+  );
 
   const optionTypes = Object.values(EJobType).map((value: string) => value);
   const optionLevels = Object.values(EJobLevel).map((value: string) => value);
@@ -263,6 +328,8 @@ const JobControl: React.FC = () => {
         closeOnClick: true,
       });
     }
+    setOpenModal(false);
+    setSelectedUser(null);
   };
 
   const rejectAppliciant = async (appliciantId: string) => {
@@ -295,6 +362,9 @@ const JobControl: React.FC = () => {
         closeOnClick: true,
       });
     }
+
+    setOpenModalReject(false);
+    setSelectedUserReject(null);
   };
 
   useEffect(() => {
@@ -302,6 +372,7 @@ const JobControl: React.FC = () => {
       const htmlDescription = stateToHTML(editorState.getCurrentContent());
       setJob({ ...job, description: htmlDescription });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorState]);
 
   useEffect(() => {
@@ -353,10 +424,12 @@ const JobControl: React.FC = () => {
           setIsLoading(false);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     getAppliciants();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -388,9 +461,8 @@ const JobControl: React.FC = () => {
     return () => {
       abortController.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paneParams]);
-
-  console.log(job);
 
   return (
     <>
@@ -609,6 +681,7 @@ const JobControl: React.FC = () => {
                 onChange={(e) => {
                   setJob((prev) => ({
                     ...prev,
+                    // eslint-disable-next-line no-useless-escape
                     salary: Number(e.target.value.replace(/[A-Za-z\.\s]/g, '')),
                   }));
                 }}
@@ -739,71 +812,79 @@ const JobControl: React.FC = () => {
                 <p>Loading</p>
               ) : appliciants && appliciants.length > 0 ? (
                 appliciants.map((item, index) => (
-                  <Card key={index}>
-                    <CardContent
-                      sx={{
-                        display: 'flex',
-                        flexDir: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <Box
+                  <div key={index}>
+                    <Card>
+                      <CardContent
                         sx={{
                           display: 'flex',
                           flexDir: 'row',
-                          columnGap: 2,
                           alignItems: 'center',
+                          justifyContent: 'space-between',
                         }}
                       >
-                        <Avatar alt="Remy Sharp" src={item?.user[0].avatar} />
-                        <Typography
-                          variant="body1"
-                          component={'a'}
-                          href={`/user/${item.userId}/profile`}
-                          sx={{ textDecoration: 'none', color: 'inherit' }}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDir: 'row',
+                            columnGap: 2,
+                            alignItems: 'center',
+                          }}
                         >
-                          {item?.user[0].username}
-                        </Typography>
-                        <Typography
-                          target="_blank"
-                          component={'a'}
-                          variant="body2"
-                          sx={{ color: 'grey.500', cursor: 'pointer' }}
-                          href={item.user[0].cv}
-                        >
-                          Download CV
-                        </Typography>
-                      </Box>
+                          <Avatar alt="Remy Sharp" src={item?.user[0].avatar} />
+                          <Typography
+                            variant="body1"
+                            component={'a'}
+                            href={`/user/${item.userId}/profile`}
+                            sx={{ textDecoration: 'none', color: 'inherit' }}
+                          >
+                            {item?.user[0].username}
+                          </Typography>
+                          <Typography
+                            target="_blank"
+                            component={'a'}
+                            variant="body2"
+                            sx={{ color: 'grey.500', cursor: 'pointer' }}
+                            href={item.user[0].cv}
+                          >
+                            Download CV
+                          </Typography>
+                        </Box>
 
-                      <div>
-                        {item.isApprove === `pending` ||
-                        item.isApprove === null ? (
-                          <>
-                            <Button
-                              variant="contained"
-                              color="success"
-                              sx={{ ml: 2 }}
-                              onClick={() => approveAppliciant(item.userId)}
-                            >
-                              Accept
-                            </Button>
+                        <div>
+                          {item.isApprove === `pending` ||
+                          item.isApprove === null ? (
+                            <>
+                              <Button
+                                variant="contained"
+                                color="success"
+                                sx={{ ml: 2 }}
+                                onClick={() => {
+                                  setOpenModal(true);
+                                  setSelectedUser(item.userId);
+                                }}
+                              >
+                                Accept
+                              </Button>
 
-                            <Button
-                              variant="contained"
-                              color="error"
-                              sx={{ ml: 2 }}
-                              onClick={() => rejectAppliciant(item.userId)}
-                            >
-                              Reject
-                            </Button>
-                          </>
-                        ) : (
-                          ''
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
+                              <Button
+                                variant="contained"
+                                color="error"
+                                sx={{ ml: 2 }}
+                                onClick={() => {
+                                  setOpenModalReject(true);
+                                  setSelectedUserReject(item.userId);
+                                }}
+                              >
+                                Reject
+                              </Button>
+                            </>
+                          ) : (
+                            ''
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                 ))
               ) : (
                 ''
@@ -814,6 +895,26 @@ const JobControl: React.FC = () => {
       ) : (
         <p>404 - Not found</p>
       )}
+
+      <DialogApproveAppliciant
+        open={openModal}
+        handleClose={() => {
+          setOpenModal(false);
+          setSelectedUser(null);
+        }}
+        handleApprove={() => selectedUser && approveAppliciant(selectedUser)}
+      />
+
+      <DialogRejectAppliciant
+        open={openModalReject}
+        handleClose={() => {
+          setOpenModalReject(false);
+          setSelectedUserReject(null);
+        }}
+        handleReject={() =>
+          selectedUserReject && rejectAppliciant(selectedUserReject)
+        }
+      />
     </>
   );
 };
