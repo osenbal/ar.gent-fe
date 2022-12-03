@@ -15,6 +15,7 @@ const SuccessResetPassword: React.FC = () => {
       setIsError(true);
       setMsg('Something went wrong');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

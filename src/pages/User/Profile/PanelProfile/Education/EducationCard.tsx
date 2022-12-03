@@ -4,7 +4,7 @@ import { useAppSelector } from '@/hooks/redux.hook';
 import { useParams } from 'react-router-dom';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { Dayjs } from 'dayjs';
-import { IEducation } from '@/interfaces/user.interface';
+import { IEducation_User } from '@/interfaces/user.interface';
 import { Edit } from '@mui/icons-material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import {
@@ -20,9 +20,9 @@ import {
 } from '@mui/material';
 
 type props = {
-  item: IEducation;
+  item: IEducation_User;
   index: number;
-  handleOnEdit: (index: number, item: IEducation) => void;
+  handleOnEdit: (index: number, item: IEducation_User) => void;
   handleOnDelete: (index: number) => void;
 };
 
@@ -34,9 +34,9 @@ const EducationCard: React.FC<props> = ({
 }) => {
   const { id } = useParams();
   const { userId } = useAppSelector((state) => state.auth);
-  const [education, setEducation] = useState<IEducation>(item);
+  const [education, setEducation] = useState<IEducation_User>(item);
   const [openEdit, setOpenEdit] = useState<boolean>(false);
-  const [educationTemp, setEducationTemp] = useState<IEducation>({
+  const [educationTemp, setEducationTemp] = useState<IEducation_User>({
     school: item.school,
     degree: item.degree,
     location: item.location,
@@ -95,6 +95,7 @@ const EducationCard: React.FC<props> = ({
       endDate: education.endDate,
       currentEducation: education.currentEducation,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openEdit]);
 
   return (

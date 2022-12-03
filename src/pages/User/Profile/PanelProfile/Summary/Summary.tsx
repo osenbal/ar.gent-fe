@@ -13,7 +13,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import { PHONE_NUMBER_REGEX } from '@/constant/_regex';
 import { parseDate } from '@/utils/utils';
-import { EGender, IUserUpdate } from '@/interfaces/user.interface';
+import { EGender, IEdited_User } from '@/interfaces/user.interface';
 import { styled } from '@mui/material/styles';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
@@ -86,17 +86,23 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
       toast.error('Phone number is not valid');
       return;
     }
-    const data: IUserUpdate = {
+    const data: IEdited_User = {
       fullName: dataEdited.fullName.trim(),
       gender: dataEdited.gender,
       phoneNumber: dataEdited.phoneNumber,
       birthday: dataEdited.birthday,
       street: dataEdited.street.trim(),
-      city: dataEdited.city,
-      state: dataEdited.state,
-      country: dataEdited.country,
+      city:
+        City.getCitiesOfState(dataEdited.country, dataEdited.state).filter(
+          (city) => city.name === dataEdited.city
+        )[0] || null,
+      state:
+        State.getStateByCodeAndCountry(dataEdited.state, dataEdited.country) ||
+        null,
+      country: Country.getCountryByCode(dataEdited.country) || null,
       zipCode: dataEdited.zipCode,
     };
+
     dispatch(asyncUserSummary({ userId, payload: data }));
     setOpen(false);
   };
@@ -180,10 +186,29 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
   }, [user?.phoneNumber]);
 
   useEffect(() => {
-    setStreet(user?.address.street || '');
-    setCountry(user?.address.country || '');
-    setState(user?.address.state || '');
-    setCity(user?.address.city || '');
+    setStreet(user?.address?.street || '');
+
+    const countryCode = Country.getCountryByCode(
+      user?.address.country?.isoCode || ''
+    );
+
+    const stateCode = State.getStateByCodeAndCountry(
+      user?.address.state?.isoCode || '',
+      countryCode?.isoCode || ''
+    );
+
+    const cityCode = City.getCitiesOfState(
+      countryCode?.isoCode || '',
+      stateCode?.isoCode || ''
+    ).filter((city) => city?.name === user?.address.city.name)[0];
+
+    setCountry(countryCode?.isoCode || '');
+    setState(stateCode?.isoCode || '');
+    setCity(cityCode?.name || '');
+
+    // setCountry(user?.address.country || '');
+    // setState(user?.address.state || '');
+    // setCity(user?.address.city || '');
     if (user?.address.zipCode) {
       setZipCode(Number(user?.address.zipCode));
     }
@@ -460,11 +485,13 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
                           }}
                           required
                         >
-                          {Country.getAllCountries().map((c) => (
-                            <MenuItem key={c.isoCode} value={c.isoCode}>
-                              {c.name}
-                            </MenuItem>
-                          ))}
+                          {Country.getAllCountries()
+                            .filter((c) => c.isoCode === 'ID')
+                            .map((c) => (
+                              <MenuItem key={c.isoCode} value={c.isoCode}>
+                                {c.name}
+                              </MenuItem>
+                            ))}
                         </Select>
                       </FormControl>
 

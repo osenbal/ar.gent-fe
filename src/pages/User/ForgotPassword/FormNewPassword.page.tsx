@@ -6,14 +6,11 @@ import {
   Box,
   Typography,
   Button,
-  TextField,
   Modal,
   FormControl,
   InputLabel,
   OutlinedInput,
-  InputAdornment,
   FormHelperText,
-  IconButton,
 } from '@mui/material';
 import NotFound from '@/pages/NotFound/NotFound.page';
 import { PASSWORD_REGEX } from '@/constant/_regex';
@@ -93,6 +90,7 @@ const FormNewPassword = () => {
 
   useEffect(() => {
     checkUniqueString();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import JobCard from '../../Jobs/JobCard';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
-import IJob, { IJobDetails } from '@/interfaces/job.interface';
+import IJob, { IReturnJobDetails } from '@/interfaces/job.interface';
 import { BACKEND_URL } from '@/config/config';
 import { useParams, useSearchParams } from 'react-router-dom';
 import JobDetails from '../../Jobs/JobDetails';
@@ -33,7 +33,7 @@ const JobListProfile: React.FC = () => {
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
 
   const [jobs, setJobs] = useState<IJob[] | []>([]);
-  const [jobDetails, setJobDetails] = useState<IJobDetails | null>(null);
+  const [jobDetails, setJobDetails] = useState<IReturnJobDetails | null>(null);
   const [isLoadingJobs, setIsLoadingJobs] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -60,7 +60,7 @@ const JobListProfile: React.FC = () => {
   };
 
   const getJobsByUserId = async () => {
-    const response = await fetch(`${BACKEND_URL}/job/${id}`, {
+    const response = await fetch(`${BACKEND_URL}/job/user/${id}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -79,13 +79,14 @@ const JobListProfile: React.FC = () => {
 
   useEffect(() => {
     getJobsByUserId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (jobIdParam) {
       setIsLoading(true);
       setTimeout(() => {
-        fetch(`${BACKEND_URL}/job/id/${jobIdParam}`, {
+        fetch(`${BACKEND_URL}/job/${jobIdParam}`, {
           method: 'GET',
           credentials: 'include',
           headers: {

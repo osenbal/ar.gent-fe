@@ -1,25 +1,15 @@
 import { E164Number } from 'libphonenumber-js';
+import { ICity, IState, ICountry } from 'country-state-city';
 
-export enum EGender {
-  MALE = 'male',
-  FEMALE = 'female',
-  OTHER = 'other',
-}
-
-export enum ERole {
-  ADMIN = 'admin',
-  USER = 'user',
-}
-
-export interface IAddress {
+export interface IAddress_User {
   street: string;
-  city: string;
-  country: string;
-  state: string;
+  country: ICountry;
+  state: IState;
+  city: ICity;
   zipCode: string;
 }
 
-export interface IEducation {
+export interface IEducation_User {
   school: string;
   degree: string;
   location: string;
@@ -28,7 +18,7 @@ export interface IEducation {
   currentEducation: boolean;
 }
 
-export interface IExperience {
+export interface IExperience_User {
   company: string;
   position: string;
   isPresent: boolean;
@@ -38,23 +28,7 @@ export interface IExperience {
   location: string;
 }
 
-/// user interface
-export interface IUserType {
-  _id: string;
-  about: string;
-  avatar: string;
-  banner: string;
-  username: string;
-  email: string;
-  fullName: string;
-  phoneNumber: string;
-  gender: EGender;
-  birthday: string;
-  verified: boolean;
-  role: string;
-}
-
-export default interface IUserRegister {
+export interface IRegister_User {
   avatar: File;
   username: string;
   fullName: string;
@@ -65,24 +39,24 @@ export default interface IUserRegister {
   password: string;
 }
 
-export interface IUserLogin {
+export interface ILogin_User {
   email: string;
   password: string;
 }
 
-export interface IUserUpdate {
+export interface IEdited_User {
   fullName: string;
   gender: EGender;
   phoneNumber: string;
   birthday: Date;
   street: string;
-  city: string;
-  state: string;
-  country: string;
+  city: ICity | null;
+  state: IState | null;
+  country: ICountry | null;
   zipCode: string;
 }
 
-export interface IUser {
+export default interface IUser {
   _id: string;
   avatar: string;
   banner: string;
@@ -91,18 +65,23 @@ export interface IUser {
   email: string;
   fullName: string;
   phoneNumber: string;
-  address: IAddress;
   cv: string;
   portfolioUrl: string[];
-  experience: IExperience[];
-  education: IEducation[];
   skill: string[];
-  birthday: Date;
-  gender: EGender;
-  role: ERole;
   verified: boolean;
   status: boolean;
+  address: IAddress_User;
+  experience: IExperience_User[];
+  education: IEducation_User[];
+  birthday: Date;
+  gender: EGender;
   createdAt: Date;
   deletedAt: Date | null;
   updatedAt: Date | null;
+}
+
+export enum EGender {
+  MALE = 'male',
+  FEMALE = 'female',
+  OTHER = 'other',
 }

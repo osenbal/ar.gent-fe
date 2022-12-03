@@ -4,7 +4,7 @@ import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
 import { asyncLogout } from '@/store/authSlice';
 import Slider from './Slider';
 import { BACKEND_URL } from '@/config/config';
-import { IUser } from '@/interfaces/user.interface';
+import IUser from '@/interfaces/user.interface';
 import { styled, useTheme } from '@mui/material/styles';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -88,6 +88,7 @@ const UserLoggedInLayout = () => {
 
   useEffect(() => {
     getUserInitials(userId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

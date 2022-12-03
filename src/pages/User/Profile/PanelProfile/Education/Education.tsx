@@ -6,7 +6,7 @@ import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { Dayjs } from 'dayjs';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
 import { asyncUserEducation } from '@/store/authSlice';
-import { IEducation } from '@/interfaces/user.interface';
+import { IEducation_User } from '@/interfaces/user.interface';
 import AddIcon from '@mui/icons-material/Add';
 import {
   Card,
@@ -25,7 +25,9 @@ const Education: React.FC = () => {
   const dispatch = useAppDispatch();
   const { user, userId } = useAppSelector((state) => state.auth);
 
-  const [educationList, setEducationList] = useState<IEducation[] | []>([]);
+  const [educationList, setEducationList] = useState<IEducation_User[] | []>(
+    []
+  );
   const [openAdd, setOpenAdd] = useState<boolean>(false);
   const [school, setSchool] = useState<string>('');
   const [degree, setDegree] = useState<string>('');
@@ -60,7 +62,7 @@ const Education: React.FC = () => {
       return;
     }
 
-    const newEducation: IEducation = {
+    const newEducation: IEducation_User = {
       school: school.trim(),
       degree: degree.trim(),
       location: location.trim(),
@@ -74,7 +76,7 @@ const Education: React.FC = () => {
     setOpenAdd(false);
   };
 
-  const handleOnEdit = (index: number, item: IEducation) => {
+  const handleOnEdit = (index: number, item: IEducation_User) => {
     const educationTemp = [...educationList];
     educationTemp[index] = item;
     dispatch(asyncUserEducation({ userId, payload: educationTemp }));

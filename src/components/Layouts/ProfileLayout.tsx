@@ -1,12 +1,10 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useAppSelector } from '@/hooks/redux.hook';
 import { NavLink, Outlet } from 'react-router-dom';
 import { Button, Box } from '@mui/material';
 import { useLocation, useParams } from 'react-router-dom';
 
 const ProfileLayout: React.FC = () => {
-  const { userId } = useAppSelector((state) => state.auth);
   const { id } = useParams();
   const location = useLocation();
 

@@ -6,7 +6,7 @@ import UserListHead from './UserListHead';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ReactPaginate from 'react-paginate';
 import { BACKEND_URL } from '@/config/config';
-import { IUser } from '@/interfaces/user.interface';
+import IUser from '@/interfaces/user.interface';
 import {
   Card,
   Table,
@@ -87,6 +87,7 @@ const UserList: React.FC = () => {
   const [order, setOrder] = useState('asc');
   const [selected, setSelected] = useState([]);
   const [orderBy, setOrderBy] = useState<string>('fullName');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [filterName, setFilterName] = useState<string>('');
   const [users, setUsers] = useState<IUser[] | []>([]);
 
@@ -102,7 +103,6 @@ const UserList: React.FC = () => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
-    console.log('order by', orderBy);
   };
 
   const handleSelectAllClick = (event: any, users: any) => {
@@ -162,7 +162,6 @@ const UserList: React.FC = () => {
     getComparator(order, orderBy),
     filterName
   );
-  console.log('filteredUsers', filteredUsers);
 
   const isNotFound = !filteredUsers.length && !!filterName;
 
@@ -217,10 +216,8 @@ const UserList: React.FC = () => {
         'Content-Type': 'application/json',
       },
     });
-    console.log(response);
     if (response.ok) {
       const data = await response.json();
-      console.log(data);
       setUsers(data.data);
       setOpen(null);
       setSelected([]);
@@ -257,6 +254,7 @@ const UserList: React.FC = () => {
 
   useEffect(() => {
     getUserList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search]);
 
   useEffect(() => {

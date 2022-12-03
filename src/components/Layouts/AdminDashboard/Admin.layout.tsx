@@ -4,7 +4,6 @@ import Header from './Header';
 import { styled } from '@mui/material';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
 import Slider from './Slider';
-import IAdmin from '@/interfaces/admin.interface';
 import { BACKEND_URL } from '@/config/config';
 import { setUserAdmin } from '@/store/authAdminSlice';
 
@@ -55,6 +54,7 @@ const AdminLayout: React.FC = () => {
 
   useEffect(() => {
     getCurrentAdmin();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

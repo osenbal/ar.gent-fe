@@ -8,7 +8,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import HelpCenterIcon from '@mui/icons-material/HelpCenter';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import { IUser } from '@/interfaces/user.interface';
+import IUser from '@/interfaces/user.interface';
 import {
   useMediaQuery,
   useTheme,

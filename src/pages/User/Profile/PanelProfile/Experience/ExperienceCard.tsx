@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAppSelector } from '@hooks/redux.hook';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
-import { IExperience } from '@/interfaces/user.interface';
+import { IExperience_User } from '@/interfaces/user.interface';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { Edit } from '@mui/icons-material';
@@ -20,9 +20,9 @@ import {
 } from '@mui/material';
 
 type props = {
-  item: IExperience;
+  item: IExperience_User;
   index: number;
-  handleOnEdit: (index: number, item: IExperience) => void;
+  handleOnEdit: (index: number, item: IExperience_User) => void;
   handleOnDelete: (index: number) => void;
 };
 
@@ -36,8 +36,8 @@ const ExperienceCard: React.FC<props> = ({
   const { userId } = useAppSelector((state) => state.auth);
 
   const [openEdit, setOpenEdit] = useState<boolean>(false);
-  const [experience, setExperience] = useState<IExperience>(item);
-  const [experienceTemp, setExperienceTemp] = useState<IExperience>({
+  const [experience, setExperience] = useState<IExperience_User>(item);
+  const [experienceTemp, setExperienceTemp] = useState<IExperience_User>({
     position: item.position,
     company: item.company,
     location: item.location,
@@ -83,6 +83,7 @@ const ExperienceCard: React.FC<props> = ({
 
   useEffect(() => {
     setExperienceTemp(experience);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openEdit]);
 
   return (

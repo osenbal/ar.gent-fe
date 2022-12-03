@@ -7,7 +7,7 @@ import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { Dayjs } from 'dayjs';
 import AddIcon from '@mui/icons-material/Add';
-import { IExperience } from '@/interfaces/user.interface';
+import { IExperience_User } from '@/interfaces/user.interface';
 import {
   Card,
   CardContent,
@@ -26,7 +26,9 @@ const Experience: React.FC = () => {
   const { id } = useParams<{ id: string }>();
 
   const [openAdd, setOpenAdd] = useState<boolean>(false);
-  const [experienceList, setExperienceList] = useState<IExperience[] | []>([]);
+  const [experienceList, setExperienceList] = useState<IExperience_User[] | []>(
+    []
+  );
 
   const [position, setPosition] = useState<string>('');
   const [company, setCompany] = useState<string>('');
@@ -63,7 +65,7 @@ const Experience: React.FC = () => {
       return;
     }
 
-    const newExperience: IExperience = {
+    const newExperience: IExperience_User = {
       position: position.trim(),
       company: company.trim(),
       location: location.trim(),
@@ -80,7 +82,7 @@ const Experience: React.FC = () => {
     setOpenAdd(false);
   };
 
-  const handleOnEdit = (index: number, item: IExperience) => {
+  const handleOnEdit = (index: number, item: IExperience_User) => {
     const experienceTemp = [...experienceList];
     experienceTemp[index] = item;
 

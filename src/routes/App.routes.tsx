@@ -4,7 +4,7 @@ import Home from '@pages/User/Home/Home.page';
 import Login from '@pages/User/Login/Login.page.user';
 import Register from '@pages/User/Register/Register.page.user';
 import SuccessRegister from '@/pages/User/Register/SuccessRegister.page';
-import Profile from '@pages/User/Profile/PannelProfile/Profile';
+import Profile from '@/pages/User/Profile/PanelProfile/Profile';
 import ProtectedRoute from '@/middleware/protectedRoute';
 import GuestRoute from '@/middleware/guestRoute';
 import PersistLogin from '@/middleware/persistLogin';
@@ -13,7 +13,7 @@ import UserLoggedInLayout from '@/components/Layouts/UserDahboard/UserLoggedIn.l
 import JobCreate from '@/pages/User/Jobs/JobCreate.page';
 import JobControl from '@/pages/User/Jobs/JobControl';
 import HelpPage from '@/pages/User/Help/Help.page';
-import JobListProfile from '@/pages/User/Profile/PannelJob/JobListProfile';
+import JobListProfile from '@/pages/User/Profile/PanelJob/JobListProfile';
 import ProfileLayout from '@/components/Layouts/ProfileLayout';
 import Dashboard from '@/pages/User/Home/Dashboard.page';
 import LoginAdmin from '@/pages/Admin/Login/LoginAdmin.page';

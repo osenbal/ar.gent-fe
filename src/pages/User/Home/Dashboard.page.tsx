@@ -8,7 +8,7 @@ import JobDetails from '@/pages/User/Jobs/JobDetails';
 import SearchApp from '@/components/Reusable/SearchApp';
 import FilterSearch from '@/components/Reusable/FilterSearch';
 import { BACKEND_URL } from '@/config/config';
-import IJob, { IJobDetails } from '@/interfaces/job.interface';
+import IJob, { IReturnJobDetails } from '@/interfaces/job.interface';
 import {
   Box,
   Button,
@@ -41,7 +41,7 @@ const Dashboard: React.FC = () => {
   const [limitPerPage] = useState<number>(4);
   const [noData, setNoData] = useState<boolean>(false);
   const [jobs, setJobs] = useState<IJob[] | []>([]);
-  const [jobDetails, setJobDetails] = useState<IJobDetails | null>(null);
+  const [jobDetails, setJobDetails] = useState<IReturnJobDetails | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingJobs, setIsLoadingJobs] = useState<boolean>(true);
   const [totalJobs, setTotalJobs] = useState<number>(0);
@@ -77,13 +77,14 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     loadJobs(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (jobIdParam) {
       setIsLoading(true);
       setTimeout(() => {
-        fetch(`${BACKEND_URL}/job/id/${jobIdParam}`, {
+        fetch(`${BACKEND_URL}/job/${jobIdParam}`, {
           method: 'GET',
           credentials: 'include',
           headers: {

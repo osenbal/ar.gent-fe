@@ -2,37 +2,30 @@ import React, { useEffect, useState } from 'react';
 import DOMPurify from 'dompurify';
 import { Link } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/redux.hook';
-import { IJobDetails } from '@/interfaces/job.interface';
+import { ToastContainer, toast } from 'react-toastify';
+import { IReturnJobDetails } from '@/interfaces/job.interface';
 import DialpadIcon from '@mui/icons-material/Dialpad';
 import WorkTwoToneIcon from '@mui/icons-material/WorkTwoTone';
-import LaunchIcon from '@mui/icons-material/Launch';
 import ApartmentTwoToneIcon from '@mui/icons-material/ApartmentTwoTone';
-import {
-  Typography,
-  Box,
-  Card,
-  Avatar,
-  Button,
-  IconButton,
-} from '@mui/material';
+import { Typography, Box, Card, Avatar, Button } from '@mui/material';
 import { BACKEND_URL } from '@/config/config';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 type props = {
-  data: IJobDetails;
+  data: IReturnJobDetails;
 };
 
 const JobDetails: React.FC<props> = ({ data }) => {
   const { userId } = useAppSelector((state) => state.auth);
-  const [isApplied, setIsApplied] = useState<boolean>(false);
+  const [statusApplied, setStatusApplied] = useState<string | boolean>('');
   const [openUploadCv, setOpenUploadCv] = useState<boolean>(false);
   const [cvFile, setCvFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleInputCv = async () => {
     if (!cvFile) return;
     if (cvFile) {
-      console.log(cvFile);
       const formData = new FormData();
       formData.append('cv', cvFile);
 
@@ -48,6 +41,7 @@ const JobDetails: React.FC<props> = ({ data }) => {
       if (res.ok) {
         setCvFile(null);
         setOpenUploadCv(false);
+        toast.success('Upload CV successfully, please apply again!');
       } else {
         console.log('error');
         setOpenUploadCv(false);
@@ -67,7 +61,12 @@ const JobDetails: React.FC<props> = ({ data }) => {
 
     const resData = await response.json();
     if (response.ok) {
-      setIsApplied(resData.data);
+      setStatusApplied(resData.data);
+      if (resData.data === false) {
+        toast.warn('unapply job successfully');
+      } else {
+        toast.success('apply job successfully!');
+      }
     } else if (response.status === 400) {
       if (resData?.data?.isExist === false) {
         setOpenUploadCv(true);
@@ -78,6 +77,7 @@ const JobDetails: React.FC<props> = ({ data }) => {
   };
 
   const checkIsApply = async () => {
+    setIsLoading(true);
     const response = await fetch(`${BACKEND_URL}/job/check-apply/${data._id}`, {
       method: 'GET',
       credentials: 'include',
@@ -88,10 +88,11 @@ const JobDetails: React.FC<props> = ({ data }) => {
 
     const resData = await response.json();
     if (response.ok) {
-      setIsApplied(resData.data);
+      setStatusApplied(resData.data);
+      setIsLoading(false);
     } else {
       console.log(resData.message);
-      setIsApplied(false);
+      setIsLoading(false);
     }
   };
 
@@ -99,15 +100,17 @@ const JobDetails: React.FC<props> = ({ data }) => {
     checkIsApply();
   }, []);
 
-  console.log(openUploadCv);
   return (
     <>
+      <ToastContainer />
+
       <Card sx={{ padding: 3 }}>
         <Typography variant="h5" fontWeight={'500'}>
           {data.title}
         </Typography>
         <Typography variant="body2" fontWeight={'400'}>
-          {data.username} | {data.location} - 10 applicants
+          {data.username} | {data.location.state.name},{' '}
+          {data.location.country.name} - 10 applicants
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
@@ -137,9 +140,24 @@ const JobDetails: React.FC<props> = ({ data }) => {
               onClick={handleApplyJob}
               variant="contained"
               sx={{ mr: 1 }}
-              endIcon={isApplied ? '' : <LaunchIcon />}
+              disabled={
+                isLoading ||
+                statusApplied === 'approved' ||
+                statusApplied === 'rejected'
+              }
+              // endIcon={statusApplied === "" ? '' : <LaunchIcon />}
             >
-              {isApplied ? 'Applied' : 'Apply'}
+              {isLoading
+                ? 'Loading...'
+                : statusApplied === false
+                ? 'Apply'
+                : statusApplied === 'pending'
+                ? 'Applied'
+                : statusApplied === 'approved'
+                ? 'Approved'
+                : statusApplied === 'rejected'
+                ? 'Rejected'
+                : ''}
             </Button>
           </Box>
         )}

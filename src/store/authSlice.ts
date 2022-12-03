@@ -2,12 +2,11 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { toast } from 'react-toastify';
 import { RootState } from '.';
 import { BACKEND_URL } from '@/config/config';
-import {
-  IEducation,
-  IExperience,
-  IUser,
-  IUserLogin,
-  IUserUpdate,
+import IUser, {
+  IEducation_User,
+  IExperience_User,
+  ILogin_User,
+  IEdited_User,
 } from '@interfaces/user.interface';
 
 // Define a type for the slice state
@@ -89,7 +88,7 @@ export const registerUser = createAsyncThunk(
 
 export const loginUser = createAsyncThunk(
   `auth/login`,
-  async (payload: IUserLogin) => {
+  async (payload: ILogin_User) => {
     const res = await fetch(`${BACKEND_URL}/auth/login`, {
       method: 'POST',
       credentials: 'include',
@@ -115,7 +114,13 @@ export const loginUser = createAsyncThunk(
 
 export const asyncUserEducation = createAsyncThunk(
   'auth/asyncUserEducation',
-  async ({ userId, payload }: { userId: string; payload: IEducation[] }) => {
+  async ({
+    userId,
+    payload,
+  }: {
+    userId: string;
+    payload: IEducation_User[];
+  }) => {
     const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
       method: 'PATCH',
       credentials: 'include',
@@ -138,7 +143,13 @@ export const asyncUserEducation = createAsyncThunk(
 
 export const asyncUserExperience = createAsyncThunk(
   'auth/asyncUserExperience',
-  async ({ userId, payload }: { userId: string; payload: IExperience[] }) => {
+  async ({
+    userId,
+    payload,
+  }: {
+    userId: string;
+    payload: IExperience_User[];
+  }) => {
     const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
       method: 'PATCH',
       credentials: 'include',
@@ -231,7 +242,7 @@ export const asyncUserAbout = createAsyncThunk(
 
 export const asyncUserSummary = createAsyncThunk(
   'auth/asyncUserSummary',
-  async ({ userId, payload }: { userId: string; payload: IUserUpdate }) => {
+  async ({ userId, payload }: { userId: string; payload: IEdited_User }) => {
     const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
       method: 'PATCH',
       credentials: 'include',

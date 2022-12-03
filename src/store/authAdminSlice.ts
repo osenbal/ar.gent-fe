@@ -87,10 +87,8 @@ export const loginAdmin = createAsyncThunk(
       },
       body: JSON.stringify(payload),
     });
-    console.log(res);
     const data = await res.json();
     if (res.ok) {
-      console.log(data);
       return { isAuth: true, adminId: data.data.adminId };
     } else {
       toast.error(`${data.message}`, {

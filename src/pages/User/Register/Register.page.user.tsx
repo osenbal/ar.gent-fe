@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { EGender } from '@interfaces/user.interface';
 import { isEmpty } from '@utils/utils';
-import IUserRegister from '@interfaces/user.interface';
+import { IRegister_User } from '@interfaces/user.interface';
 import { Helmet } from 'react-helmet-async';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux.hook';
 import { registerUser } from '@store/authSlice';
@@ -72,6 +72,7 @@ const Register: React.FC = () => {
   const [showMatchPassword, setShowMatchPassword] = useState<boolean>(false);
   const [validMatch, setValidMatch] = useState<boolean>(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [errors, setErrors] = useState<object | null>();
 
   const validate = () => {
@@ -137,7 +138,7 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const isValid = validate();
+    const isValid: boolean = validate();
     if (!isValid || !phoneNumber || !avatar || !gender || !birthday) {
       toast.error('Please fill in all fields');
       return;
@@ -148,7 +149,7 @@ const Register: React.FC = () => {
     }
 
     const formData = new FormData();
-    const newUser: IUserRegister = {
+    const newUser: IRegister_User = {
       avatar: avatar,
       username: username.trim(),
       fullName: fullName.trim(),
@@ -182,6 +183,7 @@ const Register: React.FC = () => {
   // validate
   useEffect(() => {
     validate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     avatar,
     username,

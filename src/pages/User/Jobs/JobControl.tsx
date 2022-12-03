@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { NumericFormat } from 'react-number-format';
-import { useParams } from 'react-router-dom';
+import { useParams, NavLink, useSearchParams } from 'react-router-dom';
 import { SyncLoader } from 'react-spinners';
 import { stateToHTML } from 'draft-js-export-html';
 import { ToastContainer, toast } from 'react-toastify';
 import TextEditor from '@/components/Reusable/TextEditor';
 import { useAppSelector } from '@/hooks/redux.hook';
 import { BACKEND_URL } from '@/config/config';
-import { IJobDetails } from '@/interfaces/job.interface';
+import {
+  INew_ObjectJob,
+  IReturn_GET_JobById,
+} from '@/interfaces/job.interface';
 import { EJobLevel, EJobType, EJobWorkPlace } from '@/interfaces/job.interface';
-import { ICreateJob } from '@/interfaces/job.interface';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Select from '@mui/material/Select';
 import {
@@ -30,6 +32,14 @@ import {
   Avatar,
   Button,
 } from '@mui/material';
+import {
+  City,
+  Country,
+  ICity,
+  ICountry,
+  IState,
+  State,
+} from 'country-state-city';
 
 export const Link = (props: any) => {
   const { url } = props.contentState.getEntity(props.entityKey).getData();
@@ -58,38 +68,45 @@ const linkDecorator = new CompositeDecorator([
 const JobControl: React.FC = () => {
   const { userId } = useAppSelector((state) => state.auth);
   const { jobId } = useParams();
+  const [searchParams] = useSearchParams();
 
-  const [job, setJob] = useState<IJobDetails>({
+  const paneParams = searchParams.get('pane');
+
+  const [job, setJob] = useState<IReturn_GET_JobById>({
     _id: '',
     userId: '',
     username: '',
     title: '',
     description: '',
-    location: '',
     salary: 0,
+    city: '',
+    state: '',
+    country: '',
     type: '',
     level: '',
     workPlace: '',
     avatarUser: '',
-    totalApplicants: 0,
+    totalAppliciants: 0,
     createdAt: new Date(),
     updatedAt: null,
     deletedAt: null,
   });
 
-  const [jobTemp, setJobTemp] = useState<IJobDetails>({
+  const [jobTemp, setJobTemp] = useState<IReturn_GET_JobById>({
     _id: '',
     userId: '',
     username: '',
     title: '',
     description: '',
-    location: '',
+    city: '',
+    state: '',
+    country: '',
     salary: 0,
     type: '',
     level: '',
     workPlace: '',
     avatarUser: '',
-    totalApplicants: 0,
+    totalAppliciants: 0,
     createdAt: new Date(),
     updatedAt: null,
     deletedAt: null,
@@ -101,6 +118,8 @@ const JobControl: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const [isLoadingAppliciant, setIsLoadingAppliciant] = useState<boolean>(true);
+
   const optionTypes = Object.values(EJobType).map((value: string) => value);
   const optionLevels = Object.values(EJobLevel).map((value: string) => value);
   const optionWorkPlace = Object.values(EJobWorkPlace).map(
@@ -111,31 +130,52 @@ const JobControl: React.FC = () => {
     if (
       jobTemp.title === job.title &&
       jobTemp.description === job.description &&
-      jobTemp.location === job.location &&
+      jobTemp.city === job.city &&
+      jobTemp.state === job.state &&
+      jobTemp.country === job.country &&
       jobTemp.salary === job.salary &&
       jobTemp.type === job.type &&
       jobTemp.level === job.level &&
       jobTemp.workPlace === job.workPlace
     ) {
+      toast.warn('No changes detected');
       return;
     }
 
     if (
       !editorState ||
       !job.title ||
-      !job.location ||
+      !job.city ||
+      !job.state ||
+      !job.country ||
       !job.type ||
       !job.level ||
       !job.workPlace ||
       !job.salary
     ) {
+      toast.warn('Please fill all fields');
       return;
     }
 
-    const editedData: ICreateJob = {
+    const country: ICountry | null =
+      Country.getCountryByCode(job.country) || null;
+    const state: IState | null =
+      State.getStateByCodeAndCountry(job.state, job.country) || null;
+    const city: ICity = City.getCitiesOfState(job.country, job.state).filter(
+      (city) => city.name === job.city
+    )[0];
+
+    if (!country || !state || !city) {
+      console.log('please select a valid country, state and city');
+      return;
+    }
+
+    const editedData: INew_ObjectJob = {
       title: job.title,
       description: stateToHTML(editorState.getCurrentContent()),
-      location: job.location,
+      country: country,
+      state: state,
+      city: city,
       salary: job.salary,
       type: job.type,
       level: job.level,
@@ -172,37 +212,126 @@ const JobControl: React.FC = () => {
   };
 
   const getAppliciants = async () => {
-    const response = await fetch(`${BACKEND_URL}/job/${jobId}/appliciants`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
+    setIsLoadingAppliciant(true);
+    const response = await fetch(
+      `${BACKEND_URL}/job/${jobId}/appliciants?pane=${paneParams}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      }
+    );
 
     const data = await response.json();
+    console.log(data);
     if (response.ok) {
       setAppliciants(data.data);
     } else {
       console.log('error');
     }
+    setIsLoadingAppliciant(false);
+  };
+
+  const approveAppliciant = async (appliciantId: string) => {
+    const response = await fetch(
+      `${BACKEND_URL}/job/approve/${userId}/${appliciantId}/${jobId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      }
+    );
+
+    const data = await response.json();
+    if (response.ok) {
+      toast.success(data.message, {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
+      getAppliciants();
+    } else {
+      toast.error(data.message, {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
+    }
+  };
+
+  const rejectAppliciant = async (appliciantId: string) => {
+    const response = await fetch(
+      `${BACKEND_URL}/job/reject/${userId}/${appliciantId}/${jobId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      toast.success(data.message, {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
+      getAppliciants();
+    } else {
+      toast.error(data.message, {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
+    }
   };
 
   useEffect(() => {
-    const controller = new AbortController();
+    if (editorState) {
+      const htmlDescription = stateToHTML(editorState.getCurrentContent());
+      setJob({ ...job, description: htmlDescription });
+    }
+  }, [editorState]);
+
+  useEffect(() => {
     if (jobId) {
       // fetch job data
-      fetch(`${BACKEND_URL}/job/id/${jobId}`, {
+      fetch(`${BACKEND_URL}/job/${jobId}`, {
         method: 'GET',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
       })
-        .then((res) => res.json())
+        .then((res) => {
+          return res.json();
+        })
         .then((data) => {
-          setJob(data.data);
-          setJobTemp(data.data);
+          const city = data.data.location.city.name;
+          const country = data.data.location.country.isoCode;
+          const state = data.data.location.state.isoCode;
+          const jobData = Object.entries(data.data).filter(
+            ([key, value]) => key !== 'location'
+          );
+          const jobDataWithLocation = Object.fromEntries([
+            ...jobData,
+            ['city', city],
+            ['country', country],
+            ['state', state],
+          ]);
+          setJob(jobDataWithLocation);
+          setJobTemp(jobDataWithLocation);
           const blocksHtmlDescription = convertFromHTML(data.data.description);
           const initialState = data.data.description
             ? EditorState.createWithContent(
@@ -214,19 +343,16 @@ const JobControl: React.FC = () => {
               )
             : EditorState.createEmpty(linkDecorator);
           setEditorState(initialState);
-          setIsLoading(false);
         })
         .catch((error) => {
           if (error.name === 'AbortError') {
             console.log('abort');
           }
+        })
+        .finally(() => {
           setIsLoading(false);
         });
     }
-
-    return () => {
-      controller.abort();
-    };
   }, []);
 
   useEffect(() => {
@@ -234,11 +360,37 @@ const JobControl: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (editorState) {
-      const htmlDescription = stateToHTML(editorState.getCurrentContent());
-      setJob({ ...job, description: htmlDescription });
-    }
-  }, [editorState]);
+    setIsLoadingAppliciant(true);
+    const abortController = new AbortController();
+    fetch(`${BACKEND_URL}/job/${jobId}/appliciants?pane=${paneParams}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      signal: abortController.signal,
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        setAppliciants(data.data);
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') {
+          console.log('abort');
+        }
+      })
+      .finally(() => {
+        setIsLoadingAppliciant(false);
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [paneParams]);
+
+  console.log(job);
 
   return (
     <>
@@ -267,15 +419,104 @@ const JobControl: React.FC = () => {
                 fullWidth
                 margin="normal"
               />
-              <TextField
-                value={job?.location}
-                onChange={(e) => setJob({ ...job, location: e.target.value })}
-                label="Location"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                sx={{ mt: 2 }}
-              />
+              {/* Location Job */}
+              <Typography variant="body1">Location</Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 2,
+                  mt: 2,
+                  flexDirection: { xs: 'column', md: 'row' },
+                }}
+              >
+                <FormControl sx={{ minWidth: 120 }} size="small">
+                  <InputLabel id="country">Country</InputLabel>
+                  <Select
+                    labelId="country"
+                    id="country"
+                    label="Country"
+                    value={job?.country}
+                    onChange={(e) => {
+                      setJob({
+                        ...job,
+                        state: '',
+                        city: '',
+                        country: e.target.value,
+                      });
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {Country.getAllCountries()
+                      .filter((country) => country.isoCode === 'ID')
+                      .map((country) => (
+                        <MenuItem key={country.isoCode} value={country.isoCode}>
+                          {country.name}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+                {/* State */}
+                <FormControl sx={{ minWidth: 120 }} size="small">
+                  <InputLabel id="state">State</InputLabel>
+                  <Select
+                    labelId="state"
+                    id="state"
+                    label="State"
+                    value={job?.state}
+                    onChange={(e) => {
+                      setJob({
+                        ...job,
+                        city: '',
+                        state: e.target.value,
+                      });
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {State.getStatesOfCountry(job.country).map((state) => (
+                      <MenuItem key={state.isoCode} value={state.isoCode}>
+                        {state.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                {/* City */}
+                <FormControl sx={{ minWidth: 120 }} size="small">
+                  <InputLabel id="state">City</InputLabel>
+                  <Select
+                    labelId="city"
+                    id="city"
+                    label="City"
+                    value={job?.city}
+                    onChange={(e) => {
+                      setJob({
+                        ...job,
+                        city: e.target.value,
+                      });
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {City.getCitiesOfState(job.country, job.state).map(
+                      (city) => (
+                        <MenuItem key={city.name} value={city.name}>
+                          {city.name}
+                        </MenuItem>
+                      )
+                    )}
+                  </Select>
+                </FormControl>
+              </Box>
+              {/* category */}
+              <Typography variant="body1" sx={{ mt: 2 }}>
+                Category
+              </Typography>
               <Box
                 sx={{
                   display: 'flex',
@@ -418,67 +659,155 @@ const JobControl: React.FC = () => {
             )}
           </Box>
 
+          {/* Appliciants */}
+          <Box sx={{ display: 'flex', mt: 4, gap: 2 }}>
+            <NavLink
+              style={{ textDecoration: 'none' }}
+              to={`/job/edit/${jobId}?pane=pending`}
+            >
+              <Button
+                sx={
+                  paneParams === `pending` || paneParams === null
+                    ? {
+                        fontWeight: 700,
+                        fontSize: '16px',
+                        textDecoration: 'underline',
+                      }
+                    : {
+                        fontWeight: 400,
+                        fontSize: '16  px',
+                        textDecoration: 'none',
+                      }
+                }
+              >
+                Applicants
+              </Button>
+            </NavLink>
+            <NavLink
+              style={{ textDecoration: 'none' }}
+              to={`/job/edit/${jobId}?pane=approved`}
+            >
+              <Button
+                sx={
+                  paneParams === `approved`
+                    ? {
+                        fontWeight: 700,
+                        fontSize: '16px',
+                        textDecoration: 'underline',
+                      }
+                    : {
+                        fontWeight: 400,
+                        fontSize: '16  px',
+                        textDecoration: 'none',
+                      }
+                }
+              >
+                Approved
+              </Button>
+            </NavLink>
+            <NavLink
+              style={{ textDecoration: 'none' }}
+              to={`/job/edit/${jobId}?pane=rejected`}
+            >
+              <Button
+                sx={
+                  paneParams === `rejected`
+                    ? {
+                        fontWeight: 700,
+                        fontSize: '16px',
+                        textDecoration: 'underline',
+                      }
+                    : {
+                        fontWeight: 400,
+                        fontSize: '16  px',
+                        textDecoration: 'none',
+                      }
+                }
+              >
+                Rejected
+              </Button>
+            </NavLink>
+          </Box>
+
           <Card sx={{ mt: 2 }}>
             <CardContent>
               <Typography variant="h5" sx={{ mb: 3 }}>
                 Appliciants
               </Typography>
-              {appliciants.length > 0
-                ? appliciants.map((item, index) => (
-                    <Card key={index}>
-                      <CardContent
+
+              {isLoadingAppliciant ? (
+                <p>Loading</p>
+              ) : appliciants && appliciants.length > 0 ? (
+                appliciants.map((item, index) => (
+                  <Card key={index}>
+                    <CardContent
+                      sx={{
+                        display: 'flex',
+                        flexDir: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <Box
                         sx={{
                           display: 'flex',
                           flexDir: 'row',
+                          columnGap: 2,
                           alignItems: 'center',
-                          justifyContent: 'space-between',
                         }}
                       >
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexDir: 'row',
-                            columnGap: 2,
-                            alignItems: 'center',
-                          }}
+                        <Avatar alt="Remy Sharp" src={item?.user[0].avatar} />
+                        <Typography
+                          variant="body1"
+                          component={'a'}
+                          href={`/user/${item.userId}/profile`}
+                          sx={{ textDecoration: 'none', color: 'inherit' }}
                         >
-                          <Avatar
-                            alt="Remy Sharp"
-                            src={'https://dummyimage.com/400x400/000/eebbbb'}
-                          />
-                          <Typography variant="body1">
-                            {item.username}
-                          </Typography>
-                          <Typography
-                            component={'a'}
-                            variant="body2"
-                            sx={{ color: 'grey.500', cursor: 'pointer' }}
-                            href={item.cv}
-                          >
-                            Download CV
-                          </Typography>
-                        </Box>
+                          {item?.user[0].username}
+                        </Typography>
+                        <Typography
+                          target="_blank"
+                          component={'a'}
+                          variant="body2"
+                          sx={{ color: 'grey.500', cursor: 'pointer' }}
+                          href={item.user[0].cv}
+                        >
+                          Download CV
+                        </Typography>
+                      </Box>
 
-                        <div>
-                          <Button
-                            variant="contained"
-                            color="success"
-                            sx={{ ml: 2 }}
-                          >
-                            Accept
-                          </Button>
-                          <Button
-                            variant="contained"
-                            color="error"
-                            sx={{ ml: 2 }}
-                          >
-                            Reject
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                : ''}
+                      <div>
+                        {item.isApprove === `pending` ||
+                        item.isApprove === null ? (
+                          <>
+                            <Button
+                              variant="contained"
+                              color="success"
+                              sx={{ ml: 2 }}
+                              onClick={() => approveAppliciant(item.userId)}
+                            >
+                              Accept
+                            </Button>
+
+                            <Button
+                              variant="contained"
+                              color="error"
+                              sx={{ ml: 2 }}
+                              onClick={() => rejectAppliciant(item.userId)}
+                            >
+                              Reject
+                            </Button>
+                          </>
+                        ) : (
+                          ''
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                ''
+              )}
             </CardContent>
           </Card>
         </Box>

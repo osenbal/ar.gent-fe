@@ -1,10 +1,12 @@
+import { ICity, ICountry, IState } from 'country-state-city';
+
 export default interface IJob {
   _id: string;
   userId: string;
   username: string;
   title: string;
   description: string;
-  location: string;
+  location: ILocation_Job;
   salary: number;
   type: EJobType | string;
   level: EJobLevel | string;
@@ -14,13 +16,13 @@ export default interface IJob {
   deletedAt: Date | null;
 }
 
-export interface IJobDetails {
+export interface IReturnJobDetails {
   _id: string;
   userId: string;
   username: string;
   title: string;
   description: string;
-  location: string;
+  location: ILocation_Job;
   salary: number;
   type: EJobType | string;
   level: EJobLevel | string;
@@ -32,14 +34,54 @@ export interface IJobDetails {
   deletedAt: Date | null;
 }
 
-export interface ICreateJob {
+export interface IReturn_GET_JobById {
+  _id: string;
+  userId: string;
+  username: string;
   title: string;
   description: string;
-  location: string;
+  city: string;
+  state: string;
+  country: string;
   salary: number;
   type: EJobType | string;
   level: EJobLevel | string;
   workPlace: EJobWorkPlace | string;
+  totalAppliciants: number;
+  avatarUser: string;
+  createdAt: Date;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+}
+
+export interface INew_ObjectJob {
+  title: string;
+  description: string;
+  type: EJobType | string;
+  level: EJobLevel | string;
+  workPlace: EJobWorkPlace | string;
+  country: ICountry;
+  state: IState;
+  city: ICity;
+  salary: number;
+}
+
+export interface IState_NewJob {
+  title: string;
+  description: string;
+  country: string;
+  state: string;
+  city: string;
+  salary: number;
+  type: EJobType | string;
+  level: EJobLevel | string;
+  workPlace: EJobWorkPlace | string;
+}
+
+export interface ILocation_Job {
+  country: ICountry;
+  state: IState;
+  city: ICity;
 }
 
 export enum EJobType {

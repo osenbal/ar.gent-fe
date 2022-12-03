@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { loginAdmin } from '@/store/authAdminSlice';
-import { BACKEND_URL } from '@/config/config';
 import {
-  Link,
   Container,
   Typography,
   Divider,
@@ -17,7 +15,6 @@ import {
 const LoginAdmin: React.FC = () => {
   const dispatch = useAppDispatch();
   const { isLoading, isAuth } = useAppSelector((state) => state.authAdmin);
-  const location = useLocation();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState<string>('');
@@ -33,11 +30,11 @@ const LoginAdmin: React.FC = () => {
 
   useEffect(() => {
     if (isLoading === false && isAuth) {
-      console.log('login success');
       navigate('/admin/dashboard', {
         replace: true,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuth]);
 
   return (

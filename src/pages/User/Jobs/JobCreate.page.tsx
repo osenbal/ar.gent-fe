@@ -6,10 +6,11 @@ import { stateToHTML } from 'draft-js-export-html';
 import TextEditor from '@/components/Reusable/TextEditor';
 import { BACKEND_URL } from '@/config/config';
 import {
-  ICreateJob,
+  IState_NewJob,
   EJobLevel,
   EJobType,
   EJobWorkPlace,
+  INew_ObjectJob,
 } from '@/interfaces/job.interface';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import {
@@ -24,6 +25,14 @@ import {
   Button,
 } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
+import {
+  City,
+  Country,
+  ICity,
+  State,
+  ICountry,
+  IState,
+} from 'country-state-city';
 
 const TEXT_EDITOR_ITEM = 'draft-js-example-item';
 
@@ -61,10 +70,12 @@ const JobCreate: React.FC = () => {
     : EditorState.createEmpty(linkDecorator);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [editorState, setEditorState] = useState<EditorState>(initialState);
-  const [jobData, setJobData] = useState<ICreateJob>({
+  const [jobData, setJobData] = useState<IState_NewJob>({
     title: '',
     description: '',
-    location: '',
+    city: '',
+    state: '',
+    country: '',
     salary: 0,
     type: '',
     level: '',
@@ -83,13 +94,42 @@ const JobCreate: React.FC = () => {
       !jobData.description ||
       !jobData.level ||
       !jobData.type ||
-      !jobData.workPlace
+      !jobData.workPlace ||
+      !jobData.city ||
+      !jobData.state ||
+      !jobData.country
     ) {
       console.log('Please fill all the fields');
       return;
     }
 
     setIsLoading(true);
+
+    const country: ICountry | null =
+      Country.getCountryByCode(jobData.country) || null;
+    const state: IState | null =
+      State.getStateByCodeAndCountry(jobData.state, jobData.country) || null;
+    const city: ICity = City.getCitiesOfState(
+      jobData.country,
+      jobData.state
+    ).filter((city) => city.name === jobData.city)[0];
+
+    if (!country || !state || !city) {
+      console.log('Please fill all the fields');
+      return;
+    }
+
+    const location = {
+      country,
+      state,
+      city,
+    };
+
+    const newJobObject: INew_ObjectJob = {
+      ...jobData,
+      ...location,
+    };
+
     const response = await fetch(`${BACKEND_URL}/job`, {
       method: 'POST',
       credentials: 'include',
@@ -97,7 +137,7 @@ const JobCreate: React.FC = () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        ...jobData,
+        ...newJobObject,
       }),
     });
 
@@ -111,7 +151,9 @@ const JobCreate: React.FC = () => {
       setJobData({
         title: '',
         description: '',
-        location: '',
+        city: '',
+        state: '',
+        country: '',
         salary: 0,
         type: '',
         level: '',
@@ -134,8 +176,6 @@ const JobCreate: React.FC = () => {
     const htmlDescription = stateToHTML(editorState.getCurrentContent());
     setJobData({ ...jobData, description: htmlDescription });
   }, [editorState]);
-
-  // console.log(stateToHTML(editorState.getCurrentContent()));
 
   return (
     <>
@@ -160,18 +200,100 @@ const JobCreate: React.FC = () => {
               fullWidth
               margin="normal"
             />
+
             {/* Location Job */}
-            <TextField
-              value={jobData.location}
-              onChange={(e) =>
-                setJobData({ ...jobData, location: e.target.value })
-              }
-              label="Location"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              sx={{ mt: 2 }}
-            />
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 2,
+                mt: 2,
+                flexDirection: { xs: 'column', md: 'row' },
+              }}
+            >
+              <FormControl sx={{ minWidth: 120 }} size="small">
+                <InputLabel id="country">Country</InputLabel>
+                <Select
+                  labelId="country"
+                  id="country"
+                  label="Country"
+                  value={jobData.country}
+                  onChange={(e) => {
+                    setJobData({
+                      ...jobData,
+                      state: '',
+                      city: '',
+                      country: e.target.value,
+                    });
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {Country.getAllCountries()
+                    .filter((country) => country.isoCode === 'ID')
+                    .map((country) => (
+                      <MenuItem key={country.isoCode} value={country.isoCode}>
+                        {country.name}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+              {/* State */}
+              <FormControl sx={{ minWidth: 120 }} size="small">
+                <InputLabel id="state">State</InputLabel>
+                <Select
+                  labelId="state"
+                  id="state"
+                  label="State"
+                  value={jobData.state}
+                  onChange={(e) => {
+                    setJobData({
+                      ...jobData,
+                      city: '',
+                      state: e.target.value,
+                    });
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {State.getStatesOfCountry(jobData.country).map((state) => (
+                    <MenuItem key={state.isoCode} value={state.isoCode}>
+                      {state.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* City */}
+              <FormControl sx={{ minWidth: 120 }} size="small">
+                <InputLabel id="state">City</InputLabel>
+                <Select
+                  labelId="city"
+                  id="city"
+                  label="City"
+                  value={jobData.city}
+                  onChange={(e) => {
+                    setJobData({
+                      ...jobData,
+                      city: e.target.value,
+                    });
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {City.getCitiesOfState(jobData.country, jobData.state).map(
+                    (city) => (
+                      <MenuItem key={city.name} value={city.name}>
+                        {city.name}
+                      </MenuItem>
+                    )
+                  )}
+                </Select>
+              </FormControl>
+            </Box>
 
             <Box
               sx={{

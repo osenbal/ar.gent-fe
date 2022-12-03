@@ -4,18 +4,12 @@ import {
   EditorState,
   RichUtils,
   DraftEditorCommand,
-  convertToRaw,
-  convertFromRaw,
-  CompositeDecorator,
   ContentBlock,
   ContentState,
 } from 'draft-js';
 import 'draft-js/dist/Draft.css';
 import { Button, Card, CardContent, styled } from '@mui/material';
-import { stateToHTML } from 'draft-js-export-html';
 import { Box } from '@mui/system';
-
-const TEXT_EDITOR_ITEM = 'draft-js-example-item';
 
 interface BlockComponentProps {
   contentState: ContentState;
@@ -58,21 +52,6 @@ export const Link = (props: any) => {
     </a>
   );
 };
-
-const linkDecorator = new CompositeDecorator([
-  {
-    strategy: (contentBlock, callback, contentState) => {
-      contentBlock.findEntityRanges((character) => {
-        const entityKey = character.getEntity();
-        return (
-          entityKey !== null &&
-          contentState.getEntity(entityKey).getType() === 'LINK'
-        );
-      }, callback);
-    },
-    component: Link,
-  },
-]);
 
 type props = {
   editorState: EditorState;
