@@ -1,5 +1,5 @@
 import { BACKEND_URL } from '@/config/config';
-import { IReturnJobDetails } from '@/interfaces/job.interface';
+import { IReturn_JobDetails } from '@/interfaces/job.interface';
 import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -7,7 +7,7 @@ import JobDetails from './JobDetails';
 
 const JobDetailsPage: React.FC = () => {
   const params = useParams();
-  const [jobData, setJobData] = useState<IReturnJobDetails | null>(null);
+  const [jobData, setJobData] = useState<IReturn_JobDetails | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const getJobDetails = async () => {

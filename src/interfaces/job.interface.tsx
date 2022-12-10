@@ -3,7 +3,6 @@ import { ICity, ICountry, IState } from 'country-state-city';
 export default interface IJob {
   _id: string;
   userId: string;
-  username: string;
   title: string;
   description: string;
   location: ILocation_Job;
@@ -16,10 +15,27 @@ export default interface IJob {
   deletedAt: Date | null;
 }
 
-export interface IReturnJobDetails {
+export interface IReturn_Jobs {
+  _id: string;
+  title: string;
+  location: ILocation_Job;
+  salary: number;
+  createdAt: Date;
+  user: {
+    _id: string;
+    username: string;
+    fullName: string;
+  };
+  offset: number;
+  page: number;
+  limit: number;
+  totalRows: number;
+  totalPage: number;
+}
+
+export interface IReturn_JobDetails {
   _id: string;
   userId: string;
-  username: string;
   title: string;
   description: string;
   location: ILocation_Job;
@@ -27,8 +43,13 @@ export interface IReturnJobDetails {
   type: EJobType | string;
   level: EJobLevel | string;
   workPlace: EJobWorkPlace | string;
-  totalApplicants: number;
-  avatarUser: string;
+  totalAppliciants: number;
+  user: {
+    _id: string;
+    username: string;
+    fullName: string;
+    avatar: string;
+  };
   createdAt: Date;
   updatedAt: Date | null;
   deletedAt: Date | null;

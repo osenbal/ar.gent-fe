@@ -4,13 +4,13 @@ import { Link } from 'react-router-dom';
 import { NumericFormat } from 'react-number-format';
 import { useAppSelector } from '@/hooks/redux.hook';
 import { DateToDMY } from '@/utils/utils';
-import IJob from '@/interfaces/job.interface';
+import { IReturn_Jobs } from '@/interfaces/job.interface';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { Typography, Card, CardContent, IconButton } from '@mui/material';
 
 type props = {
-  job: IJob;
+  job: IReturn_Jobs;
   handleDelete: (id: string) => void;
   path: string;
 };
@@ -35,7 +35,7 @@ const JobCard: React.FC<props> = ({ job, handleDelete, path }) => {
             : {
                 backgroundColor: 'inherit',
               }),
-          marginTop: 2,
+          marginBottom: 2,
           position: 'relative',
           padding: 1,
           transition: 'all 0.4s ease-in-out',
@@ -50,11 +50,7 @@ const JobCard: React.FC<props> = ({ job, handleDelete, path }) => {
             cursor: 'pointer',
             color: 'inherit',
           }}
-          to={
-            path === 'profile'
-              ? `?jobId=${job?._id}`
-              : `/jobs?search&jobId=${job?._id}`
-          }
+          to={path === 'profile' ? `?jobId=${job?._id}` : `?jobId=${job?._id}`}
           id="jobDetailLink"
         >
           <CardContent>
@@ -80,7 +76,7 @@ const JobCard: React.FC<props> = ({ job, handleDelete, path }) => {
                 fontWeight: '400',
               }}
             >
-              {job.username}
+              {job.user.username}
             </Typography>
             <Typography
               sx={{
@@ -114,7 +110,7 @@ const JobCard: React.FC<props> = ({ job, handleDelete, path }) => {
           </CardContent>
         </Link>
 
-        {userId === job.userId && path === 'profile' && (
+        {userId === job.user._id && path === 'profile' && (
           <>
             <IconButton
               onClick={() => handleDelete(job._id)}

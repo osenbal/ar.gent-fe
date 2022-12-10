@@ -10,7 +10,7 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useMediaQuery, Typography, Toolbar, IconButton } from '@mui/material';
 
-const APP_BAR_DESKTOP = 92;
+const APP_BAR_DESKTOP = 0;
 const APP_BAR_MOBILE = 64;
 
 interface AppBarProps extends MuiAppBarProps {
@@ -31,7 +31,7 @@ const Main = styled('main')(({ theme }) => ({
   overflow: 'auto',
   minHeight: '100vh',
   height: '100%',
-  paddingBottom: theme.spacing(10),
+  // paddingBottom: theme.spacing(10),
   paddingLeft: theme.spacing(1),
   paddingRight: theme.spacing(1),
   paddingTop: APP_BAR_MOBILE,

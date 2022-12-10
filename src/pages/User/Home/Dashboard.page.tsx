@@ -6,16 +6,10 @@ import { ToastContainer } from 'react-toastify';
 import JobCard from '@/pages/User/Jobs/JobCard';
 import JobDetails from '@/pages/User/Jobs/JobDetails';
 import SearchApp from '@/components/Reusable/SearchApp';
-import FilterSearch from '@/components/Reusable/FilterSearch';
 import { BACKEND_URL } from '@/config/config';
-import IJob, { IReturnJobDetails } from '@/interfaces/job.interface';
-import {
-  Box,
-  Button,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { IReturn_JobDetails, IReturn_Jobs } from '@/interfaces/job.interface';
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
+import ReactPaginate from 'react-paginate';
 
 const Loader: React.FC = () => {
   return (
@@ -33,23 +27,39 @@ const Loader: React.FC = () => {
 };
 
 const Dashboard: React.FC = () => {
-  const [queryParams] = useSearchParams();
+  const [queryParams, setQueryParams] = useSearchParams();
   const theme = useTheme();
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
 
-  const [page, setPage] = useState<number>(1);
-  const [limitPerPage] = useState<number>(4);
-  const [noData, setNoData] = useState<boolean>(false);
-  const [jobs, setJobs] = useState<IJob[] | []>([]);
-  const [jobDetails, setJobDetails] = useState<IReturnJobDetails | null>(null);
+  const [keyword, setKeyword] = useState<string>('');
+  const [search, setSearch] = useState<string>('');
+  const [page, setPage] = useState<number>(0);
+  const [limit, setLimit] = useState<number>(10);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [pages, setPages] = useState<number>(0);
+  const [jobs, setJobs] = useState<IReturn_Jobs[] | []>([]);
+  const [jobDetails, setJobDetails] = useState<IReturn_JobDetails | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingJobs, setIsLoadingJobs] = useState<boolean>(true);
   const [totalJobs, setTotalJobs] = useState<number>(0);
 
   const jobIdParam = queryParams.get('jobId');
 
-  const loadJobs = (page: number) => {
-    fetch(`${BACKEND_URL}/job?page=${page}&limit=${limitPerPage}`, {
+  const keyPressHandler = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      setPage(0);
+      setSearch(keyword);
+    }
+  };
+
+  const handleChangePage = ({ selected }: { selected: any }) => {
+    setPage(selected);
+  };
+
+  const loadJobs = () => {
+    setIsLoadingJobs(true);
+    fetch(`${BACKEND_URL}/job?page=${page}&limit=${limit}&search=${search}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -59,12 +69,16 @@ const Dashboard: React.FC = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.code === 200) {
-          setTotalJobs(data.total);
-          const newPage = page + 1;
-          const newList = jobs.concat(data.data);
-          setJobs(newList);
-          setPage(newPage);
-          if (data.data.length === 0) setNoData(true);
+          console.log(data);
+          setTotalJobs(data.totalRows);
+          setPage(data.page);
+          setLimit(data.limit);
+          setPages(data.totalPage);
+          setJobs(data.data);
+          console.log(data.data[0]._id);
+          if (jobIdParam) {
+            setQueryParams({ jobId: `${data.data[0]._id}` });
+          }
         }
       })
       .catch((error) => {
@@ -76,9 +90,9 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    loadJobs(page);
+    loadJobs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [page, search]);
 
   useEffect(() => {
     if (jobIdParam) {
@@ -93,6 +107,7 @@ const Dashboard: React.FC = () => {
         })
           .then((res) => res.json())
           .then((data) => {
+            console.log(data);
             setJobDetails(data.data);
           })
           .catch((error) => {
@@ -110,6 +125,8 @@ const Dashboard: React.FC = () => {
     setIsLoading(true);
   }, [jobIdParam]);
 
+  console.log(keyword);
+
   return (
     <>
       <Helmet>
@@ -118,10 +135,14 @@ const Dashboard: React.FC = () => {
 
       <ToastContainer />
 
-      <SearchApp />
-      <Box sx={{ mt: 2, display: 'flex', overflow: 'hidden', width: '100%' }}>
+      <SearchApp
+        keyword={keyword}
+        setKeyword={setKeyword}
+        onKeyPress={keyPressHandler}
+      />
+      {/* <Box sx={{ mt: 2, display: 'flex', overflow: 'hidden', width: '100%' }}>
         <FilterSearch />
-      </Box>
+      </Box> */}
 
       {jobIdParam ? (
         <>
@@ -133,6 +154,7 @@ const Dashboard: React.FC = () => {
               flexDirection: 'row',
               gap: 2,
               mt: 5,
+              height: '100%',
               positon: 'relative',
             }}
           >
@@ -141,7 +163,8 @@ const Dashboard: React.FC = () => {
                 <Box
                   sx={{
                     width: '33%',
-                    maxHeight: '100vh',
+                    height: '100vh',
+                    pb: '120px',
                     overflow: 'auto',
                     pr: 2,
                   }}
@@ -149,11 +172,11 @@ const Dashboard: React.FC = () => {
                   {isLoadingJobs ? (
                     <Loader />
                   ) : jobs.length > 0 ? (
-                    jobs.map((job) => (
+                    jobs.map((job, index) => (
                       <JobCard
                         path="jobs"
                         handleDelete={() => 0}
-                        key={job._id}
+                        key={index}
                         job={job}
                       />
                     ))
@@ -163,15 +186,34 @@ const Dashboard: React.FC = () => {
                     </Typography>
                   )}
 
-                  {!noData && totalJobs !== jobs.length && (
+                  {
+                    // paggination
+                    <nav key={totalJobs}>
+                      <ReactPaginate
+                        previousLabel={'< '}
+                        nextLabel={'>'}
+                        breakLabel={'...'}
+                        containerClassName={'pagination-list'}
+                        pageLinkClassName={'pagination-link'}
+                        previousLinkClassName={'pagination-previous'}
+                        nextLinkClassName={'pagination-next'}
+                        activeLinkClassName={'pagination-link is-current'}
+                        disabledLinkClassName={'pagination-link is-disabled'}
+                        pageCount={Math.min(5, pages)}
+                        onPageChange={handleChangePage}
+                      />
+                    </nav>
+                  }
+
+                  {/* {totalJobs > jobs.length && (
                     <Button
-                      sx={{ display: 'block', m: '0 auto', mt: 3 }}
-                      onClick={() => loadJobs(page)}
+                      disabled={isLoadingNewPage}
+                      sx={{ display: 'block', m: '0 auto', mt: 3, mb: 5 }}
+                      onClick={() => setPage((prev) => prev + 1)}
                     >
                       Load More
                     </Button>
-                  )}
-                  {isLoadingJobs && <Loader />}
+                  )} */}
                 </Box>
               </>
             )}
@@ -182,12 +224,14 @@ const Dashboard: React.FC = () => {
                   ? {
                       width: '65%',
                       maxWidth: '65%',
-                      minHeight: '100vh',
+                      height: '100vh',
+                      pb: '120px',
                       overflow: 'auto',
                     }
                   : {
                       width: '100%',
-                      minHeight: '100vh',
+                      height: '100vh',
+                      pb: '120px',
                       overflow: 'auto',
                     }
               }
@@ -205,46 +249,65 @@ const Dashboard: React.FC = () => {
           </Box>
         </>
       ) : (
-        <Box>
-          <>
-            <Box
-              sx={{
-                maxWidth: '600px',
-                margin: '0 auto',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Box sx={{ minWidth: '100%', mt: 3 }}>
-                {isLoadingJobs ? (
-                  <Loader />
-                ) : jobs.length > 0 ? (
-                  jobs.map((job) => (
-                    <JobCard
-                      path="jobs"
-                      handleDelete={() => 0}
-                      key={job._id}
-                      job={job}
-                    />
-                  ))
-                ) : (
-                  <Typography variant="h6" color="textSecondary">
-                    No jobs found
-                  </Typography>
-                )}
-              </Box>
-              {!noData && totalJobs !== jobs.length && (
-                <Button sx={{ mt: 3 }} onClick={() => loadJobs(page)}>
-                  Load More
-                </Button>
+        <>
+          <Box
+            sx={{
+              maxWidth: '600px',
+              margin: '0 auto',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Box sx={{ minWidth: '100%', mt: 3 }}>
+              {isLoadingJobs ? (
+                <Loader />
+              ) : jobs.length > 0 ? (
+                jobs.map((job, index) => (
+                  <JobCard
+                    path="jobs"
+                    handleDelete={() => 0}
+                    key={index}
+                    job={job}
+                  />
+                ))
+              ) : (
+                <Typography variant="h6" color="textSecondary">
+                  No jobs found
+                </Typography>
               )}
-
-              {isLoadingJobs && <Loader />}
             </Box>
-          </>
-        </Box>
+
+            {
+              // paggination
+              <nav key={totalJobs}>
+                <ReactPaginate
+                  previousLabel={'< '}
+                  nextLabel={'>'}
+                  breakLabel={'...'}
+                  containerClassName={'pagination-list'}
+                  pageLinkClassName={'pagination-link'}
+                  previousLinkClassName={'pagination-previous'}
+                  nextLinkClassName={'pagination-next'}
+                  activeLinkClassName={'pagination-link is-current'}
+                  disabledLinkClassName={'pagination-link is-disabled'}
+                  pageCount={Math.min(5, pages)}
+                  onPageChange={handleChangePage}
+                />
+              </nav>
+            }
+            {/* {totalJobs > jobs.length && (
+              <Button
+                disabled={isLoadingNewPage}
+                sx={{ mt: 3, mb: 5 }}
+                onClick={() => setPage((prev) => prev + 1)}
+              >
+                Load More
+              </Button>
+            )} */}
+          </Box>
+        </>
       )}
     </>
   );

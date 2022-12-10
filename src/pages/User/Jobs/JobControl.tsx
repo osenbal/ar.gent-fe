@@ -830,21 +830,21 @@ const JobControl: React.FC = () => {
                             alignItems: 'center',
                           }}
                         >
-                          <Avatar alt="Remy Sharp" src={item?.user[0].avatar} />
+                          <Avatar alt="Remy Sharp" src={item?.user.avatar} />
                           <Typography
                             variant="body1"
                             component={'a'}
                             href={`/user/${item.userId}/profile`}
                             sx={{ textDecoration: 'none', color: 'inherit' }}
                           >
-                            {item?.user[0].username}
+                            {item.user.username}
                           </Typography>
                           <Typography
                             target="_blank"
                             component={'a'}
                             variant="body2"
                             sx={{ color: 'grey.500', cursor: 'pointer' }}
-                            href={item.user[0].cv}
+                            href={item?.user.cv}
                           >
                             Download CV
                           </Typography>

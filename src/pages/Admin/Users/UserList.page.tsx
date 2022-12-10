@@ -241,6 +241,7 @@ const UserList: React.FC = () => {
     );
     if (response.ok) {
       const data = await response.json();
+      console.log(data);
       setUsers(data.data);
       setPage(data.page);
       setLimit(data.limit);

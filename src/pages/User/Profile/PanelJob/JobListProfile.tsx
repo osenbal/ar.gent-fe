@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import JobCard from '../../Jobs/JobCard';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
-import IJob, { IReturnJobDetails } from '@/interfaces/job.interface';
+import { IReturn_JobDetails, IReturn_Jobs } from '@/interfaces/job.interface';
 import { BACKEND_URL } from '@/config/config';
 import { useParams, useSearchParams } from 'react-router-dom';
 import JobDetails from '../../Jobs/JobDetails';
@@ -32,8 +32,8 @@ const JobListProfile: React.FC = () => {
   const jobIdParam = queryParams.get('jobId');
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
 
-  const [jobs, setJobs] = useState<IJob[] | []>([]);
-  const [jobDetails, setJobDetails] = useState<IReturnJobDetails | null>(null);
+  const [jobs, setJobs] = useState<IReturn_Jobs[] | []>([]);
+  const [jobDetails, setJobDetails] = useState<IReturn_JobDetails | null>(null);
   const [isLoadingJobs, setIsLoadingJobs] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 

@@ -3,7 +3,7 @@ import DOMPurify from 'dompurify';
 import { Link } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/redux.hook';
 import { ToastContainer, toast } from 'react-toastify';
-import { IReturnJobDetails } from '@/interfaces/job.interface';
+import { IReturn_JobDetails } from '@/interfaces/job.interface';
 import DialpadIcon from '@mui/icons-material/Dialpad';
 import WorkTwoToneIcon from '@mui/icons-material/WorkTwoTone';
 import ApartmentTwoToneIcon from '@mui/icons-material/ApartmentTwoTone';
@@ -13,7 +13,7 @@ import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 type props = {
-  data: IReturnJobDetails;
+  data: IReturn_JobDetails;
 };
 
 const JobDetails: React.FC<props> = ({ data }) => {
@@ -87,6 +87,7 @@ const JobDetails: React.FC<props> = ({ data }) => {
     });
 
     const resData = await response.json();
+    console.log(resData);
     if (response.ok) {
       setStatusApplied(resData.data);
       setIsLoading(false);
@@ -109,8 +110,8 @@ const JobDetails: React.FC<props> = ({ data }) => {
           {data.title}
         </Typography>
         <Typography variant="body2" fontWeight={'400'}>
-          {data.username} | {data.location.state.name},{' '}
-          {data.location.country.name} - 10 applicants
+          {data.user?.username} | {data.location?.state?.name},{' '}
+          {data.location?.country?.name} - {data.totalAppliciants} applicants
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
@@ -167,9 +168,9 @@ const JobDetails: React.FC<props> = ({ data }) => {
         </Typography>
         <Link to={`/user/${data.userId}/profile`}>
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-            <Avatar src={data.avatarUser} alt="avatar" />
+            <Avatar src={data.user?.avatar} alt="avatar" />
             <Typography variant="body2" fontWeight={'500'} ml={2}>
-              {data.username}
+              {data.user?.username}
             </Typography>
           </Box>
         </Link>

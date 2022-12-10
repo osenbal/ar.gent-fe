@@ -9,12 +9,12 @@ import About from './About/About';
 import Skills from './Skills/Skills';
 import PortfolioUrl from './PortfolioUrl/PortfolioUrl';
 import { BACKEND_URL } from '@/config/config';
-import { Box, Skeleton } from '@mui/material';
+import { Box, Button, Skeleton } from '@mui/material';
 
 const Profile: React.FC = () => {
   const { id } = useParams();
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, userId } = useAppSelector((state) => state.auth);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -35,6 +35,21 @@ const Profile: React.FC = () => {
     } else {
       dispatch(setUser(null));
       setIsLoading(false);
+    }
+  };
+
+  const handleVerifyEmail = async () => {
+    // verify email
+    const response = await fetch(`${BACKEND_URL}/user/send-verify/${userId}`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+    } else {
     }
   };
 
@@ -79,6 +94,19 @@ const Profile: React.FC = () => {
             <p>User Not Found</p>
           ) : (
             <>
+              <div>
+                {user._id === userId &&
+                  (user.verified ? (
+                    ''
+                  ) : (
+                    <Button
+                      sx={{ width: '100%', color: '#FED049' }}
+                      onClick={() => console.log('req send verify email')}
+                    >
+                      Please, Verify Your Email !
+                    </Button>
+                  ))}
+              </div>
               <Summary id={id} />
               <About />
               <Education />

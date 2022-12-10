@@ -44,13 +44,26 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const SearchApp = () => {
+type SearchAppProps = {
+  keyword: string;
+  setKeyword: React.Dispatch<React.SetStateAction<string>>;
+  onKeyPress: (e: React.KeyboardEvent) => void;
+};
+
+const SearchApp: React.FC<SearchAppProps> = ({
+  keyword,
+  setKeyword,
+  onKeyPress,
+}) => {
   return (
     <Search>
       <SearchIconWrapper>
         <SearchIcon />
       </SearchIconWrapper>
       <StyledInputBase
+        value={keyword}
+        onChange={(e) => setKeyword(e.target.value)}
+        onKeyDown={(e) => onKeyPress(e)}
         placeholder="Search…"
         inputProps={{ 'aria-label': 'search' }}
       />

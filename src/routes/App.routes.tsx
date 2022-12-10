@@ -27,6 +27,7 @@ import VerifyEmailPage from '@/pages/User/VerifyEmail/VerifyEmail.page';
 import SuccessResetPassword from '@/pages/User/ForgotPassword/SuccessResetPassword';
 import UserApplication from '@/pages/User/Profile/PanelUserApplication/UserApplication';
 import JobDetailsPage from '@/pages/User/Jobs/JobDetails.page';
+import JobNearlyPage from '@/pages/User/Jobs/JobNearly.page';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -67,6 +68,7 @@ const AppRoutes: React.FC = () => {
           <Route element={<ProtectedRoute />}>
             <Route element={<UserLoggedInLayout />}>
               <Route path="jobs" element={<Dashboard />} />
+              <Route path="nearly/jobs" element={<JobNearlyPage />} />
               <Route element={<ProfileLayout />}>
                 <Route path="user/:id/profile" element={<Profile />} />
                 <Route path="user/:id/job" element={<JobListProfile />} />

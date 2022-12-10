@@ -6,6 +6,7 @@ import MaterialUISwitch from '../../Reusable/Switch';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import HomeIcon from '@mui/icons-material/Home';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 import HelpCenterIcon from '@mui/icons-material/HelpCenter';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import IUser from '@/interfaces/user.interface';
@@ -33,6 +34,11 @@ const MENU_OPTIONS = (userId: string) => [
     label: 'Home',
     path: '/jobs',
     icon: <HomeIcon />,
+  },
+  {
+    label: 'Nearest Jobs',
+    path: '/nearly/jobs',
+    icon: <MyLocationIcon />,
   },
   {
     label: 'My Profile',

@@ -200,7 +200,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     const cityCode = City.getCitiesOfState(
       countryCode?.isoCode || '',
       stateCode?.isoCode || ''
-    ).filter((city) => city?.name === user?.address.city.name)[0];
+    ).filter((city) => city?.name === user?.address?.city?.name)[0];
 
     setCountry(countryCode?.isoCode || '');
     setState(stateCode?.isoCode || '');
