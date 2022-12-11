@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
+import { EJobLevel, EJobType, EJobWorkPlace } from '@/interfaces/job.interface';
 import { FormControl, Box, MenuItem, InputLabel, styled } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 
 const FilterSearch = () => {
   const [jobType, setJobType] = useState<string>('');
-  const [category, setCategory] = useState<string>('');
-  const [level, setLevel] = useState<string>('');
+  const [jobLevel, setJobLevel] = useState<string>('');
   const [workplace, setWorkplace] = useState<string>('');
 
-  const handleChangeJobType = (event: SelectChangeEvent) => {
-    setJobType(event.target.value);
-  };
+  const optionTypes = Object.values(EJobType).map((value: string) => value);
+  const optionLevels = Object.values(EJobLevel).map((value: string) => value);
+  const optionWorkPlace = Object.values(EJobWorkPlace).map(
+    (value: string) => value
+  );
 
   const ContainerFilterSearch = styled(Box)<{ uptab?: string }>(
     ({ theme, uptab }) => ({
@@ -24,83 +26,75 @@ const FilterSearch = () => {
   return (
     <>
       <ContainerFilterSearch sx={{ width: '100%' }}>
-        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+        {/* Job Type */}
+        <FormControl sx={{ minWidth: 120 }} size="small">
           <InputLabel id="filterJobType">Job Type</InputLabel>
           <Select
             labelId="filterJobType"
             id="filterJobType"
-            value={jobType}
             label="Job Type"
-            onChange={handleChangeJobType}
+            value={jobType}
+            onChange={(e) => {
+              let val: EJobType = e.target.value as EJobType;
+              setJobType(val);
+            }}
           >
             <MenuItem value="">
               <em>None</em>
             </MenuItem>
-            <MenuItem value={1}>Full Time</MenuItem>
-            <MenuItem value={2}>Part Time</MenuItem>
-            <MenuItem value={3}>Internship</MenuItem>
-            <MenuItem value={3}>Internship</MenuItem>
-            <MenuItem value={30}>Contract</MenuItem>
+            {optionTypes.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
-        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-          <InputLabel id="filterCategory">Category</InputLabel>
-          <Select
-            labelId="filterCategory"
-            id="filterCategory"
-            value={category}
-            label="Category"
-            onChange={(event: SelectChangeEvent) =>
-              setCategory(event.target.value)
-            }
-          >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            <MenuItem value={1}>Developer</MenuItem>
-            <MenuItem value={2}>Task</MenuItem>
-            <MenuItem value={2}>Front End</MenuItem>
-            <MenuItem value={2}>Back End</MenuItem>
-            <MenuItem value={2}>Full Stack</MenuItem>
-          </Select>
-        </FormControl>
-        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+
+        {/* Job Level */}
+        <FormControl sx={{ minWidth: 120 }} size="small">
           <InputLabel id="filterLevel">Level</InputLabel>
           <Select
             labelId="filterLevel"
             id="filterLevel"
-            value={level}
+            value={jobLevel}
             label="Level"
-            onChange={(event: SelectChangeEvent) =>
-              setLevel(event.target.value)
-            }
+            onChange={(event: SelectChangeEvent) => {
+              let val: EJobLevel = event.target.value as EJobLevel;
+              setJobLevel(val);
+            }}
           >
             <MenuItem value="">
               <em>None</em>
             </MenuItem>
-            <MenuItem value={1}>Beginer</MenuItem>
-            <MenuItem value={2}>Mid Senior</MenuItem>
-            <MenuItem value={2}>Senior</MenuItem>
+            {optionLevels.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 
-        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+        {/* Workplace Job */}
+        <FormControl sx={{ minWidth: 120 }} size="small">
           <InputLabel id="filterWorkPlace">Workplace</InputLabel>
           <Select
             labelId="filterWorkPlace"
             id="filterWorkPlace"
             value={workplace}
             label="Workplace"
-            onChange={(event: SelectChangeEvent) =>
-              setWorkplace(event.target.value)
-            }
+            onChange={(event: SelectChangeEvent) => {
+              let val: EJobWorkPlace = event.target.value as EJobWorkPlace;
+              setWorkplace(val);
+            }}
           >
             <MenuItem value="">
               <em>None</em>
             </MenuItem>
-            <MenuItem value={1}>Remote</MenuItem>
-            <MenuItem value={2}>Onsite</MenuItem>
-            <MenuItem value={3}>Hybrith</MenuItem>
+            {optionWorkPlace.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </ContainerFilterSearch>

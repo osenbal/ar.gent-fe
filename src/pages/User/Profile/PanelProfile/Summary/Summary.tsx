@@ -6,7 +6,7 @@ import {
   asyncUserCv,
   asyncUserBanner,
 } from '@/store/authSlice';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { City, Country, State } from 'country-state-city';
 import { MuiTelInput } from 'mui-tel-input';
 import dayjs, { Dayjs } from 'dayjs';
@@ -242,7 +242,6 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
 
   return (
     <>
-      <ToastContainer />
       <Box sx={{ position: 'relative', width: '100%' }}>
         {banner ? (
           <Banner src={banner} alt="banner" />

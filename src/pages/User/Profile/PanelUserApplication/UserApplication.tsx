@@ -3,11 +3,18 @@ import { NavLink, useParams } from 'react-router-dom';
 import { BACKEND_URL } from '@/config/config';
 import { DateToDMY } from '@/utils/utils';
 import CheckIcon from '@mui/icons-material/Check';
-import { Card, CardContent, Typography, styled, Grid } from '@mui/material';
+import {
+  Card,
+  CardContent,
+  Typography,
+  styled,
+  Grid,
+  Box,
+} from '@mui/material';
 
 const StyledContainer = styled(Grid)(({ theme }) => ({
   justifyContent: 'start',
-  marginTop: '1rem',
+  marginTop: 5,
 }));
 
 const StyledLink = styled(NavLink)(({ theme }) => ({
@@ -106,7 +113,9 @@ const UserApplication: React.FC = () => {
           ))}
         </StyledContainer>
       ) : (
-        <p>Not Found</p>
+        <Box sx={{ mt: 5 }}>
+          <p>Not Found</p>
+        </Box>
       )}
     </>
   );

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SyncLoader } from 'react-spinners';
 import { ToastContainer } from 'react-toastify';
+import ReactPaginate from 'react-paginate';
 import JobCard from '@/pages/User/Jobs/JobCard';
 import JobDetails from '@/pages/User/Jobs/JobDetails';
 import SearchApp from '@/components/Reusable/SearchApp';
 import { BACKEND_URL } from '@/config/config';
 import { IReturn_JobDetails, IReturn_Jobs } from '@/interfaces/job.interface';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
-import ReactPaginate from 'react-paginate';
 
 const Loader: React.FC = () => {
   return (
@@ -27,12 +27,13 @@ const Loader: React.FC = () => {
 };
 
 const Dashboard: React.FC = () => {
-  const [queryParams, setQueryParams] = useSearchParams();
   const theme = useTheme();
+  const navigate = useNavigate();
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
+  const [queryParams, setQueryParams] = useSearchParams();
+  const jobIdParam = queryParams.get('jobId');
 
   const [keyword, setKeyword] = useState<string>('');
-  const [search, setSearch] = useState<string>('');
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -43,13 +44,12 @@ const Dashboard: React.FC = () => {
   const [isLoadingJobs, setIsLoadingJobs] = useState<boolean>(true);
   const [totalJobs, setTotalJobs] = useState<number>(0);
 
-  const jobIdParam = queryParams.get('jobId');
-
   const keyPressHandler = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      setPage(0);
-      setSearch(keyword);
+      navigate(`/jobs/search?keyword=${keyword}`, {
+        replace: true,
+      });
     }
   };
 
@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
 
   const loadJobs = () => {
     setIsLoadingJobs(true);
-    fetch(`${BACKEND_URL}/job?page=${page}&limit=${limit}&search=${search}`, {
+    fetch(`${BACKEND_URL}/job?page=${page}&limit=${limit}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -69,13 +69,11 @@ const Dashboard: React.FC = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.code === 200) {
-          console.log(data);
           setTotalJobs(data.totalRows);
           setPage(data.page);
           setLimit(data.limit);
           setPages(data.totalPage);
           setJobs(data.data);
-          console.log(data.data[0]._id);
           if (jobIdParam) {
             setQueryParams({ jobId: `${data.data[0]._id}` });
           }
@@ -92,7 +90,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     loadJobs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, search]);
+  }, [page]);
 
   useEffect(() => {
     if (jobIdParam) {

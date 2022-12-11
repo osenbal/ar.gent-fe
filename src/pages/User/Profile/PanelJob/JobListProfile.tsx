@@ -187,7 +187,7 @@ const JobListProfile: React.FC = () => {
           </Box>
         </>
       ) : (
-        <Box>
+        <Box sx={{ mt: 5 }}>
           {isLoadingJobs ? (
             <Loader />
           ) : jobs.length > 0 && !isLoadingJobs ? (

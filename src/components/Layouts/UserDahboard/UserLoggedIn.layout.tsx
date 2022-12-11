@@ -10,7 +10,7 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useMediaQuery, Typography, Toolbar, IconButton } from '@mui/material';
 
-const APP_BAR_DESKTOP = 0;
+const APP_BAR_DESKTOP = 10;
 const APP_BAR_MOBILE = 64;
 
 interface AppBarProps extends MuiAppBarProps {

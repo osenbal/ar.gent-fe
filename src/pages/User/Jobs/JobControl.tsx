@@ -34,6 +34,8 @@ import {
   Dialog,
   DialogContent,
   DialogActions,
+  DialogTitle,
+  TextareaAutosize,
 } from '@mui/material';
 import {
   City,
@@ -72,24 +74,63 @@ const DialogApproveAppliciant = ({
   open,
   handleApprove,
   handleClose,
+  message,
+  setMessage,
+  isLoading,
 }: {
   open: boolean;
   handleApprove: any;
   handleClose: any;
+  message: string;
+  setMessage: any;
+  isLoading: boolean;
 }) => {
   return (
     <Dialog
       open={open}
       onClose={handleClose}
-      aria-labelledby="dialog-content-approve-appliciant"
-      aria-describedby="dialog-content-approve-appliciant"
+      aria-labelledby="dialog-title-approve-appliciant"
+      aria-describedby="dialog-title-approve-appliciant"
     >
-      <DialogContent id="dialog-content-approve-appliciant">
+      <DialogTitle id="dialog-title-approve-appliciant">
         Are You Sure Approve This User for this Job ?
+      </DialogTitle>
+      <DialogContent>
+        <Typography>Message for this appliciants</Typography>
+
+        <TextareaAutosize
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          aria-label="message for this appliciants"
+          minRows={3}
+          placeholder="location interview / link zoom interview or etc..."
+          style={{
+            width: '100%',
+            padding: 3,
+            borderRadius: '8px',
+            marginTop: 2,
+          }}
+        />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleApprove}>Yes</Button>
-        <Button onClick={handleClose}>No</Button>
+        {isLoading ? (
+          <LoadingButton
+            size="small"
+            loading={isLoading}
+            variant="outlined"
+            disabled
+          >
+            Loading
+          </LoadingButton>
+        ) : (
+          <Button disabled={isLoading} onClick={handleApprove}>
+            Yes
+          </Button>
+        )}
+
+        <Button disabled={isLoading} onClick={handleClose}>
+          No
+        </Button>
       </DialogActions>
     </Dialog>
   );
@@ -99,10 +140,16 @@ const DialogRejectAppliciant = ({
   open,
   handleReject,
   handleClose,
+  message,
+  setMessage,
+  isLoading,
 }: {
   open: boolean;
   handleReject: any;
   handleClose: any;
+  message: string;
+  setMessage: any;
+  isLoading: boolean;
 }) => {
   return (
     <Dialog
@@ -111,12 +158,44 @@ const DialogRejectAppliciant = ({
       aria-labelledby="dialog-content-reject-appliciant"
       aria-describedby="dialog-content-reject-appliciant"
     >
-      <DialogContent id="dialog-content-reject-appliciant">
+      <DialogTitle id="dialog-content-reject-appliciant">
         Are You Sure Reject This User for this Job ?
+      </DialogTitle>
+      <DialogContent>
+        <Typography>Message for this appliciants (optional)</Typography>
+
+        <TextareaAutosize
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          aria-label="message for this appliciants"
+          minRows={3}
+          placeholder="optional message for this appliciants"
+          style={{
+            width: '100%',
+            padding: 3,
+            borderRadius: '8px',
+            marginTop: 2,
+          }}
+        />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleReject}>Yes</Button>
-        <Button onClick={handleClose}>No</Button>
+        {isLoading ? (
+          <LoadingButton
+            size="small"
+            loading={isLoading}
+            variant="outlined"
+            disabled
+          >
+            Loading
+          </LoadingButton>
+        ) : (
+          <Button disabled={isLoading} onClick={handleReject}>
+            Yes
+          </Button>
+        )}
+        <Button disabled={isLoading} onClick={handleClose}>
+          No
+        </Button>
       </DialogActions>
     </Dialog>
   );
@@ -184,6 +263,11 @@ const JobControl: React.FC = () => {
   const [selectedUserReject, setSelectedUserReject] = useState<string | null>(
     null
   );
+
+  const [message, setMessage] = useState<string>('');
+  const [isLoadingApprove, setIsLoadingApprove] = useState<boolean>(false);
+  const [messageReject, setMessageReject] = useState<string>('');
+  const [isLoadingReject, setIsLoadingReject] = useState<boolean>(false);
 
   const optionTypes = Object.values(EJobType).map((value: string) => value);
   const optionLevels = Object.values(EJobLevel).map((value: string) => value);
@@ -300,6 +384,7 @@ const JobControl: React.FC = () => {
   };
 
   const approveAppliciant = async (appliciantId: string) => {
+    setIsLoadingApprove(true);
     const response = await fetch(
       `${BACKEND_URL}/job/approve/${userId}/${appliciantId}/${jobId}`,
       {
@@ -308,6 +393,7 @@ const JobControl: React.FC = () => {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
+        body: JSON.stringify({ message }),
       }
     );
 
@@ -319,6 +405,7 @@ const JobControl: React.FC = () => {
         hideProgressBar: false,
         closeOnClick: true,
       });
+      setIsLoadingApprove(false);
       getAppliciants();
     } else {
       toast.error(data.message, {
@@ -327,12 +414,15 @@ const JobControl: React.FC = () => {
         hideProgressBar: false,
         closeOnClick: true,
       });
+      setIsLoadingApprove(false);
     }
     setOpenModal(false);
+    setMessage('');
     setSelectedUser(null);
   };
 
   const rejectAppliciant = async (appliciantId: string) => {
+    setIsLoadingReject(true);
     const response = await fetch(
       `${BACKEND_URL}/job/reject/${userId}/${appliciantId}/${jobId}`,
       {
@@ -353,6 +443,7 @@ const JobControl: React.FC = () => {
         hideProgressBar: false,
         closeOnClick: true,
       });
+      setIsLoadingReject(false);
       getAppliciants();
     } else {
       toast.error(data.message, {
@@ -361,9 +452,11 @@ const JobControl: React.FC = () => {
         hideProgressBar: false,
         closeOnClick: true,
       });
+      setIsLoadingReject(false);
     }
 
     setOpenModalReject(false);
+    setMessageReject('');
     setSelectedUserReject(null);
   };
 
@@ -479,7 +572,7 @@ const JobControl: React.FC = () => {
           <SyncLoader color="#3f51b5" loading={isLoading} size={15} />
         </Box>
       ) : userId === job?.userId ? (
-        <Box>
+        <Box sx={{ mb: 5 }}>
           <Card>
             <CardContent>
               <Typography variant="h5">Job Edit</Typography>
@@ -898,6 +991,9 @@ const JobControl: React.FC = () => {
 
       <DialogApproveAppliciant
         open={openModal}
+        message={message}
+        setMessage={setMessage}
+        isLoading={isLoadingApprove}
         handleClose={() => {
           setOpenModal(false);
           setSelectedUser(null);
@@ -907,6 +1003,9 @@ const JobControl: React.FC = () => {
 
       <DialogRejectAppliciant
         open={openModalReject}
+        message={messageReject}
+        setMessage={setMessageReject}
+        isLoading={isLoadingReject}
         handleClose={() => {
           setOpenModalReject(false);
           setSelectedUserReject(null);

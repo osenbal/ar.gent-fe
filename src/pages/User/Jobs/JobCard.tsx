@@ -7,7 +7,7 @@ import { DateToDMY } from '@/utils/utils';
 import { IReturn_Jobs } from '@/interfaces/job.interface';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { Typography, Card, CardContent, IconButton } from '@mui/material';
+import { Typography, Card, CardContent, IconButton, Box } from '@mui/material';
 
 type props = {
   job: IReturn_Jobs;
@@ -17,8 +17,12 @@ type props = {
 
 const JobCard: React.FC<props> = ({ job, handleDelete, path }) => {
   const { userId } = useAppSelector((state) => state.auth);
-  const [queryParams] = useSearchParams();
+  const [queryParams, setQueryParams] = useSearchParams();
   const jobIdParam = queryParams.get('jobId');
+  const keywordParams = queryParams.get('keyword');
+  const workplaceParam = queryParams.get('workplace');
+  const levelParam = queryParams.get('level');
+  const typeParam = queryParams.get('type');
 
   return (
     <>
@@ -44,13 +48,26 @@ const JobCard: React.FC<props> = ({ job, handleDelete, path }) => {
           }`,
         }}
       >
-        <Link
+        <Box
           style={{
             textDecoration: 'none',
             cursor: 'pointer',
             color: 'inherit',
           }}
-          to={path === 'profile' ? `?jobId=${job?._id}` : `?jobId=${job?._id}`}
+          onClick={() => {
+            path === 'jobSearch'
+              ? keywordParams
+                ? setQueryParams({
+                    jobId: job._id,
+                    level: levelParam || '',
+                    type: typeParam || '',
+                    workplace: workplaceParam || '',
+                    keyword: keywordParams,
+                  })
+                : setQueryParams({ jobId: job._id })
+              : setQueryParams({ jobId: job._id });
+          }}
+          // to={path === 'profile' ? `?jobId=${job?._id}` : `?jobId=${job?._id}`}
           id="jobDetailLink"
         >
           <CardContent>
@@ -108,7 +125,7 @@ const JobCard: React.FC<props> = ({ job, handleDelete, path }) => {
               <>posted : {DateToDMY(job.createdAt)}</>
             </Typography>
           </CardContent>
-        </Link>
+        </Box>
 
         {userId === job.user._id && path === 'profile' && (
           <>

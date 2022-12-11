@@ -175,6 +175,7 @@ const JobCreate: React.FC = () => {
   useEffect(() => {
     const htmlDescription = stateToHTML(editorState.getCurrentContent());
     setJobData({ ...jobData, description: htmlDescription });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorState]);
 
   return (
@@ -393,6 +394,7 @@ const JobCreate: React.FC = () => {
               onChange={(e) => {
                 setJobData((prev) => ({
                   ...prev,
+                  // eslint-disable-next-line no-useless-escape
                   salary: Number(e.target.value.replace(/[A-Za-z\.\s]/g, '')),
                 }));
               }}

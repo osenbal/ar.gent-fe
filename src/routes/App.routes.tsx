@@ -28,6 +28,7 @@ import SuccessResetPassword from '@/pages/User/ForgotPassword/SuccessResetPasswo
 import UserApplication from '@/pages/User/Profile/PanelUserApplication/UserApplication';
 import JobDetailsPage from '@/pages/User/Jobs/JobDetails.page';
 import JobNearlyPage from '@/pages/User/Jobs/JobNearly.page';
+import JobSearchPage from '@/pages/User/Jobs/JobSearch.page';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -68,6 +69,7 @@ const AppRoutes: React.FC = () => {
           <Route element={<ProtectedRoute />}>
             <Route element={<UserLoggedInLayout />}>
               <Route path="jobs" element={<Dashboard />} />
+              <Route path="jobs/search" element={<JobSearchPage />} />
               <Route path="nearly/jobs" element={<JobNearlyPage />} />
               <Route element={<ProfileLayout />}>
                 <Route path="user/:id/profile" element={<Profile />} />
