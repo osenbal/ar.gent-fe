@@ -1,5 +1,5 @@
+import React, { useState, useEffect, useRef } from 'react';
 import { BACKEND_URL } from '@/config/config';
-import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import { SyncLoader } from 'react-spinners';
@@ -59,13 +59,15 @@ const Transition = React.forwardRef(function Transition(
 
 const JobNearlyPage: React.FC = () => {
   const theme = useTheme();
-  const [queryParams, setQueryParams] = useSearchParams();
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
+  const [queryParams, setQueryParams] = useSearchParams();
+  let updatedSearchParams = new URLSearchParams(queryParams.toString());
 
   const jobIdParam = queryParams.get('jobId');
   const levelParam = queryParams.get('level');
   const typeParam = queryParams.get('type');
   const workplaceParam = queryParams.get('workplace');
+  const startParam = queryParams.get('start');
 
   const optionTypes = Object.values(EJobType).map((value: string) => value);
   const optionLevels = Object.values(EJobLevel).map((value: string) => value);
@@ -73,9 +75,13 @@ const JobNearlyPage: React.FC = () => {
     (value: string) => value
   );
 
+  const jobsRef = useRef<HTMLDivElement>(null);
+
   const [user, setUser] = useState<IUser | null>(null);
   const [keyword, setKeyword] = useState<string>('');
-  const [page, setPage] = useState<number>(0);
+  const [page, setPage] = useState<number>(
+    startParam ? parseInt(startParam) : 0
+  );
   const [limit, setLimit] = useState<number>(10);
   const [pages, setPages] = useState<number>(0);
   const [jobs, setJobs] = useState<IReturn_Jobs[] | []>([]);
@@ -101,13 +107,21 @@ const JobNearlyPage: React.FC = () => {
   };
 
   const handleChangePage = ({ selected }: { selected: any }) => {
+    if (selected !== 0) {
+      updatedSearchParams.set('start', `${selected}`);
+      setQueryParams(updatedSearchParams.toString());
+    } else {
+      updatedSearchParams.delete('start');
+      setQueryParams(updatedSearchParams.toString());
+    }
     setPage(selected);
   };
 
   const keyPressHandler = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      setQueryParams({ keyword: keyword });
+      updatedSearchParams.set('keyword', `${keyword}`);
+      setQueryParams(updatedSearchParams.toString());
       if (page !== 0) {
         setPage(0);
       } else {
@@ -116,7 +130,9 @@ const JobNearlyPage: React.FC = () => {
     }
   };
 
-  const getJobsNearly = () => {
+  const getJobsNearly = async () => {
+    await window.scrollTo(0, 0);
+    await jobsRef.current?.scrollTo(0, 0);
     setIsLoadingJobs(true);
     if (optionWorkPlace.includes(workplace) === false) {
       setWorkplace('');
@@ -129,6 +145,7 @@ const JobNearlyPage: React.FC = () => {
     if (optionTypes.includes(jobType) === false) {
       setJobType('');
     }
+
     fetch(
       `${BACKEND_URL}/job/nearly?page=${page}&limit=${limit}&search=${keyword}&workplace=${workplace}&level=${jobLevel}&type=${jobType}`,
       {
@@ -146,13 +163,26 @@ const JobNearlyPage: React.FC = () => {
         setLimit(data.limit);
         setPages(data.totalPage);
         setJobs(data.data);
-        setQueryParams({
-          jobId: data?.data[0]?._id,
-          level: jobLevel,
-          type: jobType,
-          workplace: workplace,
-          keyword: keyword,
-        });
+        if (data.data.length > 0) {
+          if (jobIdParam) {
+            const jobExist = Boolean(
+              data.data.find((job: any) => job._id === jobIdParam)
+            );
+            if (!jobExist) {
+              console.log('job not exist');
+              updatedSearchParams.set('jobId', data?.data[0]?._id);
+              setQueryParams(updatedSearchParams.toString());
+            }
+          } else {
+            updatedSearchParams.set('jobId', `${data.data[0]._id}`);
+            setQueryParams(updatedSearchParams.toString());
+          }
+        } else {
+          updatedSearchParams.delete('jobId');
+          setQueryParams(updatedSearchParams.toString());
+          setIsLoadingDetailJob(false);
+          setJobDetails(null);
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -199,8 +229,12 @@ const JobNearlyPage: React.FC = () => {
   useEffect(() => {
     if (jobIdParam) {
       setIsLoadingDetailJob(true);
-      console.log('load detail');
-      if (jobIdParam === 'null' || jobIdParam === 'undefined' || !jobIdParam) {
+      if (
+        jobIdParam === 'null' ||
+        jobIdParam === 'undefined' ||
+        !jobIdParam ||
+        jobIdParam === ''
+      ) {
         setJobDetails(null);
         setIsLoading(false);
         setIsLoadingDetailJob(false);
@@ -389,6 +423,7 @@ const JobNearlyPage: React.FC = () => {
           }}
         >
           <Box
+            ref={jobsRef}
             sx={{
               width: '33%',
               height: '100vh',
@@ -460,7 +495,7 @@ const JobNearlyPage: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Box>
+          <Box ref={jobsRef}>
             {isLoadingJobs ? (
               <Loader />
             ) : (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SyncLoader } from 'react-spinners';
 import ReactPaginate from 'react-paginate';
@@ -7,7 +7,7 @@ import JobCard from '@/pages/User/Jobs/JobCard';
 import JobDetails from '@/pages/User/Jobs/JobDetails';
 import SearchApp from '@/components/Reusable/SearchApp';
 import { BACKEND_URL } from '@/config/config';
-import {
+import IJob, {
   IReturn_JobDetails,
   IReturn_Jobs,
   EJobWorkPlace,
@@ -60,12 +60,14 @@ const JobSearchPage: React.FC = () => {
   const theme = useTheme();
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
   const [queryParams, setQueryParams] = useSearchParams();
+  let updatedSearchParams = new URLSearchParams(queryParams.toString());
 
   const jobIdParam = queryParams.get('jobId');
   const searchParam = queryParams.get('keyword');
   const levelParam = queryParams.get('level');
   const typeParam = queryParams.get('type');
   const workplaceParam = queryParams.get('workplace');
+  const startParam = queryParams.get('start');
 
   const optionTypes = Object.values(EJobType).map((value: string) => value);
   const optionLevels = Object.values(EJobLevel).map((value: string) => value);
@@ -73,8 +75,12 @@ const JobSearchPage: React.FC = () => {
     (value: string) => value
   );
 
+  const jobsRef = useRef<HTMLDivElement>(null);
+
   const [keyword, setKeyword] = useState<string>(searchParam || '');
-  const [page, setPage] = useState<number>(0);
+  const [page, setPage] = useState<number>(
+    startParam ? parseInt(startParam) : 0
+  );
   const [limit, setLimit] = useState<number>(10);
   const [pages, setPages] = useState<number>(0);
   const [totalJobs, setTotalJobs] = useState<number>(0);
@@ -101,12 +107,21 @@ const JobSearchPage: React.FC = () => {
   };
 
   const handleChangePage = ({ selected }: { selected: any }) => {
+    if (selected !== 0) {
+      updatedSearchParams.set('start', `${selected}`);
+      setQueryParams(updatedSearchParams.toString());
+    } else {
+      updatedSearchParams.delete('start');
+      setQueryParams(updatedSearchParams.toString());
+    }
     setPage(selected);
   };
 
   const keyPressHandler = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      setQueryParams({ keyword: keyword });
+      e.preventDefault();
+      updatedSearchParams.set('keyword', `${keyword}`);
+      setQueryParams(updatedSearchParams.toString());
       if (page !== 0) {
         setPage(0);
       } else {
@@ -117,6 +132,8 @@ const JobSearchPage: React.FC = () => {
   };
 
   const loadJobs = async (controller: any) => {
+    await window.scrollTo(0, 0);
+    await jobsRef.current?.scrollTo(0, 0);
     setIsLoadingJobs(true);
     if (optionWorkPlace.includes(workplace) === false) {
       setWorkplace('');
@@ -131,7 +148,7 @@ const JobSearchPage: React.FC = () => {
     }
 
     fetch(
-      `${BACKEND_URL}/job?page=${page}&limit=${limit}&search=${keyword}&workplace=${workplace}&level=${jobLevel}&type=${jobType}`,
+      `${BACKEND_URL}/job?page=${page}&limit=${limit}&search=${keyword}&workplace=${workplace}&level=${jobLevel}&type=${jobType}&startIndex=${startParam}`,
       {
         method: 'GET',
         credentials: 'include',
@@ -149,17 +166,31 @@ const JobSearchPage: React.FC = () => {
           setLimit(data.limit);
           setPages(data.totalPage);
           setJobs(data.data);
-          setQueryParams({
-            jobId: data?.data[0]?._id,
-            level: jobLevel,
-            type: jobType,
-            workplace: workplace,
-            keyword: keyword,
-          });
+          if (data.data.length > 0) {
+            if (jobIdParam) {
+              const jobExist = Boolean(
+                data.data.find((job: any) => job._id === jobIdParam)
+              );
+              if (!jobExist) {
+                console.log('job not exist');
+                updatedSearchParams.set('jobId', data?.data[0]?._id);
+                setQueryParams(updatedSearchParams.toString());
+              }
+            } else {
+              updatedSearchParams.set('jobId', `${data.data[0]._id}`);
+              setQueryParams(updatedSearchParams.toString());
+            }
+          } else {
+            updatedSearchParams.delete('jobId');
+            setQueryParams(updatedSearchParams.toString());
+            setIsLoadingDetailJob(false);
+            setJobDetails(null);
+          }
         }
       })
       .catch((error) => {
         console.log(error);
+        setIsLoadingDetailJob(false);
       })
       .finally(() => {
         setIsLoading(false);
@@ -170,25 +201,24 @@ const JobSearchPage: React.FC = () => {
   useEffect(() => {
     const controller = new AbortController();
     loadJobs(controller);
-    return () => {
-      controller.abort();
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   useEffect(() => {
     const controller = new AbortController();
     loadJobs(controller);
-    return () => {
-      controller.abort();
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workplace, jobLevel, jobType]);
 
   useEffect(() => {
     if (jobIdParam) {
       setIsLoadingDetailJob(true);
-      if (jobIdParam === 'null' || jobIdParam === 'undefined') {
+      if (
+        jobIdParam === 'null' ||
+        jobIdParam === 'undefined' ||
+        !jobIdParam ||
+        jobIdParam === ''
+      ) {
         setJobDetails(null);
         setIsLoading(false);
         setIsLoadingDetailJob(false);
@@ -209,6 +239,7 @@ const JobSearchPage: React.FC = () => {
           })
           .catch((error) => {
             console.log('abort');
+            setIsLoadingDetailJob(false);
           })
           .finally(() => {
             setIsLoading(false);
@@ -354,6 +385,7 @@ const JobSearchPage: React.FC = () => {
           }}
         >
           <Box
+            ref={jobsRef}
             sx={{
               width: '33%',
               height: '100vh',
@@ -383,6 +415,7 @@ const JobSearchPage: React.FC = () => {
               // paggination
               <nav key={totalJobs}>
                 <ReactPaginate
+                  forcePage={page}
                   previousLabel={'< '}
                   nextLabel={'>'}
                   breakLabel={'...'}
@@ -429,7 +462,7 @@ const JobSearchPage: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Box>
+          <Box ref={jobsRef}>
             {isLoadingJobs ? (
               <Loader />
             ) : (

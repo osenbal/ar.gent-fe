@@ -18,11 +18,14 @@ type props = {
 const JobCard: React.FC<props> = ({ job, handleDelete, path }) => {
   const { userId } = useAppSelector((state) => state.auth);
   const [queryParams, setQueryParams] = useSearchParams();
+  let updatedSearchParams = new URLSearchParams(queryParams.toString());
+
   const jobIdParam = queryParams.get('jobId');
-  const keywordParams = queryParams.get('keyword');
-  const workplaceParam = queryParams.get('workplace');
-  const levelParam = queryParams.get('level');
-  const typeParam = queryParams.get('type');
+  // const keywordParams = queryParams.get('keyword');
+  // const workplaceParam = queryParams.get('workplace');
+  // const levelParam = queryParams.get('level');
+  // const typeParam = queryParams.get('type');
+  // const startParam = queryParams.get('start');
 
   return (
     <>
@@ -55,20 +58,9 @@ const JobCard: React.FC<props> = ({ job, handleDelete, path }) => {
             color: 'inherit',
           }}
           onClick={() => {
-            path === 'jobSearch'
-              ? keywordParams
-                ? setQueryParams({
-                    jobId: job._id,
-                    level: levelParam || '',
-                    type: typeParam || '',
-                    workplace: workplaceParam || '',
-                    keyword: keywordParams,
-                  })
-                : setQueryParams({ jobId: job._id })
-              : setQueryParams({ jobId: job._id });
+            updatedSearchParams.set('jobId', job._id);
+            setQueryParams(updatedSearchParams.toString());
           }}
-          // to={path === 'profile' ? `?jobId=${job?._id}` : `?jobId=${job?._id}`}
-          id="jobDetailLink"
         >
           <CardContent>
             <Typography
