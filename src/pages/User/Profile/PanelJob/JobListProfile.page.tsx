@@ -1,28 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import JobCard from '../../Jobs/JobCard';
-import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import JobCard from '../../Jobs/components/JobCard';
+import JobDetails from '../../Jobs/components/JobDetails';
+import Loader from '@/components/Reusable/Loader';
 import { IReturn_JobDetails, IReturn_Jobs } from '@/interfaces/job.interface';
 import { BACKEND_URL } from '@/config/config';
-import { useParams, useSearchParams } from 'react-router-dom';
-import JobDetails from '../../Jobs/JobDetails';
-import { ToastContainer, toast } from 'react-toastify';
-import { SyncLoader } from 'react-spinners';
-import { useNavigate } from 'react-router-dom';
-
-const Loader = () => {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-      }}
-    >
-      <SyncLoader color="#3f51b5" />
-    </Box>
-  );
-};
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 
 const JobListProfile: React.FC = () => {
   const theme = useTheme();

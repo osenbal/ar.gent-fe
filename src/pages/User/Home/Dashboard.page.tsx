@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { SyncLoader } from 'react-spinners';
 import { ToastContainer } from 'react-toastify';
 import ReactPaginate from 'react-paginate';
-import JobCard from '@/pages/User/Jobs/JobCard';
-import JobDetails from '@/pages/User/Jobs/JobDetails';
+import JobCard from '@/pages/User/Jobs/components/JobCard';
+import JobDetails from '@/pages/User/Jobs/components/JobDetails';
+import Loader from '@/components/Reusable/Loader';
 import SearchApp from '@/components/Reusable/SearchApp';
 import { BACKEND_URL } from '@/config/config';
 import { IReturn_JobDetails, IReturn_Jobs } from '@/interfaces/job.interface';
@@ -22,21 +22,6 @@ import {
   IconButton,
   Slide,
 } from '@mui/material';
-
-const Loader: React.FC = () => {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-      }}
-    >
-      <SyncLoader color="#3f51b5" />
-    </Box>
-  );
-};
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -59,6 +44,7 @@ const Dashboard: React.FC = () => {
 
   const jobsRef = useRef<HTMLDivElement>(null);
 
+  // ------------------ States ------------------
   const [keyword, setKeyword] = useState<string>('');
   const [page, setPage] = useState<number>(
     startParam ? parseInt(startParam) : 0
@@ -75,6 +61,7 @@ const Dashboard: React.FC = () => {
 
   const [open, setOpen] = useState(false);
 
+  // ------------------ Functions ------------------
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -155,6 +142,7 @@ const Dashboard: React.FC = () => {
       });
   };
 
+  // ------------------ useEffects ------------------
   useEffect(() => {
     const controller = new AbortController();
     loadJobs(controller);
@@ -198,11 +186,6 @@ const Dashboard: React.FC = () => {
       }, 1000);
     }
   }, [jobIdParam]);
-
-  // useEffect(() => {
-  //   setJobDetails(null);
-  //   setIsLoading(true);
-  // }, [jobIdParam]);
 
   return (
     <>

@@ -3,7 +3,7 @@ import { IReturn_JobDetails } from '@/interfaces/job.interface';
 import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import JobDetails from './JobDetails';
+import JobDetails from './components/JobDetails';
 
 const JobDetailsPage: React.FC = () => {
   const params = useParams();

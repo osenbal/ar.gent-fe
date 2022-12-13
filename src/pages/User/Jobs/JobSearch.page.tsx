@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { SyncLoader } from 'react-spinners';
 import ReactPaginate from 'react-paginate';
 import { Helmet } from 'react-helmet-async';
-import JobCard from '@/pages/User/Jobs/JobCard';
-import JobDetails from '@/pages/User/Jobs/JobDetails';
+import JobCard from '@/pages/User/Jobs/components/JobCard';
+import JobDetails from '@/pages/User/Jobs/components/JobDetails';
 import SearchApp from '@/components/Reusable/SearchApp';
+import Loader from '@/components/Reusable/Loader';
 import { BACKEND_URL } from '@/config/config';
-import IJob, {
+import {
   IReturn_JobDetails,
   IReturn_Jobs,
   EJobWorkPlace,
@@ -31,21 +31,6 @@ import {
   MenuItem,
   InputLabel,
 } from '@mui/material';
-
-const Loader: React.FC = () => {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-      }}
-    >
-      <SyncLoader color="#3f51b5" />
-    </Box>
-  );
-};
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {

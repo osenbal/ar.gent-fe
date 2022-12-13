@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BACKEND_URL } from '@/config/config';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
-import { SyncLoader } from 'react-spinners';
 import ReactPaginate from 'react-paginate';
-import JobCard from './JobCard';
-import JobDetails from './JobDetails';
+import JobCard from './components/JobCard';
+import JobDetails from './components/JobDetails';
+import Loader from '@/components/Reusable/Loader';
 import SearchApp from '@/components/Reusable/SearchApp';
 import {
   IReturn_JobDetails,
@@ -32,21 +32,6 @@ import {
   InputLabel,
 } from '@mui/material';
 import IUser from '@/interfaces/user.interface';
-
-const Loader: React.FC = () => {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-      }}
-    >
-      <SyncLoader color="#3f51b5" />
-    </Box>
-  );
-};
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {

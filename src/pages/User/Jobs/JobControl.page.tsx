@@ -4,14 +4,25 @@ import { useParams, NavLink, useSearchParams } from 'react-router-dom';
 import { SyncLoader } from 'react-spinners';
 import { stateToHTML } from 'draft-js-export-html';
 import { ToastContainer, toast } from 'react-toastify';
+import {
+  City,
+  Country,
+  ICity,
+  ICountry,
+  IState,
+  State,
+} from 'country-state-city';
+
 import TextEditor from '@/components/Reusable/TextEditor';
 import { useAppSelector } from '@/hooks/redux.hook';
 import { BACKEND_URL } from '@/config/config';
 import {
   INew_ObjectJob,
   IReturn_GET_JobById,
+  EJobLevel,
+  EJobType,
+  EJobWorkPlace,
 } from '@/interfaces/job.interface';
-import { EJobLevel, EJobType, EJobWorkPlace } from '@/interfaces/job.interface';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Select from '@mui/material/Select';
 import {
@@ -37,14 +48,6 @@ import {
   DialogTitle,
   TextareaAutosize,
 } from '@mui/material';
-import {
-  City,
-  Country,
-  ICity,
-  ICountry,
-  IState,
-  State,
-} from 'country-state-city';
 
 export const Link = (props: any) => {
   const { url } = props.contentState.getEntity(props.entityKey).getData();
@@ -208,6 +211,13 @@ const JobControlPage: React.FC = () => {
 
   const paneParams = searchParams.get('pane');
 
+  const optionTypes = Object.values(EJobType).map((value: string) => value);
+  const optionLevels = Object.values(EJobLevel).map((value: string) => value);
+  const optionWorkPlace = Object.values(EJobWorkPlace).map(
+    (value: string) => value
+  );
+
+  // ------------------ states ------------------
   const [job, setJob] = useState<IReturn_GET_JobById>({
     _id: '',
     userId: '',
@@ -253,7 +263,6 @@ const JobControlPage: React.FC = () => {
   const [appliciants, setAppliciants] = useState<any[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
   const [isLoadingAppliciant, setIsLoadingAppliciant] = useState<boolean>(true);
 
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -269,12 +278,7 @@ const JobControlPage: React.FC = () => {
   const [messageReject, setMessageReject] = useState<string>('');
   const [isLoadingReject, setIsLoadingReject] = useState<boolean>(false);
 
-  const optionTypes = Object.values(EJobType).map((value: string) => value);
-  const optionLevels = Object.values(EJobLevel).map((value: string) => value);
-  const optionWorkPlace = Object.values(EJobWorkPlace).map(
-    (value: string) => value
-  );
-
+  // ------------------ Functions ------------------
   const handleEditJob = async () => {
     if (
       jobTemp.title === job.title &&
@@ -460,6 +464,7 @@ const JobControlPage: React.FC = () => {
     setSelectedUserReject(null);
   };
 
+  // ------------------  useEffects ------------------
   useEffect(() => {
     if (editorState) {
       const htmlDescription = stateToHTML(editorState.getCurrentContent());
