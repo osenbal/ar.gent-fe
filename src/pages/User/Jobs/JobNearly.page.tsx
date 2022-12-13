@@ -450,6 +450,7 @@ const JobNearlyPage: React.FC = () => {
             )}
             <nav key={totalJobs}>
               <ReactPaginate
+                forcePage={page}
                 previousLabel={'< '}
                 nextLabel={'>'}
                 breakLabel={'...'}
