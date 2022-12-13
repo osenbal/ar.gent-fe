@@ -10,8 +10,8 @@ import GuestRoute from '@/middleware/guestRoute';
 import PersistLogin from '@/middleware/persistLogin';
 import ForgotPassword from '@pages/User/ForgotPassword/ForgotPassword.page';
 import UserLoggedInLayout from '@/components/Layouts/UserDahboard/UserLoggedIn.layout';
-import JobCreate from '@/pages/User/Jobs/JobCreate.page';
-import JobControl from '@/pages/User/Jobs/JobControl';
+import JobCreatePage from '@/pages/User/Jobs/JobCreate.page';
+import JobControlPage from '@/pages/User/Jobs/JobControl.page';
 import HelpPage from '@/pages/User/Help/Help.page';
 import JobListProfile from '@/pages/User/Profile/PanelJob/JobListProfile';
 import ProfileLayout from '@/components/Layouts/ProfileLayout';
@@ -79,8 +79,8 @@ const AppRoutes: React.FC = () => {
                   element={<UserApplication />}
                 />
               </Route>
-              <Route path="job/create" element={<JobCreate />} />
-              <Route path="job/edit/:jobId" element={<JobControl />} />
+              <Route path="job/create" element={<JobCreatePage />} />
+              <Route path="job/edit/:jobId" element={<JobControlPage />} />
               <Route path="job/detail/:jobId" element={<JobDetailsPage />} />
               <Route path="help" element={<HelpPage />} />
             </Route>

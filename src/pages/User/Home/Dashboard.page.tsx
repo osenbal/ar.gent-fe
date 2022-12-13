@@ -36,7 +36,6 @@ const Dashboard: React.FC = () => {
   const [keyword, setKeyword] = useState<string>('');
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [pages, setPages] = useState<number>(0);
   const [jobs, setJobs] = useState<IReturn_Jobs[] | []>([]);
   const [jobDetails, setJobDetails] = useState<IReturn_JobDetails | null>(null);
@@ -57,7 +56,7 @@ const Dashboard: React.FC = () => {
     setPage(selected);
   };
 
-  const loadJobs = () => {
+  const loadJobs = (controller: any) => {
     setIsLoadingJobs(true);
     fetch(`${BACKEND_URL}/job?page=${page}&limit=${limit}`, {
       method: 'GET',
@@ -65,6 +64,7 @@ const Dashboard: React.FC = () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
     })
       .then((res) => res.json())
       .then((data) => {
@@ -88,7 +88,12 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    loadJobs();
+    const controller = new AbortController();
+    loadJobs(controller);
+
+    return () => {
+      controller.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
@@ -118,12 +123,10 @@ const Dashboard: React.FC = () => {
     }
   }, [jobIdParam]);
 
-  useEffect(() => {
-    setJobDetails(null);
-    setIsLoading(true);
-  }, [jobIdParam]);
-
-  console.log(keyword);
+  // useEffect(() => {
+  //   setJobDetails(null);
+  //   setIsLoading(true);
+  // }, [jobIdParam]);
 
   return (
     <>
@@ -138,9 +141,6 @@ const Dashboard: React.FC = () => {
         setKeyword={setKeyword}
         onKeyPress={keyPressHandler}
       />
-      {/* <Box sx={{ mt: 2, display: 'flex', overflow: 'hidden', width: '100%' }}>
-        <FilterSearch />
-      </Box> */}
 
       {jobIdParam ? (
         <>
@@ -151,7 +151,7 @@ const Dashboard: React.FC = () => {
               alignItems: 'start',
               flexDirection: 'row',
               gap: 2,
-              mt: 5,
+              mt: 4,
               height: '100%',
               positon: 'relative',
             }}
@@ -183,35 +183,22 @@ const Dashboard: React.FC = () => {
                       No jobs found
                     </Typography>
                   )}
-
-                  {
-                    // paggination
-                    <nav key={totalJobs}>
-                      <ReactPaginate
-                        previousLabel={'< '}
-                        nextLabel={'>'}
-                        breakLabel={'...'}
-                        containerClassName={'pagination-list'}
-                        pageLinkClassName={'pagination-link'}
-                        previousLinkClassName={'pagination-previous'}
-                        nextLinkClassName={'pagination-next'}
-                        activeLinkClassName={'pagination-link is-current'}
-                        disabledLinkClassName={'pagination-link is-disabled'}
-                        pageCount={Math.min(5, pages)}
-                        onPageChange={handleChangePage}
-                      />
-                    </nav>
-                  }
-
-                  {/* {totalJobs > jobs.length && (
-                    <Button
-                      disabled={isLoadingNewPage}
-                      sx={{ display: 'block', m: '0 auto', mt: 3, mb: 5 }}
-                      onClick={() => setPage((prev) => prev + 1)}
-                    >
-                      Load More
-                    </Button>
-                  )} */}
+                  <nav key={totalJobs}>
+                    <ReactPaginate
+                      forcePage={page}
+                      previousLabel={'< '}
+                      nextLabel={'>'}
+                      breakLabel={'...'}
+                      containerClassName={'pagination-list'}
+                      pageLinkClassName={'pagination-link'}
+                      previousLinkClassName={'pagination-previous'}
+                      nextLinkClassName={'pagination-next'}
+                      activeLinkClassName={'pagination-link is-current'}
+                      disabledLinkClassName={'pagination-link is-disabled'}
+                      pageCount={Math.min(5, pages)}
+                      onPageChange={handleChangePage}
+                    />
+                  </nav>
                 </Box>
               </>
             )}
@@ -281,6 +268,7 @@ const Dashboard: React.FC = () => {
               // paggination
               <nav key={totalJobs}>
                 <ReactPaginate
+                  forcePage={page}
                   previousLabel={'< '}
                   nextLabel={'>'}
                   breakLabel={'...'}

@@ -83,9 +83,7 @@ const UserApplication: React.FC = () => {
     );
 
     const resData = await response.json();
-    console.log(response);
     if (response.ok) {
-      console.log(resData);
       setApplications(resData.data);
       setIsLoading(false);
     } else {

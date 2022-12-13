@@ -228,7 +228,7 @@ const UserList: React.FC = () => {
     }
   };
 
-  const getUserList = async () => {
+  const getUserList = async (controller: any) => {
     const response = await fetch(
       `${BACKEND_URL}/admin/get/users?page=${page}&limit=${limit}&search=${search}`,
       {
@@ -237,6 +237,7 @@ const UserList: React.FC = () => {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
+        signal: controller.signal,
       }
     );
     if (response.ok) {
@@ -254,7 +255,12 @@ const UserList: React.FC = () => {
   };
 
   useEffect(() => {
-    getUserList();
+    const controller = new AbortController();
+    getUserList(controller);
+
+    return () => {
+      controller.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search]);
 

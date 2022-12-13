@@ -71,7 +71,7 @@ const Profile: React.FC = () => {
   return (
     <>
       <ToastContainer />
-      <Box sx={{ mt: 5, mb: 5 }}>
+      <Box sx={{ mt: 4, mb: 5 }}>
         {isLoading ? (
           <>
             <Box sx={{ position: 'relative' }}>

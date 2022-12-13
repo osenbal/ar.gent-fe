@@ -60,7 +60,7 @@ const linkDecorator = new CompositeDecorator([
   },
 ]);
 
-const JobCreate: React.FC = () => {
+const JobCreatePage: React.FC = () => {
   const data = localStorage.getItem(TEXT_EDITOR_ITEM);
   const initialState = data
     ? EditorState.createWithContent(
@@ -445,4 +445,4 @@ const JobCreate: React.FC = () => {
   );
 };
 
-export default JobCreate;
+export default JobCreatePage;

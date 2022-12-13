@@ -67,6 +67,12 @@ const JobSearchPage: React.FC = () => {
   const typeParam = queryParams.get('type');
   const workplaceParam = queryParams.get('workplace');
 
+  const optionTypes = Object.values(EJobType).map((value: string) => value);
+  const optionLevels = Object.values(EJobLevel).map((value: string) => value);
+  const optionWorkPlace = Object.values(EJobWorkPlace).map(
+    (value: string) => value
+  );
+
   const [keyword, setKeyword] = useState<string>(searchParam || '');
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
@@ -86,12 +92,6 @@ const JobSearchPage: React.FC = () => {
 
   const [open, setOpen] = useState(false);
 
-  const optionTypes = Object.values(EJobType).map((value: string) => value);
-  const optionLevels = Object.values(EJobLevel).map((value: string) => value);
-  const optionWorkPlace = Object.values(EJobWorkPlace).map(
-    (value: string) => value
-  );
-
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -110,12 +110,13 @@ const JobSearchPage: React.FC = () => {
       if (page !== 0) {
         setPage(0);
       } else {
-        loadJobs();
+        const controller = new AbortController();
+        loadJobs(controller);
       }
     }
   };
 
-  const loadJobs = async () => {
+  const loadJobs = async (controller: any) => {
     setIsLoadingJobs(true);
     if (optionWorkPlace.includes(workplace) === false) {
       setWorkplace('');
@@ -137,6 +138,7 @@ const JobSearchPage: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        signal: controller.signal,
       }
     )
       .then((res) => res.json())
@@ -166,12 +168,20 @@ const JobSearchPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadJobs();
+    const controller = new AbortController();
+    loadJobs(controller);
+    return () => {
+      controller.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   useEffect(() => {
-    loadJobs();
+    const controller = new AbortController();
+    loadJobs(controller);
+    return () => {
+      controller.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workplace, jobLevel, jobType]);
 
@@ -224,7 +234,8 @@ const JobSearchPage: React.FC = () => {
 
       <Box
         sx={{
-          mt: 5,
+          mt: 3,
+          py: 1,
           display: 'flex',
           overflow: 'auto',
           flexDirection: 'row',

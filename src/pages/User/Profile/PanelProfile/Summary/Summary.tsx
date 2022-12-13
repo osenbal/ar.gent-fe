@@ -14,11 +14,15 @@ import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import { PHONE_NUMBER_REGEX } from '@/constant/_regex';
 import { parseDate } from '@/utils/utils';
 import { EGender, IEdited_User } from '@/interfaces/user.interface';
+import { BACKEND_URL } from '@/config/config';
 import { styled } from '@mui/material/styles';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import { Edit, CameraAlt } from '@mui/icons-material';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
+import ReportIcon from '@mui/icons-material/Report';
+import { Edit, CameraAlt } from '@mui/icons-material';
+import { TransitionProps } from '@mui/material/transitions';
+import Slide from '@mui/material/Slide';
 import {
   Avatar,
   Box,
@@ -32,11 +36,25 @@ import {
   Select,
   MenuItem,
   DialogTitle,
+  DialogContentText,
+  DialogContent,
+  DialogActions,
   Dialog,
   Input,
   Button,
   Skeleton,
+  Tooltip,
+  Zoom,
 } from '@mui/material';
+
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>;
+  },
+  ref: React.Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
   const dispatch = useAppDispatch();
@@ -77,8 +95,45 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
   const [open, setOpen] = useState(false);
   const [openInfo, setOpenInfo] = useState(false);
 
+  const [reportDescription, setReportDescription] = useState<string>('');
+  const [reportDescriptionError, setReportDescriptionError] =
+    useState<boolean>(false);
+  const [openReportDialog, setOpenReportDialog] = useState<boolean>(false);
+
   const handleOpenEditSummary = () => setOpen(true);
   const handleCloseEditSummary = () => setOpen(false);
+
+  const handleReportUser = async (e: React.MouseEvent) => {
+    if (reportDescription === '' || reportDescription.length <= 30) {
+      setReportDescriptionError(true);
+      return;
+    }
+
+    const response = await fetch(`${BACKEND_URL}/user/report/${id}`, {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({ description: reportDescription }),
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'applications/json',
+      },
+    });
+
+    if (response.ok) {
+      const resData = await response.json();
+      if (resData.code === 200) {
+        toast.success(resData.message);
+      } else {
+        toast.warn(resData.message);
+      }
+      setReportDescription('');
+    } else {
+      toast.error('something went error');
+      setReportDescription('');
+    }
+
+    setOpenReportDialog(false);
+  };
 
   const handleSaveChanges = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -156,6 +211,13 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     street,
     zipCode,
   ]);
+
+  useEffect(() => {
+    if (reportDescription.length > 30) {
+      setReportDescriptionError(false);
+      return;
+    }
+  }, [reportDescription]);
 
   useEffect(() => {
     setFullName(user?.fullName || '');
@@ -573,9 +635,76 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Typography variant="h5" sx={{ fontWeight: '700', marginTop: 2 }}>
-                {fullName}
-              </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDir: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: '700', marginTop: 2 }}
+                >
+                  {fullName}
+                </Typography>
+                {userId !== id && (
+                  <>
+                    <Tooltip TransitionComponent={Zoom} title="Report">
+                      <IconButton
+                        sx={{ width: 32, height: 32 }}
+                        onClick={() => setOpenReportDialog(true)}
+                      >
+                        <ReportIcon />
+                      </IconButton>
+                    </Tooltip>
+
+                    <Dialog
+                      open={openReportDialog}
+                      TransitionComponent={Transition}
+                      keepMounted
+                      onClose={() => {
+                        setOpenReportDialog(false);
+                        setReportDescription('');
+                      }}
+                      aria-describedby="report-user-dialog"
+                      sx={{ minWidth: '400px' }}
+                    >
+                      <DialogTitle>{`Report ${username} ?`}</DialogTitle>
+                      <DialogContent>
+                        <DialogContentText id="report-user-dialog">
+                          Why you report this user ?
+                        </DialogContentText>
+
+                        <TextField
+                          value={reportDescription}
+                          onChange={(e) => setReportDescription(e.target.value)}
+                          error={reportDescriptionError}
+                          id="filled-textarea"
+                          multiline
+                          helperText={`min character > 30`}
+                          minRows={3}
+                          aria-describedby="component-error-text"
+                          placeholder="Placeholder"
+                          sx={{ mt: 2 }}
+                        />
+                      </DialogContent>
+                      <DialogActions>
+                        <Button
+                          onClick={() => {
+                            setOpenReportDialog(false);
+                            setReportDescription('');
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button onClick={handleReportUser}>Report</Button>
+                      </DialogActions>
+                    </Dialog>
+                  </>
+                )}
+              </Box>
               <Box sx={{ display: 'flex', gap: 3 }}>
                 <Typography variant="body1" sx={{ fontWeight: '500' }}>
                   {Country.getCountryByCode(country)?.name}

@@ -99,6 +99,7 @@ const JobDetails: React.FC<props> = ({ data }) => {
 
   useEffect(() => {
     checkIsApply();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

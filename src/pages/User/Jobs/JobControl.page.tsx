@@ -201,7 +201,7 @@ const DialogRejectAppliciant = ({
   );
 };
 
-const JobControl: React.FC = () => {
+const JobControlPage: React.FC = () => {
   const { userId } = useAppSelector((state) => state.auth);
   const { jobId } = useParams();
   const [searchParams] = useSearchParams();
@@ -1018,4 +1018,4 @@ const JobControl: React.FC = () => {
   );
 };
 
-export default JobControl;
+export default JobControlPage;
