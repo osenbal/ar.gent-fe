@@ -13,6 +13,7 @@ import PortfolioUrl from './PortfolioUrl/PortfolioUrl';
 import { BACKEND_URL } from '@/config/config';
 import SendIcon from '@mui/icons-material/Send';
 import { Box, Button, Skeleton } from '@mui/material';
+import FetchIntercept from '@/utils/api';
 
 const Profile: React.FC = () => {
   const { id } = useParams();
@@ -24,7 +25,7 @@ const Profile: React.FC = () => {
 
   const getUser = async () => {
     // fetch user from server
-    const response = await fetch(`${BACKEND_URL}/user/${id}`, {
+    const response = await FetchIntercept(`${BACKEND_URL}/user/${id}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -32,9 +33,8 @@ const Profile: React.FC = () => {
       },
     });
 
-    if (response.ok) {
-      const userData = await response.json();
-      dispatch(setUser(userData.data));
+    if (response.code === 200) {
+      dispatch(setUser(response.data));
       setIsLoading(false);
     } else {
       dispatch(setUser(null));
@@ -45,20 +45,22 @@ const Profile: React.FC = () => {
   const handleVerifyEmail = async () => {
     // verify email
     setIsLoadingVerifycation(true);
-    const response = await fetch(`${BACKEND_URL}/user/send-verify/${userId}`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await FetchIntercept(
+      `${BACKEND_URL}/user/send-verify/${userId}`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-    const resData = await response.json();
-    if (response.ok) {
-      toast.success(`${resData.message}`);
+    if (response.code === 201) {
+      toast.success(`${response.message}`);
       setIsLoadingVerifycation(false);
     } else {
-      toast.warning(`${resData.message}`);
+      toast.warning(`${response.message}`);
       setIsLoadingVerifycation(false);
     }
   };

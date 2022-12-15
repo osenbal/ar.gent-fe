@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import ReactPaginate from 'react-paginate';
 import useRefreshToken from '@/hooks/refreshToken.hook';
 import { useAppDispatch } from '@/hooks/redux.hook';
+import FetchIntercept from '@/utils/api';
 import { asyncLogout } from '@/store/authSlice';
 import JobCard from '@/pages/User/Jobs/components/JobCard';
 import JobDetails from '@/pages/User/Jobs/components/JobDetails';
@@ -25,6 +26,7 @@ import {
   IconButton,
   Slide,
 } from '@mui/material';
+import { isEmpty } from '@/utils/utils';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -95,21 +97,6 @@ const Dashboard: React.FC = () => {
     setPage(selected);
   };
 
-  const asyncLoadJobs = async () => {
-    const response = await fetch(
-      `${BACKEND_URL}/job?page=${page}&limit=${limit}&startIndex=${startParam}`,
-      {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    ).then((res) => res.json());
-
-    return response;
-  };
-
   const setDataState = (response: any) => {
     setTotalJobs(response.totalRows);
     setPage(response.page);
@@ -133,44 +120,38 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const loadJobs = async (controller: any) => {
+  const setAllLoadingFalse = () => {
+    setIsLoadingDetailJob(false);
+    setIsLoadingJobs(false);
+    setIsLoading(false);
+  };
+
+  const loadJobs = async () => {
     await window.scrollTo(0, 0);
     await jobsRef.current?.scrollTo(0, 0);
-
     setIsLoadingJobs(true);
-
     try {
-      const response = await asyncLoadJobs();
+      const response = await FetchIntercept(
+        `${BACKEND_URL}/job?page=${page}&limit=${limit}&startIndex=${startParam}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
       if (response.code === 200) {
         setDataState(response);
         if (response.data.length > 0) {
           handleParams(response);
-        } else {
-          setIsLoadingJobs(false);
-          setIsLoadingDetailJob(false);
-          setJobDetails(null);
-        }
-      } else if (response.status === 401) {
-        await refreshToken();
-        const response = await asyncLoadJobs();
-        if (response.code === 200) {
-          setDataState(response);
-          if (response.data.length > 0) {
-            handleParams(response);
-          }
-        } else if (response.status === 401) {
-          dispatch(asyncLogout());
-        } else {
-          setIsLoadingDetailJob(false);
-          setIsLoading(false);
-          setIsLoadingJobs(false);
-          setJobDetails(null);
         }
       } else {
-        setIsLoadingDetailJob(false);
+        setAllLoadingFalse();
       }
     } catch (error) {
-      setIsLoadingDetailJob(false);
+      setAllLoadingFalse();
       console.log(error);
     }
 
@@ -178,49 +159,41 @@ const Dashboard: React.FC = () => {
     setIsLoadingJobs(false);
   };
 
-  // ------------------ useEffects ------------------
-  useEffect(() => {
-    const controller = new AbortController();
-    loadJobs(controller);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
-
-  useEffect(() => {
-    if (jobIdParam) {
-      setIsLoadingDetailJob(true);
-      if (
-        jobIdParam === 'null' ||
-        jobIdParam === 'undefined' ||
-        !jobIdParam ||
-        jobIdParam === ''
-      ) {
-        setJobDetails(null);
-        setIsLoading(false);
-        setIsLoadingDetailJob(false);
-        return;
-      }
-      setTimeout(() => {
-        fetch(`${BACKEND_URL}/job/${jobIdParam}`, {
+  const loadJobDetails = async () => {
+    setIsLoadingDetailJob(true);
+    if (jobIdParam !== null) {
+      const response = await FetchIntercept(
+        `${BACKEND_URL}/job/${jobIdParam}`,
+        {
           method: 'GET',
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            console.log(data);
-            setJobDetails(data.data);
-          })
-          .catch((error) => {
-            console.log('abort');
-          })
-          .finally(() => {
-            setIsLoading(false);
-            setIsLoadingDetailJob(false);
-          });
-      }, 1000);
+        }
+      );
+
+      if (response.code === 200) {
+        setJobDetails(response.data);
+        setIsLoadingDetailJob(false);
+      } else {
+        setJobDetails(null);
+        setIsLoadingDetailJob(false);
+      }
     }
+  };
+
+  // ------------------ useEffects ------------------
+  useEffect(() => {
+    loadJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
+  useEffect(() => {
+    if (jobIdParam !== null) {
+      loadJobDetails();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobIdParam]);
 
   return (

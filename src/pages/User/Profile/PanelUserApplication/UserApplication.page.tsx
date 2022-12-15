@@ -11,6 +11,7 @@ import {
   Grid,
   Box,
 } from '@mui/material';
+import FetchIntercept from '@/utils/api';
 
 const StyledContainer = styled(Grid)(({ theme }) => ({
   justifyContent: 'start',
@@ -71,7 +72,7 @@ const UserApplication: React.FC = () => {
 
   const getUserApplications = async () => {
     setIsLoading(true);
-    const response = await fetch(
+    const response = await FetchIntercept(
       `${BACKEND_URL}/job/applications/${params.id}`,
       {
         method: 'GET',
@@ -82,9 +83,8 @@ const UserApplication: React.FC = () => {
       }
     );
 
-    const resData = await response.json();
-    if (response.ok) {
-      setApplications(resData.data);
+    if (response.code === 200) {
+      setApplications(response.data);
       setIsLoading(false);
     } else {
       setIsLoading(false);

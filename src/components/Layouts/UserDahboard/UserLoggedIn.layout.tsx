@@ -9,6 +9,7 @@ import { styled, useTheme } from '@mui/material/styles';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useMediaQuery, Typography, Toolbar, IconButton } from '@mui/material';
+import FetchIntercept from '@/utils/api';
 
 const APP_BAR_DESKTOP = 10;
 const APP_BAR_MOBILE = 64;
@@ -73,16 +74,15 @@ const UserLoggedInLayout = () => {
   };
 
   const getUserInitials = async (userId: string) => {
-    const response = await fetch(`${BACKEND_URL}/user`, {
+    const response = await FetchIntercept(`${BACKEND_URL}/user`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
     });
-    if (response.ok) {
-      const user = await response.json();
-      setInitialUser(user.data);
+    if (response.code === 200) {
+      setInitialUser(response.data);
     }
   };
 

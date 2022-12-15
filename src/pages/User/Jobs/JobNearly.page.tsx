@@ -5,11 +5,11 @@ import { useSearchParams } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
 import useRefreshToken from '@/hooks/refreshToken.hook';
 import { useAppDispatch } from '@/hooks/redux.hook';
-import { asyncLogout } from '@/store/authSlice';
 import JobCard from './components/JobCard';
 import JobDetails from './components/JobDetails';
 import Loader from '@/components/Reusable/Loader';
 import SearchApp from '@/components/Reusable/SearchApp';
+import FetchIntercept from '@/utils/api';
 import {
   IReturn_JobDetails,
   IReturn_Jobs,
@@ -47,8 +47,6 @@ const Transition = React.forwardRef(function Transition(
 
 const JobNearlyPage: React.FC = () => {
   const theme = useTheme();
-  const refreshToken = useRefreshToken();
-  const dispatch = useAppDispatch();
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
   const [queryParams, setQueryParams] = useSearchParams();
   let updatedSearchParams = new URLSearchParams(queryParams.toString());
@@ -120,21 +118,6 @@ const JobNearlyPage: React.FC = () => {
     }
   };
 
-  const asyncLoadJobs = async () => {
-    const response = await fetch(
-      `${BACKEND_URL}/job/nearly?page=${page}&limit=${limit}&search=${keyword}&workplace=${workplace}&level=${jobLevel}&type=${jobType}`,
-      {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    ).then((res) => res.json());
-
-    return response;
-  };
-
   const setDataState = (response: any) => {
     setTotalJobs(response.totalRows);
     setPage(response.page);
@@ -143,13 +126,18 @@ const JobNearlyPage: React.FC = () => {
     setJobs(response.data);
   };
 
+  const setAllLoadingFalse = () => {
+    setIsLoadingDetailJob(false);
+    setIsLoadingJobs(false);
+    setIsLoading(false);
+  };
+
   const handleParams = (response: any) => {
-    if (jobIdParam) {
+    if (jobIdParam && jobIdParam !== null) {
       const jobExist = Boolean(
         response.data.find((job: any) => job._id === jobIdParam)
       );
       if (!jobExist) {
-        console.log('job not exist');
         updatedSearchParams.set('jobId', response?.data[0]?._id);
         setQueryParams(updatedSearchParams.toString());
       }
@@ -162,7 +150,9 @@ const JobNearlyPage: React.FC = () => {
   const getJobsNearly = async () => {
     await window.scrollTo(0, 0);
     await jobsRef.current?.scrollTo(0, 0);
+
     setIsLoadingJobs(true);
+
     if (optionWorkPlace.includes(workplace) === false) {
       setWorkplace('');
     }
@@ -174,8 +164,18 @@ const JobNearlyPage: React.FC = () => {
     if (optionTypes.includes(jobType) === false) {
       setJobType('');
     }
+
     try {
-      const response = await asyncLoadJobs();
+      const response = await FetchIntercept(
+        `${BACKEND_URL}/job/nearly?page=${page}&limit=${limit}&search=${keyword}&workplace=${workplace}&level=${jobLevel}&type=${jobType}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       if (response.code === 200) {
         setDataState(response);
@@ -187,40 +187,45 @@ const JobNearlyPage: React.FC = () => {
           setIsLoadingDetailJob(false);
           setJobDetails(null);
         }
-      } else if (response.status === 401) {
-        await refreshToken();
-        const response = await asyncLoadJobs();
-        if (response.code === 200) {
-          setDataState(response);
-          if (response?.data?.length > 0) {
-            handleParams(response);
-          } else {
-            updatedSearchParams.delete('jobId');
-            setQueryParams(updatedSearchParams.toString());
-            setIsLoadingDetailJob(false);
-            setJobDetails(null);
-          }
-        } else if (response.status === 401) {
-          dispatch(asyncLogout());
-        } else {
-          setIsLoadingDetailJob(false);
-          setIsLoading(false);
-          setIsLoadingJobs(false);
-          setJobDetails(null);
-        }
+      } else {
+        setAllLoadingFalse();
       }
     } catch (error) {
-      setIsLoadingDetailJob(false);
-      setIsLoading(false);
-      setIsLoadingJobs(false);
+      setAllLoadingFalse();
+      console.log(error);
     }
 
     setIsLoading(false);
     setIsLoadingJobs(false);
   };
 
+  const loadJobDetails = async () => {
+    setIsLoadingDetailJob(true);
+    if (jobIdParam !== null && jobIdParam) {
+      const response = await FetchIntercept(
+        `${BACKEND_URL}/job/${jobIdParam}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.code === 200) {
+        console.log(response.data);
+        setJobDetails(response.data);
+        setIsLoadingDetailJob(false);
+      } else {
+        // setJobDetails(null);
+        setIsLoadingDetailJob(false);
+      }
+    }
+  };
+
   const getCurrentUser = async () => {
-    const response = await fetch(`${BACKEND_URL}/user`, {
+    const response = await FetchIntercept(`${BACKEND_URL}/user`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -252,40 +257,10 @@ const JobNearlyPage: React.FC = () => {
   }, [workplace, jobLevel, jobType]);
 
   useEffect(() => {
-    if (jobIdParam) {
-      setIsLoadingDetailJob(true);
-      if (
-        jobIdParam === 'null' ||
-        jobIdParam === 'undefined' ||
-        !jobIdParam ||
-        jobIdParam === ''
-      ) {
-        setJobDetails(null);
-        setIsLoading(false);
-        setIsLoadingDetailJob(false);
-        return;
-      }
-      setTimeout(() => {
-        fetch(`${BACKEND_URL}/job/${jobIdParam}`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            setJobDetails(data.data);
-          })
-          .catch((error) => {
-            console.log('abort');
-          })
-          .finally(() => {
-            setIsLoading(false);
-            setIsLoadingDetailJob(false);
-          });
-      }, 1000);
+    if (jobIdParam !== null && jobIdParam) {
+      loadJobDetails();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobIdParam]);
 
   return (
@@ -510,7 +485,7 @@ const JobNearlyPage: React.FC = () => {
           >
             {isLoadingDetailJob ? (
               <Loader />
-            ) : jobDetails ? (
+            ) : jobDetails !== null ? (
               <JobDetails data={jobDetails} />
             ) : (
               <Typography variant="h6" color="textSecondary">

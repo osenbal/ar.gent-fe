@@ -11,6 +11,7 @@ import { Typography, Box, Card, Avatar, Button } from '@mui/material';
 import { BACKEND_URL } from '@/config/config';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import FetchIntercept from '@/utils/api';
 
 type props = {
   data: IReturn_JobDetails;
@@ -29,7 +30,7 @@ const JobDetails: React.FC<props> = ({ data }) => {
       const formData = new FormData();
       formData.append('cv', cvFile);
 
-      const res = await fetch(
+      const res = await FetchIntercept(
         `${BACKEND_URL}/user/uploadfile/${userId}?type=cv`,
         {
           method: 'PUT',
@@ -38,7 +39,7 @@ const JobDetails: React.FC<props> = ({ data }) => {
         }
       );
 
-      if (res.ok) {
+      if (res.code === 200) {
         setCvFile(null);
         setOpenUploadCv(false);
         toast.success('Upload CV successfully, please apply again!');
@@ -50,45 +51,47 @@ const JobDetails: React.FC<props> = ({ data }) => {
   };
 
   const handleApplyJob = async () => {
-    const response = await fetch(`${BACKEND_URL}/job/apply/${data._id}`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId }),
-    });
-
-    const resData = await response.json();
-    if (response.ok) {
-      setStatusApplied(resData.data);
-      if (resData.data === false) {
+    const response = await FetchIntercept(
+      `${BACKEND_URL}/job/apply/${data._id}`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      }
+    );
+    if (response.code === 201 || response.code === 200) {
+      setStatusApplied(response.data);
+      if (response.data === false) {
         toast.warn('unapply job successfully');
       } else {
         toast.success('apply job successfully!');
       }
-    } else if (response.status === 400) {
-      if (resData?.data?.isExist === false) {
+    } else if (response.code === 400 && response.data.isExist === false) {
+      if (response?.data?.isExist === false) {
         setOpenUploadCv(true);
       }
     } else {
-      console.log(resData.message);
+      console.log(response.message);
     }
   };
 
   const checkIsApply = async () => {
     setIsLoading(true);
-    const response = await fetch(`${BACKEND_URL}/job/check-apply/${data._id}`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const resData = await response.json();
-    if (response.ok) {
-      setStatusApplied(resData.data);
+    const response = await FetchIntercept(
+      `${BACKEND_URL}/job/check-apply/${data._id}`,
+      {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    if (response.code === 200) {
+      setStatusApplied(response.data);
       setIsLoading(false);
     } else {
       setIsLoading(false);

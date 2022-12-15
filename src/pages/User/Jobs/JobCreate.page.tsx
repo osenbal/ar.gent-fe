@@ -33,6 +33,7 @@ import {
   ICountry,
   IState,
 } from 'country-state-city';
+import FetchIntercept from '@/utils/api';
 
 const TEXT_EDITOR_ITEM = 'draft-js-example-item';
 
@@ -130,7 +131,7 @@ const JobCreatePage: React.FC = () => {
       ...location,
     };
 
-    const response = await fetch(`${BACKEND_URL}/job`, {
+    const response = await FetchIntercept(`${BACKEND_URL}/job`, {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -141,7 +142,7 @@ const JobCreatePage: React.FC = () => {
       }),
     });
 
-    if (response.ok) {
+    if (response.code === 201) {
       toast.success('Job created successfully', {
         position: 'top-right',
         autoClose: 3000,

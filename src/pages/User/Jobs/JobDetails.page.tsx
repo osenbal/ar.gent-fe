@@ -1,5 +1,6 @@
 import { BACKEND_URL } from '@/config/config';
 import { IReturn_JobDetails } from '@/interfaces/job.interface';
+import FetchIntercept from '@/utils/api';
 import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -12,13 +13,16 @@ const JobDetailsPage: React.FC = () => {
 
   const getJobDetails = async () => {
     setIsLoading(true);
-    const response = await fetch(`${BACKEND_URL}/job/${params.jobId}`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await FetchIntercept(
+      `${BACKEND_URL}/job/${params.jobId}`,
+      {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     const resData = await response.json();
 

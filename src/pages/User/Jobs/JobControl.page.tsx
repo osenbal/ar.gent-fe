@@ -47,6 +47,7 @@ import {
   DialogTitle,
   TextareaAutosize,
 } from '@mui/material';
+import FetchIntercept from '@/utils/api';
 
 export const Link = (props: any) => {
   const { url } = props.contentState.getEntity(props.entityKey).getData();
@@ -278,6 +279,52 @@ const JobControlPage: React.FC = () => {
   const [isLoadingReject, setIsLoadingReject] = useState<boolean>(false);
 
   // ------------------ Functions ------------------
+  const getJobDetail = async () => {
+    if (jobId) {
+      const response = await FetchIntercept(`${BACKEND_URL}/job/${jobId}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log(response);
+      if (response.code === 200) {
+        const city = response.data.location.city.name;
+        const country = response.data.location.country.isoCode;
+        const state = response.data.location.state.isoCode;
+        const jobData = Object.entries(response.data).filter(
+          ([key, value]) => key !== 'location'
+        );
+        const jobDataWithLocation = Object.fromEntries([
+          ...jobData,
+          ['city', city],
+          ['country', country],
+          ['state', state],
+        ]);
+        setJob(jobDataWithLocation);
+        setJobTemp(jobDataWithLocation);
+        const blocksHtmlDescription = convertFromHTML(
+          response.data.description
+        );
+        const initialState = response.data.description
+          ? EditorState.createWithContent(
+              ContentState.createFromBlockArray(
+                blocksHtmlDescription.contentBlocks,
+                blocksHtmlDescription.entityMap
+              ),
+              linkDecorator
+            )
+          : EditorState.createEmpty(linkDecorator);
+        setEditorState(initialState);
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+      }
+    }
+  };
+
   const handleEditJob = async () => {
     if (
       jobTemp.title === job.title &&
@@ -334,7 +381,7 @@ const JobControlPage: React.FC = () => {
       workPlace: job.workPlace,
     };
 
-    const response = await fetch(`${BACKEND_URL}/job/${jobId}`, {
+    const response = await FetchIntercept(`${BACKEND_URL}/job/${jobId}`, {
       method: 'PATCH',
       credentials: 'include',
       headers: {
@@ -343,18 +390,16 @@ const JobControlPage: React.FC = () => {
       body: JSON.stringify(editedData),
     });
 
-    if (response.ok) {
-      const data = await response.json();
+    if (response.code === 200) {
       setJobTemp(job);
-      toast.success(data.data, {
+      toast.success(response.data, {
         position: 'top-right',
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
       });
     } else {
-      const data = await response.json();
-      toast.error(data.message, {
+      toast.error(response.message, {
         position: 'top-right',
         autoClose: 3000,
         hideProgressBar: false,
@@ -365,7 +410,7 @@ const JobControlPage: React.FC = () => {
 
   const getAppliciants = async () => {
     setIsLoadingAppliciant(true);
-    const response = await fetch(
+    const response = await FetchIntercept(
       `${BACKEND_URL}/job/${jobId}/appliciants?pane=${paneParams}`,
       {
         method: 'GET',
@@ -376,19 +421,18 @@ const JobControlPage: React.FC = () => {
       }
     );
 
-    const data = await response.json();
-    console.log(data);
-    if (response.ok) {
-      setAppliciants(data.data);
+    if (response.code === 200) {
+      setAppliciants(response.data);
+      setIsLoadingAppliciant(false);
     } else {
       console.log('error');
+      setIsLoadingAppliciant(false);
     }
-    setIsLoadingAppliciant(false);
   };
 
   const approveAppliciant = async (appliciantId: string) => {
     setIsLoadingApprove(true);
-    const response = await fetch(
+    const response = await FetchIntercept(
       `${BACKEND_URL}/job/approve/${userId}/${appliciantId}/${jobId}`,
       {
         method: 'POST',
@@ -400,9 +444,8 @@ const JobControlPage: React.FC = () => {
       }
     );
 
-    const data = await response.json();
-    if (response.ok) {
-      toast.success(data.message, {
+    if (response.code === 200) {
+      toast.success(response.message, {
         position: 'top-right',
         autoClose: 3000,
         hideProgressBar: false,
@@ -411,7 +454,7 @@ const JobControlPage: React.FC = () => {
       setIsLoadingApprove(false);
       getAppliciants();
     } else {
-      toast.error(data.message, {
+      toast.error(response.message, {
         position: 'top-right',
         autoClose: 3000,
         hideProgressBar: false,
@@ -426,7 +469,7 @@ const JobControlPage: React.FC = () => {
 
   const rejectAppliciant = async (appliciantId: string) => {
     setIsLoadingReject(true);
-    const response = await fetch(
+    const response = await FetchIntercept(
       `${BACKEND_URL}/job/reject/${userId}/${appliciantId}/${jobId}`,
       {
         method: 'POST',
@@ -437,10 +480,8 @@ const JobControlPage: React.FC = () => {
       }
     );
 
-    const data = await response.json();
-
-    if (response.ok) {
-      toast.success(data.message, {
+    if (response.code === 200) {
+      toast.success(response.message, {
         position: 'top-right',
         autoClose: 3000,
         hideProgressBar: false,
@@ -449,7 +490,7 @@ const JobControlPage: React.FC = () => {
       setIsLoadingReject(false);
       getAppliciants();
     } else {
-      toast.error(data.message, {
+      toast.error(response.message, {
         position: 'top-right',
         autoClose: 3000,
         hideProgressBar: false,
@@ -474,90 +515,14 @@ const JobControlPage: React.FC = () => {
 
   useEffect(() => {
     if (jobId) {
-      // fetch job data
-      fetch(`${BACKEND_URL}/job/${jobId}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then((res) => {
-          return res.json();
-        })
-        .then((data) => {
-          const city = data.data.location.city.name;
-          const country = data.data.location.country.isoCode;
-          const state = data.data.location.state.isoCode;
-          const jobData = Object.entries(data.data).filter(
-            ([key, value]) => key !== 'location'
-          );
-          const jobDataWithLocation = Object.fromEntries([
-            ...jobData,
-            ['city', city],
-            ['country', country],
-            ['state', state],
-          ]);
-          setJob(jobDataWithLocation);
-          setJobTemp(jobDataWithLocation);
-          const blocksHtmlDescription = convertFromHTML(data.data.description);
-          const initialState = data.data.description
-            ? EditorState.createWithContent(
-                ContentState.createFromBlockArray(
-                  blocksHtmlDescription.contentBlocks,
-                  blocksHtmlDescription.entityMap
-                ),
-                linkDecorator
-              )
-            : EditorState.createEmpty(linkDecorator);
-          setEditorState(initialState);
-        })
-        .catch((error) => {
-          if (error.name === 'AbortError') {
-            console.log('abort');
-          }
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+      console.log('load job');
+      getJobDetail();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     getAppliciants();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    setIsLoadingAppliciant(true);
-    const abortController = new AbortController();
-    fetch(`${BACKEND_URL}/job/${jobId}/appliciants?pane=${paneParams}`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      signal: abortController.signal,
-    })
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        setAppliciants(data.data);
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') {
-          console.log('abort');
-        }
-      })
-      .finally(() => {
-        setIsLoadingAppliciant(false);
-      });
-
-    return () => {
-      abortController.abort();
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paneParams]);
 

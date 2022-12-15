@@ -46,6 +46,7 @@ import {
   Tooltip,
   Zoom,
 } from '@mui/material';
+import FetchIntercept from '@/utils/api';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -109,7 +110,7 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
       return;
     }
 
-    const response = await fetch(`${BACKEND_URL}/user/report/${id}`, {
+    const response = await FetchIntercept(`${BACKEND_URL}/user/report/${id}`, {
       method: 'POST',
       credentials: 'include',
       body: JSON.stringify({ description: reportDescription }),
@@ -119,16 +120,11 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
       },
     });
 
-    if (response.ok) {
-      const resData = await response.json();
-      if (resData.code === 200) {
-        toast.success(resData.message);
-      } else {
-        toast.warn(resData.message);
-      }
+    if (response.code === 200) {
+      toast.success(response.message);
       setReportDescription('');
     } else {
-      toast.error('something went error');
+      toast.error(response.message || 'something went error');
       setReportDescription('');
     }
 

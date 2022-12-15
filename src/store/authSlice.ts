@@ -33,6 +33,34 @@ const initialState: AuthState = {
   visited_userDetails: {},
 };
 
+const fetchIntercept = async (url: string, options: RequestInit) => {
+  const response = await fetch(url, options).then((res) => res.json());
+
+  if (response.status === 401) {
+    const refreshToken = await fetch(`${BACKEND_URL}/auth/refresh`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (refreshToken.ok) {
+      const data = await response.json();
+      setIsAuth(true);
+      setUserId(data.userId);
+      return await fetch(url, options).then((res) => res.json());
+    } else {
+      console.log('logout');
+      setIsAuth(false);
+      setUserId('');
+      setUser(null);
+      setIsLoading(false);
+    }
+  } else {
+    return response;
+  }
+};
+
 export const asyncLogout = createAsyncThunk(
   'auth/asyncLogout',
   async (payload) => {
@@ -121,7 +149,7 @@ export const asyncUserEducation = createAsyncThunk(
     userId: string;
     payload: IEducation_User[];
   }) => {
-    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
+    const response = await fetchIntercept(`${BACKEND_URL}/user/${userId}`, {
       method: 'PATCH',
       credentials: 'include',
       headers: {
@@ -129,10 +157,9 @@ export const asyncUserEducation = createAsyncThunk(
       },
       body: JSON.stringify({ education: payload }),
     });
-
-    const data = await response.json();
-    if (response.ok) {
-      toast.success(`${data.message}`, {
+    console.log(response);
+    if (response.code === 200) {
+      toast.success(`${response.message}`, {
         position: 'bottom-left',
         theme: 'dark',
       });

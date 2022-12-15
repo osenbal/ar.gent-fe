@@ -20,6 +20,8 @@ import {
 import { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import FetchIntercept from '@/utils/api';
+
 import {
   useTheme,
   useMediaQuery,
@@ -115,25 +117,9 @@ const JobSearchPage: React.FC = () => {
       if (page !== 0) {
         setPage(0);
       } else {
-        const controller = new AbortController();
-        loadJobs(controller);
+        loadJobs();
       }
     }
-  };
-
-  const asyncLoadJobs = async () => {
-    const response = await fetch(
-      `${BACKEND_URL}/job?page=${page}&limit=${limit}&search=${keyword}&workplace=${workplace}&level=${jobLevel}&type=${jobType}&startIndex=${startParam}`,
-      {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    ).then((res) => res.json());
-
-    return response;
   };
 
   const setDataState = (response: any) => {
@@ -144,13 +130,18 @@ const JobSearchPage: React.FC = () => {
     setJobs(response.data);
   };
 
+  const setAllLoadingFalse = () => {
+    setIsLoadingDetailJob(false);
+    setIsLoadingJobs(false);
+    setIsLoading(false);
+  };
+
   const handleParams = (response: any) => {
     if (jobIdParam) {
       const jobExist = Boolean(
         response.data.find((job: any) => job._id === jobIdParam)
       );
       if (!jobExist) {
-        console.log('job not exist');
         updatedSearchParams.set('jobId', response?.data[0]?._id);
         setQueryParams(updatedSearchParams.toString());
       }
@@ -160,7 +151,7 @@ const JobSearchPage: React.FC = () => {
     }
   };
 
-  const loadJobs = async (controller: any) => {
+  const loadJobs = async () => {
     await window.scrollTo(0, 0);
     await jobsRef.current?.scrollTo(0, 0);
     setIsLoadingJobs(true);
@@ -177,7 +168,16 @@ const JobSearchPage: React.FC = () => {
     }
 
     try {
-      const response = await asyncLoadJobs();
+      const response = await FetchIntercept(
+        `${BACKEND_URL}/job/nearly?page=${page}&limit=${limit}&search=${keyword}&workplace=${workplace}&level=${jobLevel}&type=${jobType}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       if (response.code === 200) {
         setDataState(response);
         if (response?.data?.length > 0) {
@@ -188,134 +188,58 @@ const JobSearchPage: React.FC = () => {
           setIsLoadingDetailJob(false);
           setJobDetails(null);
         }
-      } else if (response.status === 401) {
-        await refreshToken();
-        const response = await asyncLoadJobs();
-        if (response.code === 200) {
-          setDataState(response);
-          if (response?.data?.length > 0) {
-            handleParams(response);
-          } else {
-            updatedSearchParams.delete('jobId');
-            setQueryParams(updatedSearchParams.toString());
-            setIsLoadingDetailJob(false);
-            setJobDetails(null);
-          }
-        } else if (response.status === 401) {
-          dispatch(asyncLogout());
-        } else {
-          setIsLoadingDetailJob(false);
-          setIsLoading(false);
-          setIsLoadingJobs(false);
-          setJobDetails(null);
-        }
+      } else {
+        setAllLoadingFalse();
       }
     } catch (error) {
-      setIsLoadingDetailJob(false);
-      setIsLoading(false);
-      setIsLoadingJobs(false);
+      setAllLoadingFalse();
+      console.log(error);
     }
 
-    fetch(
-      `${BACKEND_URL}/job?page=${page}&limit=${limit}&search=${keyword}&workplace=${workplace}&level=${jobLevel}&type=${jobType}&startIndex=${startParam}`,
-      {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        signal: controller.signal,
-      }
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.code === 200) {
-          setTotalJobs(data.totalRows);
-          setPage(data.page);
-          setLimit(data.limit);
-          setPages(data.totalPage);
-          setJobs(data.data);
-          if (data.data.length > 0) {
-            if (jobIdParam) {
-              const jobExist = Boolean(
-                data.data.find((job: any) => job._id === jobIdParam)
-              );
-              if (!jobExist) {
-                console.log('job not exist');
-                updatedSearchParams.set('jobId', data?.data[0]?._id);
-                setQueryParams(updatedSearchParams.toString());
-              }
-            } else {
-              updatedSearchParams.set('jobId', `${data.data[0]._id}`);
-              setQueryParams(updatedSearchParams.toString());
-            }
-          } else {
-            updatedSearchParams.delete('jobId');
-            setQueryParams(updatedSearchParams.toString());
-            setIsLoadingDetailJob(false);
-            setJobDetails(null);
-          }
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        setIsLoadingDetailJob(false);
-      })
-      .finally(() => {
-        setIsLoading(false);
-        setIsLoadingJobs(false);
-      });
+    setIsLoading(false);
+    setIsLoadingJobs(false);
   };
 
-  useEffect(() => {
-    const controller = new AbortController();
-    loadJobs(controller);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    loadJobs(controller);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workplace, jobLevel, jobType]);
-
-  useEffect(() => {
-    if (jobIdParam) {
-      setIsLoadingDetailJob(true);
-      if (
-        jobIdParam === 'null' ||
-        jobIdParam === 'undefined' ||
-        !jobIdParam ||
-        jobIdParam === ''
-      ) {
-        setJobDetails(null);
-        setIsLoading(false);
-        setIsLoadingDetailJob(false);
-        return;
-      }
-      setTimeout(() => {
-        fetch(`${BACKEND_URL}/job/${jobIdParam}`, {
+  const loadJobDetails = async () => {
+    setIsLoadingDetailJob(true);
+    if (jobIdParam !== null && jobIdParam) {
+      const response = await FetchIntercept(
+        `${BACKEND_URL}/job/${jobIdParam}`,
+        {
           method: 'GET',
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            console.log(data);
-            setJobDetails(data.data);
-          })
-          .catch((error) => {
-            console.log('abort');
-            setIsLoadingDetailJob(false);
-          })
-          .finally(() => {
-            setIsLoading(false);
-            setIsLoadingDetailJob(false);
-          });
-      }, 1000);
+        }
+      );
+
+      if (response.code === 200) {
+        console.log(response.data);
+        setJobDetails(response.data);
+        setIsLoadingDetailJob(false);
+      } else {
+        // setJobDetails(null);
+        setIsLoadingDetailJob(false);
+      }
     }
+  };
+
+  useEffect(() => {
+    loadJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
+  useEffect(() => {
+    loadJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workplace, jobLevel, jobType]);
+
+  useEffect(() => {
+    if (jobIdParam !== null && jobIdParam) {
+      loadJobDetails();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobIdParam]);
 
   return (

@@ -7,6 +7,7 @@ import Loader from '@/components/Reusable/Loader';
 import { IReturn_JobDetails, IReturn_Jobs } from '@/interfaces/job.interface';
 import { BACKEND_URL } from '@/config/config';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
+import FetchIntercept from '@/utils/api';
 
 const JobListProfile: React.FC = () => {
   const theme = useTheme();
@@ -23,14 +24,14 @@ const JobListProfile: React.FC = () => {
 
   const handleDelete = async (jobId: string) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/job/${jobId}`, {
+      const response = await FetchIntercept(`${BACKEND_URL}/job/${jobId}`, {
         method: 'DELETE',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      if (response.ok) {
+      if (response.code === 200) {
         const updatedJobs = jobs.filter((job) => job._id !== jobId);
         setJobs(updatedJobs);
         toast.success('Job deleted successfully');
@@ -44,7 +45,7 @@ const JobListProfile: React.FC = () => {
   };
 
   const getJobsByUserId = async () => {
-    const response = await fetch(`${BACKEND_URL}/job/user/${id}`, {
+    const response = await FetchIntercept(`${BACKEND_URL}/job/user/${id}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -52,12 +53,26 @@ const JobListProfile: React.FC = () => {
       },
     });
 
-    if (response.ok) {
-      const jobData = await response.json();
-      setJobs(jobData.data);
+    if (response.code === 200) {
+      setJobs(response.data);
       setIsLoadingJobs(false);
     } else {
       setIsLoadingJobs(false);
+    }
+  };
+
+  const getJobDetail = async (jobId: string) => {
+    const response = await FetchIntercept(`${BACKEND_URL}/job/${jobId}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.code === 200) {
+      setJobDetails(response.data);
+      setIsLoading(false);
     }
   };
 
@@ -68,32 +83,8 @@ const JobListProfile: React.FC = () => {
 
   useEffect(() => {
     if (jobIdParam) {
-      setIsLoading(true);
-      setTimeout(() => {
-        fetch(`${BACKEND_URL}/job/${jobIdParam}`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            setJobDetails(data.data);
-          })
-          .catch((error) => {
-            console.log(error);
-          })
-          .finally(() => {
-            setIsLoading(false);
-          });
-      }, 1000);
+      getJobDetail(jobIdParam);
     }
-  }, [jobIdParam]);
-
-  useEffect(() => {
-    setJobDetails(null);
-    setIsLoading(true);
   }, [jobIdParam]);
 
   return (
