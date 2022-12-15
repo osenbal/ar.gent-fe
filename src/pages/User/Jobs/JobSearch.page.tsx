@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
 import { Helmet } from 'react-helmet-async';
+import useRefreshToken from '@/hooks/refreshToken.hook';
+import { useAppDispatch } from '@/hooks/redux.hook';
+import { asyncLogout } from '@/store/authSlice';
 import JobCard from '@/pages/User/Jobs/components/JobCard';
 import JobDetails from '@/pages/User/Jobs/components/JobDetails';
 import SearchApp from '@/components/Reusable/SearchApp';
@@ -43,6 +46,8 @@ const Transition = React.forwardRef(function Transition(
 
 const JobSearchPage: React.FC = () => {
   const theme = useTheme();
+  const refreshToken = useRefreshToken();
+  const dispatch = useAppDispatch();
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
   const [queryParams, setQueryParams] = useSearchParams();
   let updatedSearchParams = new URLSearchParams(queryParams.toString());
@@ -116,6 +121,45 @@ const JobSearchPage: React.FC = () => {
     }
   };
 
+  const asyncLoadJobs = async () => {
+    const response = await fetch(
+      `${BACKEND_URL}/job?page=${page}&limit=${limit}&search=${keyword}&workplace=${workplace}&level=${jobLevel}&type=${jobType}&startIndex=${startParam}`,
+      {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    ).then((res) => res.json());
+
+    return response;
+  };
+
+  const setDataState = (response: any) => {
+    setTotalJobs(response.totalRows);
+    setPage(response.page);
+    setLimit(response.limit);
+    setPages(response.totalPage);
+    setJobs(response.data);
+  };
+
+  const handleParams = (response: any) => {
+    if (jobIdParam) {
+      const jobExist = Boolean(
+        response.data.find((job: any) => job._id === jobIdParam)
+      );
+      if (!jobExist) {
+        console.log('job not exist');
+        updatedSearchParams.set('jobId', response?.data[0]?._id);
+        setQueryParams(updatedSearchParams.toString());
+      }
+    } else {
+      updatedSearchParams.set('jobId', `${response.data[0]._id}`);
+      setQueryParams(updatedSearchParams.toString());
+    }
+  };
+
   const loadJobs = async (controller: any) => {
     await window.scrollTo(0, 0);
     await jobsRef.current?.scrollTo(0, 0);
@@ -130,6 +174,46 @@ const JobSearchPage: React.FC = () => {
 
     if (optionTypes.includes(jobType) === false) {
       setJobType('');
+    }
+
+    try {
+      const response = await asyncLoadJobs();
+      if (response.code === 200) {
+        setDataState(response);
+        if (response?.data?.length > 0) {
+          handleParams(response);
+        } else {
+          updatedSearchParams.delete('jobId');
+          setQueryParams(updatedSearchParams.toString());
+          setIsLoadingDetailJob(false);
+          setJobDetails(null);
+        }
+      } else if (response.status === 401) {
+        await refreshToken();
+        const response = await asyncLoadJobs();
+        if (response.code === 200) {
+          setDataState(response);
+          if (response?.data?.length > 0) {
+            handleParams(response);
+          } else {
+            updatedSearchParams.delete('jobId');
+            setQueryParams(updatedSearchParams.toString());
+            setIsLoadingDetailJob(false);
+            setJobDetails(null);
+          }
+        } else if (response.status === 401) {
+          dispatch(asyncLogout());
+        } else {
+          setIsLoadingDetailJob(false);
+          setIsLoading(false);
+          setIsLoadingJobs(false);
+          setJobDetails(null);
+        }
+      }
+    } catch (error) {
+      setIsLoadingDetailJob(false);
+      setIsLoading(false);
+      setIsLoadingJobs(false);
     }
 
     fetch(

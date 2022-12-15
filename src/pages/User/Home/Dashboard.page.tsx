@@ -3,6 +3,9 @@ import { Helmet } from 'react-helmet-async';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import ReactPaginate from 'react-paginate';
+import useRefreshToken from '@/hooks/refreshToken.hook';
+import { useAppDispatch } from '@/hooks/redux.hook';
+import { asyncLogout } from '@/store/authSlice';
 import JobCard from '@/pages/User/Jobs/components/JobCard';
 import JobDetails from '@/pages/User/Jobs/components/JobDetails';
 import Loader from '@/components/Reusable/Loader';
@@ -35,6 +38,8 @@ const Transition = React.forwardRef(function Transition(
 const Dashboard: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const refreshToken = useRefreshToken();
+  const dispatch = useAppDispatch();
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
   const [queryParams, setQueryParams] = useSearchParams();
   let updatedSearchParams = new URLSearchParams(queryParams.toString());
@@ -90,11 +95,8 @@ const Dashboard: React.FC = () => {
     setPage(selected);
   };
 
-  const loadJobs = async (controller: any) => {
-    await window.scrollTo(0, 0);
-    await jobsRef.current?.scrollTo(0, 0);
-    setIsLoadingJobs(true);
-    fetch(
+  const asyncLoadJobs = async () => {
+    const response = await fetch(
       `${BACKEND_URL}/job?page=${page}&limit=${limit}&startIndex=${startParam}`,
       {
         method: 'GET',
@@ -102,44 +104,78 @@ const Dashboard: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        signal: controller.signal,
       }
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.code === 200) {
-          setTotalJobs(data.totalRows);
-          setPage(data.page);
-          setLimit(data.limit);
-          setPages(data.totalPage);
-          setJobs(data.data);
-          if (data.data.length > 0) {
-            if (jobIdParam) {
-              const jobExist = Boolean(
-                data.data.find((job: any) => job._id === jobIdParam)
-              );
-              if (!jobExist) {
-                updatedSearchParams.set('jobId', `${data.data[0]._id}`);
-                setQueryParams(updatedSearchParams.toString());
-              }
-            } else {
-              updatedSearchParams.set('jobId', `${data.data[0]._id}`);
-              setQueryParams(updatedSearchParams.toString());
-            }
-          } else {
-            setIsLoadingDetailJob(false);
-            setJobDetails(null);
-          }
+    ).then((res) => res.json());
+
+    return response;
+  };
+
+  const setDataState = (response: any) => {
+    setTotalJobs(response.totalRows);
+    setPage(response.page);
+    setLimit(response.limit);
+    setPages(response.totalPage);
+    setJobs(response.data);
+  };
+
+  const handleParams = (response: any) => {
+    if (jobIdParam) {
+      const jobExist = Boolean(
+        response.data.find((job: any) => job._id === jobIdParam)
+      );
+      if (!jobExist) {
+        updatedSearchParams.set('jobId', `${response.data[0]._id}`);
+        setQueryParams(updatedSearchParams.toString());
+      }
+    } else {
+      updatedSearchParams.set('jobId', `${response.data[0]._id}`);
+      setQueryParams(updatedSearchParams.toString());
+    }
+  };
+
+  const loadJobs = async (controller: any) => {
+    await window.scrollTo(0, 0);
+    await jobsRef.current?.scrollTo(0, 0);
+
+    setIsLoadingJobs(true);
+
+    try {
+      const response = await asyncLoadJobs();
+      if (response.code === 200) {
+        setDataState(response);
+        if (response.data.length > 0) {
+          handleParams(response);
+        } else {
+          setIsLoadingJobs(false);
+          setIsLoadingDetailJob(false);
+          setJobDetails(null);
         }
-      })
-      .catch((error) => {
+      } else if (response.status === 401) {
+        await refreshToken();
+        const response = await asyncLoadJobs();
+        if (response.code === 200) {
+          setDataState(response);
+          if (response.data.length > 0) {
+            handleParams(response);
+          }
+        } else if (response.status === 401) {
+          dispatch(asyncLogout());
+        } else {
+          setIsLoadingDetailJob(false);
+          setIsLoading(false);
+          setIsLoadingJobs(false);
+          setJobDetails(null);
+        }
+      } else {
         setIsLoadingDetailJob(false);
-        console.log(error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-        setIsLoadingJobs(false);
-      });
+      }
+    } catch (error) {
+      setIsLoadingDetailJob(false);
+      console.log(error);
+    }
+
+    setIsLoading(false);
+    setIsLoadingJobs(false);
   };
 
   // ------------------ useEffects ------------------

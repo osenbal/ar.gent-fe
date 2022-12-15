@@ -73,7 +73,7 @@ const UserLoggedInLayout = () => {
   };
 
   const getUserInitials = async (userId: string) => {
-    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
+    const response = await fetch(`${BACKEND_URL}/user`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

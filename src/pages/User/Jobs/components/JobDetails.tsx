@@ -87,12 +87,10 @@ const JobDetails: React.FC<props> = ({ data }) => {
     });
 
     const resData = await response.json();
-    console.log(resData);
     if (response.ok) {
       setStatusApplied(resData.data);
       setIsLoading(false);
     } else {
-      console.log(resData.message);
       setIsLoading(false);
     }
   };
