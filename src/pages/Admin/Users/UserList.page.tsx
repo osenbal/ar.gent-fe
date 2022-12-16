@@ -26,6 +26,7 @@ import {
   TableContainer,
 } from '@mui/material';
 import './UserList.style.css';
+import FetchAdminIntercept from '@/utils/api.admin';
 
 // ----------------------------------------------------------------------
 
@@ -166,18 +167,20 @@ const UserList: React.FC = () => {
   const isNotFound = !filteredUsers.length && !!filterName;
 
   const handleBannedUser = async (userId: string) => {
-    const response = await fetch(`${BACKEND_URL}/admin/banned/${userId}`, {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (response.ok) {
-      const data = await response.json();
+    const response = await FetchAdminIntercept(
+      `${BACKEND_URL}/admin/banned/${userId}`,
+      {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    if (response.code === 200) {
       setUsers(
         users.map((user: any) =>
-          user._id === data.data._id ? data.data : user
+          user._id === response.data._id ? response.data : user
         )
       );
 
@@ -189,15 +192,18 @@ const UserList: React.FC = () => {
   };
 
   const handleDeleteUsers = async () => {
-    const response = await fetch(`${BACKEND_URL}/admin/delete/users`, {
-      method: 'DELETE',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ usersId: selected }),
-    });
-    if (response.ok) {
+    const response = await FetchAdminIntercept(
+      `${BACKEND_URL}/admin/delete/users`,
+      {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ usersId: selected }),
+      }
+    );
+    if (response.code === 200) {
       setPage(0);
       setSelected([]);
       setOpen(null);
@@ -209,16 +215,18 @@ const UserList: React.FC = () => {
   };
 
   const handleDeleteUserById = async (userId: string) => {
-    const response = await fetch(`${BACKEND_URL}/admin/delete/user/${userId}`, {
-      method: 'DELETE',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (response.ok) {
-      const data = await response.json();
-      setUsers(data.data);
+    const response = await FetchAdminIntercept(
+      `${BACKEND_URL}/admin/delete/user/${userId}`,
+      {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    if (response.code === 200) {
+      setUsers(response.data);
       setOpen(null);
       setSelected([]);
     } else {
@@ -229,7 +237,7 @@ const UserList: React.FC = () => {
   };
 
   const getUserList = async (controller: any) => {
-    const response = await fetch(
+    const response = await FetchAdminIntercept(
       `${BACKEND_URL}/admin/get/users?page=${page}&limit=${limit}&search=${search}`,
       {
         method: 'GET',
@@ -240,14 +248,14 @@ const UserList: React.FC = () => {
         signal: controller.signal,
       }
     );
-    if (response.ok) {
-      const data = await response.json();
-      console.log(data);
-      setUsers(data.data);
-      setPage(data.page);
-      setLimit(data.limit);
-      setPages(data.totalPage);
-      setRows(data.totalRows);
+    if (response.code === 200) {
+      // const data = await response.json();
+      console.log(response);
+      setUsers(response.data);
+      setPage(response.page);
+      setLimit(response.limit);
+      setPages(response.totalPage);
+      setRows(response.totalRows);
     } else {
       console.log('error');
       setUsers([]);

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { setIsLoading } from '@/store/authAdminSlice';
+import { useAppDispatch } from '@/hooks/redux.hook';
+import FetchAdminIntercept from '@/utils/api.admin';
+import { BACKEND_URL } from '@/config/config';
 import { green, grey, blue } from '@mui/material/colors';
 import AdbIcon from '@mui/icons-material/Adb';
 import AppleIcon from '@mui/icons-material/Apple';
 import WindowIcon from '@mui/icons-material/Window';
-import { BACKEND_URL } from '@/config/config';
 import {
   Avatar,
   Box,
@@ -16,30 +19,36 @@ import {
 } from '@mui/material';
 
 const DashboardAdmin: React.FC = () => {
+  const dispatch = useAppDispatch();
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [totalJobs, setTotalJobs] = useState<number>(0);
   const [totalReports, setTotalReports] = useState<number>(0);
 
   const getTotalUsers = async () => {
-    const response = await fetch(`${BACKEND_URL}/admin/get/users/total`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
+    dispatch(setIsLoading(true));
+    const response = await FetchAdminIntercept(
+      `${BACKEND_URL}/admin/get/users/total`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      }
+    );
 
-    if (response.ok) {
-      const data = await response.json();
-      setTotalUsers(data.data);
+    if (response.code === 200) {
+      setTotalUsers(response.data);
+      dispatch(setIsLoading(false));
     } else {
-      console.log('Error');
       setTotalUsers(0);
+      dispatch(setIsLoading(false));
     }
   };
 
   useEffect(() => {
     getTotalUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

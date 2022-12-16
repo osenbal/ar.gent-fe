@@ -1,10 +1,14 @@
 import { store } from '@/store';
-import { setIsAuth, setUserId, asyncLogout } from '@/store/authSlice';
+import {
+  setIsAuth,
+  setAdminId,
+  asyncLogoutAdmin,
+} from '@/store/authAdminSlice';
 import { BACKEND_URL } from '@/config/config';
 
-const FetchIntercept = async (url: string, options: RequestInit) => {
+const FetchAdminIntercept = async (url: string, options: RequestInit) => {
   const refreshToken = async () => {
-    const response = await fetch(`${BACKEND_URL}/auth/refresh`, {
+    const response = await fetch(`${BACKEND_URL}/admin/refresh`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -14,11 +18,11 @@ const FetchIntercept = async (url: string, options: RequestInit) => {
     if (response.ok) {
       const data = await response.json();
       store.dispatch(setIsAuth(true));
-      store.dispatch(setUserId(data.data._id));
+      store.dispatch(setAdminId(data.data._id));
     } else {
       store.dispatch(setIsAuth(false));
-      store.dispatch(setUserId(''));
-      store.dispatch(asyncLogout());
+      store.dispatch(setAdminId(''));
+      store.dispatch(asyncLogoutAdmin());
     }
   };
 
@@ -32,4 +36,4 @@ const FetchIntercept = async (url: string, options: RequestInit) => {
   }
 };
 
-export default FetchIntercept;
+export default FetchAdminIntercept;
