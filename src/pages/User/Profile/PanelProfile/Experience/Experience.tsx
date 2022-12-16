@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAppSelector, useAppDispatch } from '@hooks/redux.hook';
-import { asyncUserExperience } from '@/store/authSlice';
+import { setExperienceUser, setIsLoading } from '@/store/authSlice';
 import ExperienceCard from './ExperienceCard';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { Dayjs } from 'dayjs';
-import AddIcon from '@mui/icons-material/Add';
+import { BACKEND_URL } from '@/config/config';
 import { IExperience_User } from '@/interfaces/user.interface';
+import AddIcon from '@mui/icons-material/Add';
 import {
   Card,
   CardContent,
@@ -19,6 +21,7 @@ import {
   FormControl,
   FormControlLabel,
 } from '@mui/material';
+import FetchIntercept from '@/utils/api';
 
 const Experience: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -48,7 +51,37 @@ const Experience: React.FC = () => {
     setIsPreset(false);
   };
 
-  const handleOnAdd = (e: React.MouseEvent) => {
+  const asyncUserExperience = async (
+    userId: string,
+    payload: IExperience_User[]
+  ) => {
+    dispatch(setIsLoading(true));
+    const response = await FetchIntercept(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ experience: payload }),
+    });
+
+    if (response.code === 200) {
+      dispatch(setExperienceUser(payload));
+      toast.success(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      dispatch(setIsLoading(false));
+    } else {
+      toast.warn(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      dispatch(setIsLoading(false));
+    }
+  };
+
+  const handleOnAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (
       position === '' ||
@@ -77,21 +110,19 @@ const Experience: React.FC = () => {
 
     const experienceTemp = [...experienceList, newExperience];
 
-    dispatch(asyncUserExperience({ userId, payload: experienceTemp }));
-
+    await asyncUserExperience(userId, experienceTemp);
     setOpenAdd(false);
   };
 
-  const handleOnEdit = (index: number, item: IExperience_User) => {
+  const handleOnEdit = async (index: number, item: IExperience_User) => {
     const experienceTemp = [...experienceList];
     experienceTemp[index] = item;
-
-    dispatch(asyncUserExperience({ userId, payload: experienceTemp }));
+    await asyncUserExperience(userId, experienceTemp);
   };
 
-  const handleOnDelete = (index: number) => {
+  const handleOnDelete = async (index: number) => {
     const experienceTemp = experienceList.filter((item, ind) => ind !== index);
-    dispatch(asyncUserExperience({ userId, payload: experienceTemp }));
+    await asyncUserExperience(userId, experienceTemp);
   };
 
   useEffect(() => {

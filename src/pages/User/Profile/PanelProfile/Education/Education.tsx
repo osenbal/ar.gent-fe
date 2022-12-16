@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import EducationCard from './EducationCard';
 import { useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { Dayjs } from 'dayjs';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
-import { asyncUserEducation } from '@/store/authSlice';
+import { setEducationUser, setIsLoading } from '@/store/authSlice';
 import { IEducation_User } from '@/interfaces/user.interface';
+import { BACKEND_URL } from '@/config/config';
 import AddIcon from '@mui/icons-material/Add';
 import {
   Card,
@@ -19,6 +21,7 @@ import {
   FormControl,
   FormControlLabel,
 } from '@mui/material';
+import FetchIntercept from '@/utils/api';
 
 const Education: React.FC = () => {
   const { id } = useParams();
@@ -45,7 +48,37 @@ const Education: React.FC = () => {
     setCurrentEducation(false);
   };
 
-  const handleOnAdd = (e: React.MouseEvent) => {
+  const asyncUserEducation = async (
+    userId: string,
+    payload: IEducation_User[]
+  ) => {
+    dispatch(setIsLoading(true));
+    const response = await FetchIntercept(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ education: payload }),
+    });
+
+    if (response.code === 200) {
+      dispatch(setEducationUser(payload));
+      toast.success(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      dispatch(setIsLoading(false));
+    } else {
+      toast.warn(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      dispatch(setIsLoading(false));
+    }
+  };
+
+  const handleOnAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (
       school === '' ||
@@ -71,20 +104,21 @@ const Education: React.FC = () => {
       currentEducation,
     };
     const educationTemp = [...educationList, newEducation];
-    dispatch(asyncUserEducation({ userId, payload: educationTemp }));
+    await asyncUserEducation(userId, educationTemp);
+
     emptyState();
     setOpenAdd(false);
   };
 
-  const handleOnEdit = (index: number, item: IEducation_User) => {
+  const handleOnEdit = async (index: number, item: IEducation_User) => {
     const educationTemp = [...educationList];
     educationTemp[index] = item;
-    dispatch(asyncUserEducation({ userId, payload: educationTemp }));
+    await asyncUserEducation(userId, educationTemp);
   };
 
-  const handleOnDelete = (index: number) => {
+  const handleOnDelete = async (index: number) => {
     const educationTemp = educationList.filter((item, ind) => ind !== index);
-    dispatch(asyncUserEducation({ userId, payload: educationTemp }));
+    await asyncUserEducation(userId, educationTemp);
   };
 
   useEffect(() => {

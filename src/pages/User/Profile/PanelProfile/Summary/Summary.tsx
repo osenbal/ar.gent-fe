@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
 import {
-  asyncUserSummary,
-  asyncUserAvatar,
-  asyncUserCv,
-  asyncUserBanner,
+  setAvatarUser,
+  setBannerUser,
+  setCvUser,
+  setIsLoading,
+  setSummaryUser,
 } from '@/store/authSlice';
 import { toast } from 'react-toastify';
 import { City, Country, State } from 'country-state-city';
@@ -13,6 +14,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import { PHONE_NUMBER_REGEX } from '@/constant/_regex';
 import { parseDate } from '@/utils/utils';
+import FetchIntercept from '@/utils/api';
 import { EGender, IEdited_User } from '@/interfaces/user.interface';
 import { BACKEND_URL } from '@/config/config';
 import { styled } from '@mui/material/styles';
@@ -46,7 +48,6 @@ import {
   Tooltip,
   Zoom,
 } from '@mui/material';
-import FetchIntercept from '@/utils/api';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -154,7 +155,35 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
       zipCode: dataEdited.zipCode,
     };
 
-    dispatch(asyncUserSummary({ userId, payload: data }));
+    // dispatch(asyncUserSummary({ userId, payload: data }));
+
+    dispatch(setIsLoading(true));
+
+    const response = await FetchIntercept(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (response.code === 200) {
+      dispatch(setSummaryUser(data));
+      dispatch(setIsLoading(false));
+
+      toast.success(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+    } else {
+      dispatch(setIsLoading(false));
+      toast.warn(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+    }
+
     setOpen(false);
   };
 
@@ -163,7 +192,31 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     const formData = new FormData();
     formData.append('image', file!);
 
-    dispatch(asyncUserAvatar({ userId, payload: formData }));
+    // dispatch(asyncUserAvatar({ userId, payload: formData }));
+    dispatch(setIsLoading(true));
+    const response = await FetchIntercept(
+      `${BACKEND_URL}/user/upload/${userId}?type=avatar`,
+      {
+        method: 'PUT',
+        credentials: 'include',
+        body: formData,
+      }
+    );
+
+    if (response.code === 200) {
+      dispatch(setAvatarUser(response.data));
+      toast.success(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      dispatch(setIsLoading(false));
+    } else {
+      toast.warn(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      dispatch(setIsLoading(false));
+    }
   };
 
   const handleBannerChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,14 +224,62 @@ const Summary: React.FC<{ id: string | undefined }> = ({ id }) => {
     const formData = new FormData();
     formData.append('image', file!);
 
-    dispatch(asyncUserBanner({ userId, payload: formData }));
+    // dispatch(asyncUserBanner({ userId, payload: formData }));
+    dispatch(setIsLoading(true));
+    const response = await FetchIntercept(
+      `${BACKEND_URL}/user/upload/${userId}?type=banner`,
+      {
+        method: 'PUT',
+        credentials: 'include',
+        body: formData,
+      }
+    );
+
+    if (response.code === 200) {
+      dispatch(setBannerUser(response.data));
+      toast.success(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      dispatch(setIsLoading(false));
+    } else {
+      toast.warn(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      dispatch(setIsLoading(false));
+    }
   };
 
   const handleCvChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     const formData = new FormData();
     formData.append('cv', file!);
-    dispatch(asyncUserCv({ userId, payload: formData }));
+    // dispatch(asyncUserCv({ userId, payload: formData }));
+
+    dispatch(setIsLoading(true));
+    const response = await FetchIntercept(
+      `${BACKEND_URL}/user/uploadfile/${userId}?type=cv`,
+      {
+        method: 'PUT',
+        credentials: 'include',
+        body: formData,
+      }
+    );
+    if (response.code === 200) {
+      dispatch(setCvUser(response.data));
+      toast.success(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      dispatch(setIsLoading(false));
+    } else {
+      toast.warn(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+      dispatch(setIsLoading(false));
+    }
   };
 
   const handleEditChange = useCallback(() => {

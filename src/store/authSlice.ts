@@ -33,34 +33,6 @@ const initialState: AuthState = {
   visited_userDetails: {},
 };
 
-const fetchIntercept = async (url: string, options: RequestInit) => {
-  const response = await fetch(url, options).then((res) => res.json());
-
-  if (response.status === 401) {
-    const refreshToken = await fetch(`${BACKEND_URL}/auth/refresh`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (refreshToken.ok) {
-      const data = await response.json();
-      setIsAuth(true);
-      setUserId(data.userId);
-      return await fetch(url, options).then((res) => res.json());
-    } else {
-      console.log('logout');
-      setIsAuth(false);
-      setUserId('');
-      setUser(null);
-      setIsLoading(false);
-    }
-  } else {
-    return response;
-  }
-};
-
 export const asyncLogout = createAsyncThunk(
   'auth/asyncLogout',
   async (payload) => {
@@ -140,236 +112,6 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-export const asyncUserEducation = createAsyncThunk(
-  'auth/asyncUserEducation',
-  async ({
-    userId,
-    payload,
-  }: {
-    userId: string;
-    payload: IEducation_User[];
-  }) => {
-    const response = await fetchIntercept(`${BACKEND_URL}/user/${userId}`, {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ education: payload }),
-    });
-    console.log(response);
-    if (response.code === 200) {
-      toast.success(`${response.message}`, {
-        position: 'bottom-left',
-        theme: 'dark',
-      });
-      return { education: payload };
-    }
-  }
-);
-
-export const asyncUserExperience = createAsyncThunk(
-  'auth/asyncUserExperience',
-  async ({
-    userId,
-    payload,
-  }: {
-    userId: string;
-    payload: IExperience_User[];
-  }) => {
-    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ experience: payload }),
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      toast.success(`${data.message}`, {
-        position: 'bottom-left',
-        theme: 'dark',
-      });
-
-      return { experience: payload };
-    }
-  }
-);
-
-export const asyncUserSkill = createAsyncThunk(
-  'auth/asyncUserSkill',
-  async ({ userId, payload }: { userId: string; payload: string[] }) => {
-    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ skill: payload }),
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      toast.success(`${data.message}`, {
-        position: 'bottom-left',
-        theme: 'dark',
-      });
-      return { skill: payload };
-    }
-  }
-);
-
-export const asyncUserPortfolioUrl = createAsyncThunk(
-  'auth/asyncUserPortfolioUrl',
-  async ({ userId, payload }: { userId: string; payload: string[] }) => {
-    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ portfolioUrl: payload }),
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      toast.success(`${data.message}`, {
-        position: 'bottom-left',
-        theme: 'dark',
-      });
-      return { portfolioUrl: payload };
-    }
-  }
-);
-
-export const asyncUserAbout = createAsyncThunk(
-  'auth/asyncUserAbout',
-  async ({ userId, payload }: { userId: string; payload: string }) => {
-    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ about: payload.trim() }),
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      toast.success(`${data.message}`, {
-        position: 'bottom-left',
-        theme: 'dark',
-      });
-      return { about: payload.trim() };
-    }
-  }
-);
-
-export const asyncUserSummary = createAsyncThunk(
-  'auth/asyncUserSummary',
-  async ({ userId, payload }: { userId: string; payload: IEdited_User }) => {
-    const response = await fetch(`${BACKEND_URL}/user/${userId}`, {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      toast.success(`${data.message}`, {
-        position: 'bottom-left',
-        theme: 'dark',
-      });
-
-      return { summary: payload };
-    }
-  }
-);
-
-export const asyncUserAvatar = createAsyncThunk(
-  'auth/asyncUserAvatar',
-  async ({ userId, payload }: { userId: string; payload: FormData }) => {
-    const response = await fetch(
-      `${BACKEND_URL}/user/upload/${userId}?type=avatar`,
-      {
-        method: 'PUT',
-        credentials: 'include',
-        body: payload,
-      }
-    );
-
-    const data = await response.json();
-    if (response.ok) {
-      toast.success(`${data.message}`, {
-        position: 'bottom-left',
-        theme: 'dark',
-      });
-
-      return { avatar: data.data };
-    }
-  }
-);
-
-export const asyncUserBanner = createAsyncThunk(
-  'auth/asyncUserBanner',
-  async ({ userId, payload }: { userId: string; payload: FormData }) => {
-    const response = await fetch(
-      `${BACKEND_URL}/user/upload/${userId}?type=banner`,
-      {
-        method: 'PUT',
-        credentials: 'include',
-        body: payload,
-      }
-    );
-
-    const data = await response.json();
-    if (response.ok) {
-      toast.success(`${data.message}`, {
-        position: 'bottom-left',
-        theme: 'dark',
-      });
-
-      return { banner: data.data };
-    }
-  }
-);
-
-export const asyncUserCv = createAsyncThunk(
-  'auth/asyncUserCv',
-  async ({ userId, payload }: { userId: string; payload: FormData }) => {
-    const response = await fetch(
-      `${BACKEND_URL}/user/uploadfile/${userId}?type=cv`,
-      {
-        method: 'PUT',
-        credentials: 'include',
-        body: payload,
-      }
-    );
-
-    const data = await response.json();
-    if (response.ok) {
-      toast.success(`${data.message}`, {
-        position: 'bottom-left',
-        theme: 'dark',
-      });
-
-      return { cv: data.data };
-    } else {
-      toast.error(`${data.message}`, {
-        position: 'bottom-left',
-        theme: 'dark',
-      });
-
-      return { cv: data.data };
-    }
-  }
-);
-
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -391,8 +133,40 @@ export const authSlice = createSlice({
       state.isLoading = action.payload;
     },
     // user profile
+    setAboutUser: (state, action) => {
+      state.user!.about = action.payload;
+    },
+    setSummaryUser: (state, action) => {
+      state.user!.fullName = action.payload.fullName;
+      state.user!.gender = action.payload.gender;
+      state.user!.phoneNumber = action.payload.phoneNumber;
+      state.user!.birthday = action.payload.birthday;
+      state.user!.address.street = action.payload.street;
+      state.user!.address.city = action.payload.city;
+      state.user!.address.state = action.payload.state;
+      state.user!.address.country = action.payload.country;
+      state.user!.address.zipCode = action.payload.zipCode;
+    },
+    setAvatarUser: (state, action) => {
+      state.user!.avatar = action.payload;
+    },
+    setBannerUser: (state, action) => {
+      state.user!.banner = action.payload;
+    },
+    setCvUser: (state, action) => {
+      state.user!.cv = action.payload;
+    },
     setEducationUser: (state, action) => {
       state.user!.education = action.payload;
+    },
+    setExperienceUser: (state, action) => {
+      state.user!.experience = action.payload;
+    },
+    setSkillUser: (state, action) => {
+      state.user!.skill = action.payload;
+    },
+    setPortfolioUser: (state, action) => {
+      state.user!.portfolioUrl = action.payload;
     },
   },
   extraReducers: {
@@ -418,79 +192,6 @@ export const authSlice = createSlice({
       state.user = null;
       state.userId = '';
     },
-    // user profile
-    [asyncUserEducation.pending.type]: (state, { payload }) => {
-      state.isLoading = true;
-    },
-    [asyncUserEducation.fulfilled.type]: (state, { payload }) => {
-      state.user!.education = payload.education;
-      state.isLoading = false;
-    },
-    [asyncUserExperience.pending.type]: (state, { payload }) => {
-      state.isLoading = true;
-    },
-    [asyncUserExperience.fulfilled.type]: (state, { payload }) => {
-      state.user!.experience = payload.experience;
-      state.isLoading = false;
-    },
-    [asyncUserSkill.pending.type]: (state, { payload }) => {
-      state.isLoading = true;
-    },
-    [asyncUserSkill.fulfilled.type]: (state, { payload }) => {
-      state.user!.skill = payload.skill;
-      state.isLoading = false;
-    },
-    [asyncUserPortfolioUrl.pending.type]: (state, { payload }) => {
-      state.isLoading = true;
-    },
-    [asyncUserPortfolioUrl.fulfilled.type]: (state, { payload }) => {
-      state.user!.portfolioUrl = payload.portfolioUrl;
-      state.isLoading = false;
-    },
-    [asyncUserAbout.pending.type]: (state, { payload }) => {
-      state.isLoading = true;
-    },
-    [asyncUserAbout.fulfilled.type]: (state, { payload }) => {
-      state.user!.about = payload.about;
-      state.isLoading = false;
-    },
-    [asyncUserSummary.pending.type]: (state, { payload }) => {
-      state.isLoading = true;
-    },
-    [asyncUserSummary.fulfilled.type]: (state, { payload }) => {
-      console.log(payload);
-      state.user!.fullName = payload.summary.fullName;
-      state.user!.gender = payload.summary.gender;
-      state.user!.phoneNumber = payload.summary.phoneNumber;
-      state.user!.birthday = payload.summary.birthday;
-      state.user!.address.street = payload.summary.street;
-      state.user!.address.city = payload.summary.city;
-      state.user!.address.state = payload.summary.state;
-      state.user!.address.country = payload.summary.country;
-      state.user!.address.zipCode = payload.summary.zipCode;
-      state.isLoading = false;
-    },
-    [asyncUserAvatar.pending.type]: (state, { payload }) => {
-      state.isLoading = true;
-    },
-    [asyncUserAvatar.fulfilled.type]: (state, { payload }) => {
-      state.user!.avatar = payload.avatar;
-      state.isLoading = false;
-    },
-    [asyncUserBanner.pending.type]: (state, { payload }) => {
-      state.isLoading = true;
-    },
-    [asyncUserBanner.fulfilled.type]: (state, { payload }) => {
-      state.user!.banner = payload.banner;
-      state.isLoading = false;
-    },
-    [asyncUserCv.pending.type]: (state, { payload }) => {
-      state.isLoading = true;
-    },
-    [asyncUserCv.fulfilled.type]: (state, { payload }) => {
-      state.user!.cv = payload.cv;
-      state.isLoading = false;
-    },
   },
 });
 
@@ -500,7 +201,15 @@ export const {
   setPersist,
   setIsLoading,
   setUserId,
+  setAboutUser,
+  setSummaryUser,
+  setAvatarUser,
+  setBannerUser,
+  setCvUser,
   setEducationUser,
+  setExperienceUser,
+  setSkillUser,
+  setPortfolioUser,
 } = authSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type

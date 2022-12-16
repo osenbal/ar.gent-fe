@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
-import { asyncUserAbout } from '@/store/authSlice';
+import { setAboutUser, setIsLoading } from '@/store/authSlice';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
+import { BACKEND_URL } from '@/config/config';
 import { Edit } from '@mui/icons-material';
 import {
   Box,
@@ -12,6 +14,7 @@ import {
   CardContent,
   TextField,
 } from '@mui/material';
+import FetchIntercept from '@/utils/api';
 
 const About: React.FC = () => {
   const { id } = useParams();
@@ -22,6 +25,33 @@ const About: React.FC = () => {
 
   const [editAbout, setEditAbout] = useState<string>('');
 
+  const asyncUserAbout = async (userId: string, payload: string) => {
+    dispatch(setIsLoading(true));
+    const response = await FetchIntercept(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ about: payload.trim() }),
+    });
+
+    if (response.code === 200) {
+      dispatch(setAboutUser(payload.trim()));
+      dispatch(setIsLoading(false));
+      toast.success(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+    } else {
+      dispatch(setIsLoading(false));
+      toast.warn(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+    }
+  };
+
   const handleSaveChanges = async (e: React.MouseEvent) => {
     e.preventDefault();
 
@@ -29,8 +59,7 @@ const About: React.FC = () => {
       setOpen(false);
       return;
     }
-
-    dispatch(asyncUserAbout({ userId, payload: editAbout }));
+    await asyncUserAbout(userId, editAbout);
     setOpen(false);
   };
 

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux.hook';
-import { asyncUserPortfolioUrl } from '@/store/authSlice';
+import { setPortfolioUser, setIsLoading } from '@/store/authSlice';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
+import FetchIntercept from '@/utils/api';
+import { BACKEND_URL } from '@/config/config';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import {
@@ -24,18 +27,45 @@ const PortfolioUrl: React.FC = () => {
   const [portfolioUrls, setPortfolioUrls] = useState<string[] | []>([]);
   const [portfolioUrl, setPortfolioUrl] = useState<string>('');
 
+  const asyncUserPortfolioUrl = async (userId: string, payload: string[]) => {
+    dispatch(setIsLoading(true));
+    const response = await FetchIntercept(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ portfolioUrl: payload }),
+    });
+
+    if (response.code === 200) {
+      dispatch(setPortfolioUser(payload));
+      dispatch(setIsLoading(false));
+      toast.success(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+    } else {
+      dispatch(setIsLoading(false));
+      toast.warn(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+    }
+  };
+
   const handleSaveChanges = async (e: React.MouseEvent) => {
     e.preventDefault();
     const tempPortfolioUrl = [...portfolioUrls, portfolioUrl];
-    dispatch(asyncUserPortfolioUrl({ userId, payload: tempPortfolioUrl }));
+    await asyncUserPortfolioUrl(userId, tempPortfolioUrl);
     setOpenAdd(false);
   };
 
-  const handleDeletePortfolioUrl = (index: number) => {
+  const handleDeletePortfolioUrl = async (index: number) => {
     const tempPortfolioUrl = portfolioUrls.filter(
       (portfolioUrl, i) => i !== index
     );
-    dispatch(asyncUserPortfolioUrl({ userId, payload: tempPortfolioUrl }));
+    await asyncUserPortfolioUrl(userId, tempPortfolioUrl);
   };
 
   useEffect(() => {

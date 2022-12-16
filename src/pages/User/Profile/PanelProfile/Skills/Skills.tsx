@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux.hook';
 import { useParams } from 'react-router-dom';
-import { asyncUserSkill } from '@/store/authSlice';
+import { toast } from 'react-toastify';
+import { setSkillUser, setIsLoading } from '@/store/authSlice';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
+import FetchIntercept from '@/utils/api';
+import { BACKEND_URL } from '@/config/config';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import AddIcon from '@mui/icons-material/Add';
 import {
@@ -24,6 +27,33 @@ const Skills: React.FC = () => {
   const [skills, setSkills] = useState<string[] | []>([]);
   const [skill, setSkill] = useState<string>('');
 
+  const asyncUserSkill = async (userId: string, payload: string[]) => {
+    dispatch(setIsLoading(true));
+    const response = await FetchIntercept(`${BACKEND_URL}/user/${userId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ skill: payload }),
+    });
+
+    if (response.code === 200) {
+      dispatch(setSkillUser(payload));
+      dispatch(setIsLoading(false));
+      toast.success(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+    } else {
+      dispatch(setIsLoading(false));
+      toast.warn(`${response.message}`, {
+        position: 'bottom-left',
+        theme: 'dark',
+      });
+    }
+  };
+
   const handleSaveChanges = async (e: React.MouseEvent) => {
     e.preventDefault();
 
@@ -35,13 +65,16 @@ const Skills: React.FC = () => {
     setSkill(skill.trim());
 
     const tempSkill = [...skills, skill];
-    dispatch(asyncUserSkill({ userId, payload: tempSkill }));
+    // dispatch(asyncUserSkill({ userId, payload: tempSkill }));
+
+    await asyncUserSkill(userId, tempSkill);
     setOpenAdd(false);
   };
 
-  const handleDeleteSkill = (index: number) => {
+  const handleDeleteSkill = async (index: number) => {
     const tempSkill = skills.filter((skill, i) => i !== index);
-    dispatch(asyncUserSkill({ userId, payload: tempSkill }));
+    // dispatch(asyncUserSkill({ userId, payload: tempSkill }));
+    await asyncUserSkill(userId, tempSkill);
   };
 
   useEffect(() => {
