@@ -147,6 +147,9 @@ const Dashboard: React.FC = () => {
         if (response.data.length > 0) {
           handleParams(response);
         }
+        if (response.data.length === 0) {
+          setIsLoadingDetailJob(false);
+        }
       } else {
         setAllLoadingFalse();
       }

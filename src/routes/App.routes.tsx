@@ -29,6 +29,8 @@ import UserApplication from '@/pages/User/Profile/PanelUserApplication/UserAppli
 import JobDetailsPage from '@/pages/User/Jobs/JobDetails.page';
 import JobNearlyPage from '@/pages/User/Jobs/JobNearly.page';
 import JobSearchPage from '@/pages/User/Jobs/JobSearch.page';
+import UserReportPage from '@/pages/Admin/UserReport/UserReport.page';
+import UserReportDetail from '@/pages/Admin/UserReport/UserReportDetail.page';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -42,6 +44,12 @@ const AppRoutes: React.FC = () => {
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<DashboardAdmin />} />
             <Route path="/admin/users" element={<UserList />} />
+            <Route path="/admin/jobs" />
+            <Route path="/admin/reports" element={<UserReportPage />} />
+            <Route
+              path="/admin/reports/:reportId"
+              element={<UserReportDetail />}
+            />
           </Route>
         </Route>
 

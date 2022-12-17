@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { filter } from 'lodash';
 import { Helmet } from 'react-helmet-async';
-import UserListToolbar from './UserListToolbar';
-import UserListHead from './UserListHead';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { Link } from 'react-router-dom';
+import UserReportListToolbar from './UserReportListToolbar';
+import UserReportListHead from './UserReportListHead';
 import ReactPaginate from 'react-paginate';
 import { BACKEND_URL } from '@/config/config';
-import IUser from '@/interfaces/user.interface';
+import { IReturn_Reported_User } from '@/interfaces/user.interface';
 import {
   Card,
   Table,
@@ -14,28 +14,26 @@ import {
   Paper,
   Avatar,
   Button,
-  Popover,
   Checkbox,
   TableRow,
-  MenuItem,
   TableBody,
   TableCell,
   Container,
   Typography,
-  IconButton,
   TableContainer,
 } from '@mui/material';
-import './UserList.style.css';
+// import './UserList.style.css';
 import FetchAdminIntercept from '@/utils/api.admin';
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'fullName', label: 'Name', alignRight: false },
+  { id: 'userReported', label: 'User Reported', alignRight: false },
   { id: 'username', label: 'Username', alignRight: false },
   { id: 'email', label: 'Email', alignRight: false },
   { id: 'isVerified', label: 'Verified', alignRight: false },
   { id: 'status', label: 'Status', alignRight: false },
+  { id: 'description', label: 'Short Description', alignRight: false },
   { id: '' },
 ];
 
@@ -76,8 +74,7 @@ function applySortFilter(array: any, comparator: any, query: any) {
 
 // ----------------------------------------------------------------------
 
-const UserList: React.FC = () => {
-  const [open, setOpen] = useState<HTMLButtonElement | null>(null);
+const UserReportPage: React.FC = () => {
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [pages, setPages] = useState<number>(0);
@@ -90,15 +87,9 @@ const UserList: React.FC = () => {
   const [orderBy, setOrderBy] = useState<string>('fullName');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [filterName, setFilterName] = useState<string>('');
-  const [users, setUsers] = useState<IUser[] | []>([]);
+  const [users, setUsers] = useState<IReturn_Reported_User[] | []>([]);
 
-  const handleOpenMenu = (event: any) => {
-    setOpen(event.currentTarget);
-  };
-
-  const handleCloseMenu = () => {
-    setOpen(null);
-  };
+  // ----------------------------------------------------------------------
 
   const handleRequestSort = (event: any, property: any) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -144,14 +135,6 @@ const UserList: React.FC = () => {
     }
   };
 
-  // const handleChangeRowsPerPage = (event: any) => {
-  //   setPage(0);
-  //   setLimit(parseInt(event.target.value, 10));
-  // };
-
-  // const emptyRows =
-  //   page > 0 ? Math.max(0, (1 + page) * limit - users.length) : 0;
-
   const handleFilterByName = (event: any) => {
     event.preventDefault();
     setPage(0);
@@ -166,34 +149,9 @@ const UserList: React.FC = () => {
 
   const isNotFound = !filteredUsers.length && !!filterName;
 
-  const handleBannedUser = async (userId: string) => {
+  const handleDeleteReport = async () => {
     const response = await FetchAdminIntercept(
-      `${BACKEND_URL}/admin/user/banned/${userId}`,
-      {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    if (response.code === 200) {
-      setUsers(
-        users.map((user: any) =>
-          user._id === response.data._id ? response.data : user
-        )
-      );
-
-      setOpen(null);
-    } else {
-      console.log('error');
-      setOpen(null);
-    }
-  };
-
-  const handleDeleteUsers = async () => {
-    const response = await FetchAdminIntercept(
-      `${BACKEND_URL}/admin/user/delete`,
+      `${BACKEND_URL}/admin/user/report/delete`,
       {
         method: 'DELETE',
         credentials: 'include',
@@ -204,47 +162,17 @@ const UserList: React.FC = () => {
       }
     );
     if (response.code === 200) {
-      if (page === 0) {
-        const controller = new AbortController();
-        getUserList(controller);
-      } else {
-        setPage(0);
-      }
-      setSelected([]);
-      setOpen(null);
-    } else {
-      console.log('error');
-      setSelected([]);
-      setOpen(null);
-    }
-  };
-
-  const handleDeleteUserById = async (userId: string) => {
-    if (!open) return;
-    const response = await FetchAdminIntercept(
-      `${BACKEND_URL}/admin/user/${userId}`,
-      {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    if (response.code === 200) {
-      setUsers(users.filter((user) => user._id !== open.id));
-      setOpen(null);
+      setPage(0);
       setSelected([]);
     } else {
       console.log('error');
-      setOpen(null);
       setSelected([]);
     }
   };
 
   const getUserList = async (controller: any) => {
     const response = await FetchAdminIntercept(
-      `${BACKEND_URL}/admin/user?page=${page}&limit=${limit}&search=${search}`,
+      `${BACKEND_URL}/admin/user/report?page=${page}&limit=${limit}&search=${search}`,
       {
         method: 'GET',
         headers: {
@@ -267,6 +195,8 @@ const UserList: React.FC = () => {
       setUsers([]);
     }
   };
+
+  // ----------------------------------------------------------------------
 
   useEffect(() => {
     const controller = new AbortController();
@@ -301,17 +231,17 @@ const UserList: React.FC = () => {
         </Stack>
 
         <Card>
-          <UserListToolbar
+          <UserReportListToolbar
             numSelected={selected.length}
             filterName={query}
             onChangeQuery={(e: any) => setQuery(e.target.value)}
             onFilterName={handleFilterByName}
-            handleDeleteUsers={handleDeleteUsers}
+            handleDeleteReports={handleDeleteReport}
           />
           <Paper sx={{ width: '100%', mb: 2, overflow: 'auto' }}>
             <TableContainer sx={{ minWidth: 800 }}>
               <Table>
-                <UserListHead
+                <UserReportListHead
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
@@ -321,30 +251,13 @@ const UserList: React.FC = () => {
                   onSelectAllClick={(e) => handleSelectAllClick(e, users)}
                 />
                 <TableBody>
-                  {filteredUsers.map((row: any) => {
-                    const {
-                      _id,
-                      fullName,
-                      username,
-                      email,
-                      avatar,
-                      status,
-                      verified,
-                    }: {
-                      _id: never;
-                      fullName: never;
-                      username: any;
-                      email: any;
-                      status: any;
-                      avatar: any;
-                      verified: any;
-                    } = row;
-                    const selectedUser = selected.indexOf(_id) !== -1;
+                  {filteredUsers.map((row: IReturn_Reported_User) => {
+                    const selectedUser = selected.indexOf(row._id) !== -1;
 
                     return (
                       <TableRow
                         hover
-                        key={_id}
+                        key={row._id}
                         tabIndex={-1}
                         role="checkbox"
                         selected={selectedUser}
@@ -352,7 +265,7 @@ const UserList: React.FC = () => {
                         <TableCell padding="checkbox">
                           <Checkbox
                             checked={selectedUser}
-                            onChange={(event) => handleClick(event, _id)}
+                            onChange={(event) => handleClick(event, row._id)}
                           />
                         </TableCell>
 
@@ -362,34 +275,57 @@ const UserList: React.FC = () => {
                             alignItems="center"
                             spacing={2}
                           >
-                            <Avatar alt={fullName} src={avatar} />
+                            <Avatar
+                              alt={row.userReported.fullName}
+                              src={row.userReported.avatar}
+                            />
                             <Typography variant="subtitle2" noWrap>
-                              {fullName}
+                              {row.userReported.fullName}
                             </Typography>
                           </Stack>
                         </TableCell>
 
-                        <TableCell align="left">{username}</TableCell>
-
-                        <TableCell align="left">{email}</TableCell>
-
                         <TableCell align="left">
-                          {verified ? 'Yes' : 'No'}
+                          <Link to={`/admin/reports/${row._id}`}>
+                            {row.userReported.username}
+                          </Link>
                         </TableCell>
 
                         <TableCell align="left">
-                          <Button>{status ? 'Active' : 'Banned'}</Button>
+                          {row.userReported.email}
                         </TableCell>
 
-                        <TableCell align="right">
-                          <IconButton
-                            id={_id}
-                            size="large"
-                            color="inherit"
-                            onClick={handleOpenMenu}
+                        <TableCell align="left">
+                          {row.userReported.verified ? 'Yes' : 'No'}
+                        </TableCell>
+
+                        <TableCell align="left">
+                          <Button>
+                            {row.userReported.status ? 'Active' : 'Banned'}
+                          </Button>
+                        </TableCell>
+
+                        <TableCell
+                          sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}
+                          align="right"
+                        >
+                          <Typography
+                            sx={{
+                              wordWrap: 'break-word',
+                              whiteSpace: 'normal',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              display: '-webkit-box',
+                              textAlign: 'left',
+                              maxWidth: 130,
+                              '-webkit-line-clamp': 2,
+                              '-webkit-box-orient': 'vertical',
+                            }}
+                            variant="subtitle2"
+                            noWrap
                           >
-                            <MoreVertIcon />
-                          </IconButton>
+                            {row.description}
+                          </Typography>
                         </TableCell>
                       </TableRow>
                     );
@@ -437,7 +373,6 @@ const UserList: React.FC = () => {
             </div>
             <nav key={rows}>
               <ReactPaginate
-                forcePage={page}
                 previousLabel={'< '}
                 nextLabel={'>'}
                 breakLabel={'...'}
@@ -454,40 +389,8 @@ const UserList: React.FC = () => {
           </Paper>
         </Card>
       </Container>
-
-      <Popover
-        open={Boolean(open)}
-        anchorEl={open}
-        onClose={handleCloseMenu}
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        PaperProps={{
-          sx: {
-            p: 1,
-            width: 190,
-            '& .MuiMenuItem-root': {
-              px: 1,
-              typography: 'body2',
-              borderRadius: 0.75,
-            },
-          },
-        }}
-      >
-        {/* get id from user list */}
-
-        <MenuItem onClick={() => (open ? handleBannedUser(open.id) : null)}>
-          Banned / Unbanned
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => (open ? handleDeleteUserById(open.id) : null)}
-          sx={{ color: 'error.main' }}
-        >
-          Delete
-        </MenuItem>
-      </Popover>
     </>
   );
 };
 
-export default UserList;
+export default UserReportPage;

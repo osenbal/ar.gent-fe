@@ -137,7 +137,7 @@ const JobDetails: React.FC<props> = ({ data }) => {
           </Typography>
         </Box>
 
-        {userId !== data.userId && (
+        {userId !== data.userId && !data.isClosed && (
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
             <Button
               onClick={handleApplyJob}

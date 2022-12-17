@@ -27,7 +27,7 @@ const DashboardAdmin: React.FC = () => {
   const getTotalUsers = async () => {
     dispatch(setIsLoading(true));
     const response = await FetchAdminIntercept(
-      `${BACKEND_URL}/admin/get/users/total`,
+      `${BACKEND_URL}/admin/user/total`,
       {
         method: 'GET',
         headers: {

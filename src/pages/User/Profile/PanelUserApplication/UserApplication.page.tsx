@@ -29,11 +29,11 @@ const CardLink = ({ link, data }: { link: string; data: any }) => {
         <Card>
           <CardContent>
             <StyledLink to={link}>
-              <Typography>{data.job[0].title}</Typography>
+              <Typography>{data?.job[0].title}</Typography>
             </StyledLink>
             <Typography sx={{ mt: 1 }}>
-              {data.job[0].location.state.name},{' '}
-              {data.job[0].location.country.name}
+              {data?.job[0].location.state.name},{' '}
+              {data?.job[0].location.country.name}
             </Typography>
 
             <div
@@ -47,12 +47,12 @@ const CardLink = ({ link, data }: { link: string; data: any }) => {
               <Typography sx={{ fontWeight: 300, fontSize: '14px' }}>
                 Appply : {DateToDMY(data.createdAt)}
               </Typography>
-              {data.isApprove === 'approved' ? (
+              {data?.isApprove === 'approved' ? (
                 <Typography sx={{ color: '#26a69a', fontWeight: 700 }}>
                   Approved
                   <CheckIcon />
                 </Typography>
-              ) : data.isApprove === 'rejected' ? (
+              ) : data?.isApprove === 'rejected' ? (
                 <>Rejected</>
               ) : (
                 <>Pending</>
@@ -82,7 +82,6 @@ const UserApplication: React.FC = () => {
         credentials: 'include',
       }
     );
-
     if (response.code === 200) {
       setApplications(response.data);
       setIsLoading(false);
@@ -100,7 +99,7 @@ const UserApplication: React.FC = () => {
     <>
       {isLoading ? (
         <p>Loading....</p>
-      ) : applications.length > 0 ? (
+      ) : applications?.length > 0 ? (
         <StyledContainer container spacing={2}>
           {applications.map((item: any, index: number) => (
             <CardLink

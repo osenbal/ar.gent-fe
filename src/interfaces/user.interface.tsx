@@ -56,6 +56,38 @@ export interface IEdited_User {
   zipCode: string;
 }
 
+export interface IReturn_Reported_User {
+  _id: never;
+  description: string;
+  userReportedId: string;
+  userReportId: string;
+  createdAt: Date;
+  userReported: {
+    _id: string;
+    email: string;
+    fullName: string;
+    username: string;
+    avatar: string;
+    phoneNumber: string;
+    address: string;
+    status: boolean;
+    verified: boolean;
+    createdAt: Date;
+  };
+  userReport: {
+    _id: string;
+    email: string;
+    fullName: string;
+    username: string;
+    avatar: string;
+    phoneNumber: string;
+    address: string;
+    status: boolean;
+    verified: boolean;
+    createdAt: Date;
+  };
+}
+
 export default interface IUser {
   _id: string;
   avatar: string;

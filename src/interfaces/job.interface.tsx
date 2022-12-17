@@ -10,6 +10,7 @@ export default interface IJob {
   type: EJobType | string;
   level: EJobLevel | string;
   workPlace: EJobWorkPlace | string;
+  isClosed: boolean;
   createdAt: Date;
   updatedAt: Date | null;
   deletedAt: Date | null;
@@ -44,6 +45,7 @@ export interface IReturn_JobDetails {
   level: EJobLevel | string;
   workPlace: EJobWorkPlace | string;
   totalAppliciants: number;
+  isClosed: boolean;
   user: {
     _id: string;
     username: string;
