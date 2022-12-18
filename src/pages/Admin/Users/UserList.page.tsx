@@ -25,7 +25,6 @@ import {
   IconButton,
   TableContainer,
 } from '@mui/material';
-import './UserList.style.css';
 import FetchAdminIntercept from '@/utils/api.admin';
 
 // ----------------------------------------------------------------------
@@ -256,7 +255,6 @@ const UserList: React.FC = () => {
     );
     if (response.code === 200) {
       // const data = await response.json();
-      console.log(response);
       setUsers(response.data);
       setPage(response.page);
       setLimit(response.limit);

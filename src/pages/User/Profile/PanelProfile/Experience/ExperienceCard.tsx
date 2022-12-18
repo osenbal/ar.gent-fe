@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAppSelector } from '@hooks/redux.hook';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import { IExperience_User } from '@/interfaces/user.interface';
@@ -56,12 +57,12 @@ const ExperienceCard: React.FC<props> = ({
       experienceTemp.location === '' ||
       experienceTemp.startDate === null
     ) {
-      console.log('please fill the field required');
+      toast.warn('please fill the field required');
       return;
     }
 
     if (experienceTemp.endDate === null && !experienceTemp.isPresent) {
-      console.log('please fill the field required');
+      toast.warn('please fill the field required');
       return;
     }
 

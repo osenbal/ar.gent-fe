@@ -3,8 +3,6 @@ import { BACKEND_URL } from '@/config/config';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
-import useRefreshToken from '@/hooks/refreshToken.hook';
-import { useAppDispatch } from '@/hooks/redux.hook';
 import JobCard from './components/JobCard';
 import JobDetails from './components/JobDetails';
 import Loader from '@/components/Reusable/Loader';
@@ -214,7 +212,6 @@ const JobNearlyPage: React.FC = () => {
       );
 
       if (response.code === 200) {
-        console.log(response.data);
         setJobDetails(response.data);
         setIsLoadingDetailJob(false);
       } else {

@@ -289,7 +289,6 @@ const JobControlPage: React.FC = () => {
         },
       });
 
-      console.log(response);
       if (response.code === 200) {
         const city = response.data.location.city.name;
         const country = response.data.location.country.isoCode;
@@ -365,7 +364,8 @@ const JobControlPage: React.FC = () => {
     )[0];
 
     if (!country || !state || !city) {
-      console.log('please select a valid country, state and city');
+      // console.log('please select a valid country, state and city');
+      toast.warn('Please select a valid country, state and city');
       return;
     }
 
@@ -515,7 +515,6 @@ const JobControlPage: React.FC = () => {
 
   useEffect(() => {
     if (jobId) {
-      console.log('load job');
       getJobDetail();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

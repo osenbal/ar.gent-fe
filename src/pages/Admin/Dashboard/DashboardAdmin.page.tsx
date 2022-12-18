@@ -10,7 +10,6 @@ import AppleIcon from '@mui/icons-material/Apple';
 import WindowIcon from '@mui/icons-material/Window';
 import {
   Avatar,
-  Box,
   Card,
   CardContent,
   Container,

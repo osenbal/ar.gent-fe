@@ -17,22 +17,20 @@ const ProtectedAdmin: React.FC = () => {
     let isMounted = true;
     const verifyToken = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/admin/refresh`, {
+        const response = await fetch(`${BACKEND_URL}/admin/refresh`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
           credentials: 'include',
         });
-        console.log(res);
-        if (res.ok) {
-          const data = await res.json();
+        if (response.ok) {
+          const data = await response.json();
           dispatch(setIsAuth(true));
           dispatch(setAdminId(data.data._id));
         }
       } catch (error) {
         console.log(error);
-        console.log('Error');
       } finally {
         isMounted && setIsLoading(false);
       }

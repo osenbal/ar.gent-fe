@@ -3,10 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import ReactPaginate from 'react-paginate';
-import useRefreshToken from '@/hooks/refreshToken.hook';
-import { useAppDispatch } from '@/hooks/redux.hook';
 import FetchIntercept from '@/utils/api';
-import { asyncLogout } from '@/store/authSlice';
 import JobCard from '@/pages/User/Jobs/components/JobCard';
 import JobDetails from '@/pages/User/Jobs/components/JobDetails';
 import Loader from '@/components/Reusable/Loader';
@@ -26,7 +23,6 @@ import {
   IconButton,
   Slide,
 } from '@mui/material';
-import { isEmpty } from '@/utils/utils';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -40,8 +36,6 @@ const Transition = React.forwardRef(function Transition(
 const Dashboard: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const refreshToken = useRefreshToken();
-  const dispatch = useAppDispatch();
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
   const [queryParams, setQueryParams] = useSearchParams();
   let updatedSearchParams = new URLSearchParams(queryParams.toString());

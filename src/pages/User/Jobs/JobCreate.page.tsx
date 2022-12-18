@@ -100,7 +100,7 @@ const JobCreatePage: React.FC = () => {
       !jobData.state ||
       !jobData.country
     ) {
-      console.log('Please fill all the fields');
+      toast.warn('Please fill all the fields');
       return;
     }
 
@@ -116,7 +116,7 @@ const JobCreatePage: React.FC = () => {
     ).filter((city) => city.name === jobData.city)[0];
 
     if (!country || !state || !city) {
-      console.log('Please fill all the fields');
+      toast.warn('Please fill all the fields');
       return;
     }
 

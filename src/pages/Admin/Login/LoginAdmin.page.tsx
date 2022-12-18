@@ -13,9 +13,9 @@ import {
 } from '@mui/material';
 
 const LoginAdmin: React.FC = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { isLoading, isAuth } = useAppSelector((state) => state.authAdmin);
-  const navigate = useNavigate();
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -54,6 +54,7 @@ const LoginAdmin: React.FC = () => {
             Login
           </Typography>
           <Divider sx={{ width: '100%' }} />
+
           <TextField
             type="email"
             label="Email"
@@ -72,6 +73,7 @@ const LoginAdmin: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+
           <Button
             disabled={isLoading}
             onClick={handleLogin}

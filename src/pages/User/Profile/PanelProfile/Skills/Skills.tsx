@@ -58,7 +58,7 @@ const Skills: React.FC = () => {
     e.preventDefault();
 
     if (skill === '') {
-      console.log('please fill the field required');
+      toast.warn('please fill the field required');
       return;
     }
 

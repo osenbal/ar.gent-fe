@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import CustomizeModal from '@/components/Reusable/CustomizeModal';
 import { useAppSelector } from '@/hooks/redux.hook';
 import { useParams } from 'react-router-dom';
@@ -54,12 +55,12 @@ const EducationCard: React.FC<props> = ({
       educationTemp.location === '' ||
       educationTemp.startDate === null
     ) {
-      console.log('please fill the field required');
+      toast.warn('please fill the field required');
       return;
     }
 
     if (educationTemp.endDate === null && !educationTemp.currentEducation) {
-      console.log('please fill the field required');
+      toast.warn('please fill the field required');
       return;
     }
 

@@ -2,9 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
 import { Helmet } from 'react-helmet-async';
-import useRefreshToken from '@/hooks/refreshToken.hook';
-import { useAppDispatch } from '@/hooks/redux.hook';
-import { asyncLogout } from '@/store/authSlice';
 import JobCard from '@/pages/User/Jobs/components/JobCard';
 import JobDetails from '@/pages/User/Jobs/components/JobDetails';
 import SearchApp from '@/components/Reusable/SearchApp';
@@ -48,8 +45,6 @@ const Transition = React.forwardRef(function Transition(
 
 const JobSearchPage: React.FC = () => {
   const theme = useTheme();
-  const refreshToken = useRefreshToken();
-  const dispatch = useAppDispatch();
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
   const [queryParams, setQueryParams] = useSearchParams();
   let updatedSearchParams = new URLSearchParams(queryParams.toString());
@@ -215,7 +210,6 @@ const JobSearchPage: React.FC = () => {
       );
 
       if (response.code === 200) {
-        console.log(response.data);
         setJobDetails(response.data);
         setIsLoadingDetailJob(false);
       } else {

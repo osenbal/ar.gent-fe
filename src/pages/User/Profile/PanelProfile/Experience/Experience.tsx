@@ -89,12 +89,12 @@ const Experience: React.FC = () => {
       location === '' ||
       startDate === null
     ) {
-      console.log('please fill the field required');
+      toast.warn('please fill the field required');
       return;
     }
 
     if (endDate === null && !isPresent) {
-      console.log('please fill the field required');
+      toast.warn('please fill the field required');
       return;
     }
 

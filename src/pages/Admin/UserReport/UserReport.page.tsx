@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { filter } from 'lodash';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
+import ReactPaginate from 'react-paginate';
 import UserReportListToolbar from './UserReportListToolbar';
 import UserReportListHead from './UserReportListHead';
-import ReactPaginate from 'react-paginate';
 import { BACKEND_URL } from '@/config/config';
+import FetchAdminIntercept from '@/utils/api.admin';
 import { IReturn_Reported_User } from '@/interfaces/user.interface';
 import {
   Card,
@@ -22,8 +23,6 @@ import {
   Typography,
   TableContainer,
 } from '@mui/material';
-// import './UserList.style.css';
-import FetchAdminIntercept from '@/utils/api.admin';
 
 // ----------------------------------------------------------------------
 
@@ -48,6 +47,8 @@ function descendingComparator(a: any, b: any, orderBy: any) {
   }
   return 0;
 }
+
+// ----------------------------------------------------------------------
 
 function getComparator(order: any, orderBy: any) {
   return order === 'desc'
@@ -182,6 +183,7 @@ const UserReportPage: React.FC = () => {
         signal: controller.signal,
       }
     );
+
     if (response.code === 200) {
       // const data = await response.json();
       console.log(response);

@@ -2,12 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { toast } from 'react-toastify';
 import { RootState } from '.';
 import { BACKEND_URL } from '@/config/config';
-import IUser, {
-  IEducation_User,
-  IExperience_User,
-  ILogin_User,
-  IEdited_User,
-} from '@interfaces/user.interface';
+import IUser, { ILogin_User } from '@interfaces/user.interface';
 
 // Define a type for the slice state
 interface AuthState {

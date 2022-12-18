@@ -100,6 +100,7 @@ const UserReportDetail = () => {
 
   const getReportDetail = async () => {
     setIsLoading(true);
+
     const response = await FetchAdminIntercept(
       `${BACKEND_URL}/admin/user/report/${reportId}`,
       {
@@ -110,6 +111,7 @@ const UserReportDetail = () => {
         },
       }
     );
+
     if (response.code === 200) {
       setDetailReport(response.data);
       setUserReport(response.data.userReport);
@@ -134,7 +136,6 @@ const UserReportDetail = () => {
       }
     );
 
-    console.log(response);
     if (response.code === 200) {
       setUserReported(response.data);
       toast.success(response.message);
@@ -159,7 +160,6 @@ const UserReportDetail = () => {
       }
     );
 
-    console.log(response);
     if (response.code === 200) {
       setIsLoadingButton(false);
       toast.success('success delete user');

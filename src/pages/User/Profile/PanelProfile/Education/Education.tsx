@@ -86,12 +86,12 @@ const Education: React.FC = () => {
       location === '' ||
       startDate === null
     ) {
-      console.log('please fill the field required');
+      toast.warn('please fill the field required');
       return;
     }
 
     if (endDate === null && !currentEducation) {
-      console.log('please fill the field required');
+      toast.warn('please fill the field required');
       return;
     }
 
