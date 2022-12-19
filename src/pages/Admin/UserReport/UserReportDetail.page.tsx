@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import FetchAdminIntercept from '@/utils/api.admin';
 import { BACKEND_URL } from '@/config/config';
 import IUser, { IReturn_Reported_User } from '@/interfaces/user.interface';
@@ -178,7 +178,6 @@ const UserReportDetail = () => {
 
   return (
     <>
-      <ToastContainer />
       <Box>
         {isLoading ? (
           <h1>Loading...</h1>

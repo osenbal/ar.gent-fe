@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
 import { setUser } from '@/store/authSlice';
@@ -12,7 +12,7 @@ import Skills from './Skills/Skills';
 import PortfolioUrl from './PortfolioUrl/PortfolioUrl';
 import { BACKEND_URL } from '@/config/config';
 import SendIcon from '@mui/icons-material/Send';
-import { Box, Button, Skeleton } from '@mui/material';
+import { Box, Button, Skeleton, Typography } from '@mui/material';
 import FetchIntercept from '@/utils/api';
 
 const Profile: React.FC = () => {
@@ -72,7 +72,6 @@ const Profile: React.FC = () => {
 
   return (
     <>
-      <ToastContainer />
       <Box sx={{ mt: 4, mb: 5 }}>
         {isLoading ? (
           <>
@@ -94,6 +93,19 @@ const Profile: React.FC = () => {
           <p>User Not Found</p>
         ) : (
           <>
+            <div>
+              {user.status === false ? (
+                <>
+                  <Typography
+                    sx={{ width: '100%', backgroundColor: '#DC3535' }}
+                  >
+                    This User has been banned
+                  </Typography>
+                </>
+              ) : (
+                ''
+              )}
+            </div>
             <div>
               {user._id === userId ? (
                 user.verified ? (

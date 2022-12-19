@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { EditorState, convertFromRaw, CompositeDecorator } from 'draft-js';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { NumericFormat } from 'react-number-format';
 import { stateToHTML } from 'draft-js-export-html';
 import TextEditor from '@/components/Reusable/TextEditor';
@@ -181,7 +181,6 @@ const JobCreatePage: React.FC = () => {
 
   return (
     <>
-      <ToastContainer />
       <Box>
         <Card>
           <CardContent>

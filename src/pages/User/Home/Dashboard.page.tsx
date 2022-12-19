@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
 import ReactPaginate from 'react-paginate';
 import FetchIntercept from '@/utils/api';
 import JobCard from '@/pages/User/Jobs/components/JobCard';
@@ -198,8 +197,6 @@ const Dashboard: React.FC = () => {
       <Helmet>
         <title>Dashboard | ar.gent</title>
       </Helmet>
-
-      <ToastContainer />
 
       <SearchApp
         keyword={keyword}

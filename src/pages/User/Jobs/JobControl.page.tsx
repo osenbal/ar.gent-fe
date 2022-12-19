@@ -3,7 +3,7 @@ import { NumericFormat } from 'react-number-format';
 import { useParams, NavLink, useSearchParams } from 'react-router-dom';
 import { SyncLoader } from 'react-spinners';
 import { stateToHTML } from 'draft-js-export-html';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import {
   City,
   Country,
@@ -527,7 +527,6 @@ const JobControlPage: React.FC = () => {
 
   return (
     <>
-      <ToastContainer />
       {isLoading ? (
         <Box
           sx={{

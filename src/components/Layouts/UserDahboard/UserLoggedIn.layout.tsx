@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
 import { asyncLogout } from '@/store/authSlice';
 import Slider from './Slider';
@@ -92,35 +93,39 @@ const UserLoggedInLayout = () => {
   }, []);
 
   return (
-    <StyledRoot>
-      <AppBar sx={{ display: { xs: 'block', md: 'none' } }} position="fixed">
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{ mr: 2, ...(open && { display: 'none' }) }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            AR.GENT
-          </Typography>
-        </Toolbar>
-      </AppBar>
+    <>
+      <ToastContainer />
 
-      <Slider
-        user={intialUser}
-        openNav={open}
-        onClosedNav={handleDrawerClose}
-        handleLogout={handleLogout}
-      />
+      <StyledRoot>
+        <AppBar sx={{ display: { xs: 'block', md: 'none' } }} position="fixed">
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              sx={{ mr: 2, ...(open && { display: 'none' }) }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" noWrap component="div">
+              AR.GENT
+            </Typography>
+          </Toolbar>
+        </AppBar>
 
-      <Main>
-        <Outlet />
-      </Main>
-    </StyledRoot>
+        <Slider
+          user={intialUser}
+          openNav={open}
+          onClosedNav={handleDrawerClose}
+          handleLogout={handleLogout}
+        />
+
+        <Main>
+          <Outlet />
+        </Main>
+      </StyledRoot>
+    </>
   );
 };
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import Header from './Header';
 import { styled } from '@mui/material';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux.hook';
@@ -59,6 +60,7 @@ const AdminLayout: React.FC = () => {
 
   return (
     <>
+      <ToastContainer />
       <StyledRoot>
         <Header onOpenNav={() => setOpenNav(true)} />
         {/* slider */}

@@ -24,10 +24,8 @@ const JobDetailsPage: React.FC = () => {
       }
     );
 
-    const resData = await response.json();
-
-    if (response.ok) {
-      setJobData(resData.data);
+    if (response.code === 200) {
+      setJobData(response.data);
       setIsLoading(false);
     } else {
       setIsLoading(false);

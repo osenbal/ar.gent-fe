@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import JobCard from '../../Jobs/components/JobCard';
 import JobDetails from '../../Jobs/components/JobDetails';
 import Loader from '@/components/Reusable/Loader';
@@ -89,7 +89,6 @@ const JobListProfile: React.FC = () => {
 
   return (
     <>
-      <ToastContainer />
       {jobIdParam ? (
         <>
           <Box

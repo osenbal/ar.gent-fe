@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import DOMPurify from 'dompurify';
 import { Link } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/redux.hook';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { IReturn_JobDetails } from '@/interfaces/job.interface';
 import DialpadIcon from '@mui/icons-material/Dialpad';
 import WorkTwoToneIcon from '@mui/icons-material/WorkTwoTone';
@@ -105,8 +105,6 @@ const JobDetails: React.FC<props> = ({ data }) => {
 
   return (
     <>
-      <ToastContainer />
-
       <Card sx={{ padding: 3 }}>
         <Typography variant="h5" fontWeight={'500'}>
           {data.title}
