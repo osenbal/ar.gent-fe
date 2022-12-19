@@ -7,6 +7,7 @@ import JobCard from './components/JobCard';
 import JobDetails from './components/JobDetails';
 import Loader from '@/components/Reusable/Loader';
 import SearchApp from '@/components/Reusable/SearchApp';
+import NoData from '@/components/Reusable/NoData';
 import FetchIntercept from '@/utils/api';
 import {
   IReturn_JobDetails,
@@ -108,6 +109,7 @@ const JobNearlyPage: React.FC = () => {
       e.preventDefault();
       updatedSearchParams.set('keyword', `${keyword}`);
       setQueryParams(updatedSearchParams.toString());
+      setIsLoading(true);
       if (page !== 0) {
         setPage(0);
       } else {
@@ -230,9 +232,8 @@ const JobNearlyPage: React.FC = () => {
       credentials: 'include',
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      setUser(data.data);
+    if (response.code === 200) {
+      setUser(response.data);
     } else {
       setUser(null);
     }
@@ -407,90 +408,98 @@ const JobNearlyPage: React.FC = () => {
       {isLoading ? (
         <Loader />
       ) : upTabScreen ? (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'start',
-            alignItems: 'start',
-            flexDirection: 'row',
-            gap: 2,
-            mt: 3,
-            height: '100%',
-            positon: 'relative',
-          }}
-        >
-          <Box
-            ref={jobsRef}
-            sx={{
-              width: '33%',
-              height: '100vh',
-              pb: '120px',
-              overflow: 'auto',
-              pr: 2,
-            }}
-          >
-            {isLoadingJobs ? (
-              <Loader />
-            ) : jobs?.length > 0 ? (
-              jobs.map((job, index) => (
-                <JobCard
-                  path="jobSearch"
-                  handleDelete={() => 0}
-                  key={index}
-                  job={job}
-                />
-              ))
-            ) : (
-              <Typography variant="h6" color="textSecondary">
-                No jobs found
-              </Typography>
-            )}
-            <nav key={totalJobs}>
-              <ReactPaginate
-                forcePage={page}
-                previousLabel={'< '}
-                nextLabel={'>'}
-                breakLabel={'...'}
-                containerClassName={'pagination-list'}
-                pageLinkClassName={'pagination-link'}
-                previousLinkClassName={'pagination-previous'}
-                nextLinkClassName={'pagination-next'}
-                activeLinkClassName={'pagination-link is-current'}
-                disabledLinkClassName={'pagination-link is-disabled'}
-                pageCount={Math.min(5, pages)}
-                onPageChange={handleChangePage}
-              />
-            </nav>
-          </Box>
-          <Box
-            sx={
-              upTabScreen
-                ? {
-                    width: '65%',
-                    maxWidth: '65%',
-                    height: '100vh',
-                    pb: '120px',
-                    overflow: 'auto',
-                  }
-                : {
-                    width: '100%',
-                    height: '100vh',
-                    pb: '120px',
-                    overflow: 'auto',
-                  }
-            }
-          >
-            {isLoadingDetailJob ? (
-              <Loader />
-            ) : jobDetails !== null ? (
-              <JobDetails data={jobDetails} />
-            ) : (
-              <Typography variant="h6" color="textSecondary">
-                No job found
-              </Typography>
-            )}
-          </Box>
-        </Box>
+        <>
+          {!isLoading && !isLoadingJobs && jobs?.length === 0 ? (
+            <NoData
+              upTabScreen={upTabScreen}
+              message="Complete your profile, and Fill in the address where you live"
+            />
+          ) : (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'start',
+                alignItems: 'start',
+                flexDirection: 'row',
+                gap: 2,
+                mt: 3,
+                height: '100%',
+                positon: 'relative',
+              }}
+            >
+              <Box
+                ref={jobsRef}
+                sx={{
+                  width: '33%',
+                  height: '100vh',
+                  pb: '120px',
+                  overflow: 'auto',
+                  pr: 2,
+                }}
+              >
+                {isLoadingJobs ? (
+                  <Loader />
+                ) : jobs?.length > 0 ? (
+                  jobs.map((job, index) => (
+                    <JobCard
+                      path="jobSearch"
+                      handleDelete={() => 0}
+                      key={index}
+                      job={job}
+                    />
+                  ))
+                ) : (
+                  ''
+                )}
+
+                {jobs?.length > 0 && (
+                  <nav key={totalJobs}>
+                    <ReactPaginate
+                      forcePage={page}
+                      previousLabel={'< '}
+                      nextLabel={'>'}
+                      breakLabel={'...'}
+                      containerClassName={'pagination-list'}
+                      pageLinkClassName={'pagination-link'}
+                      previousLinkClassName={'pagination-previous'}
+                      nextLinkClassName={'pagination-next'}
+                      activeLinkClassName={'pagination-link is-current'}
+                      disabledLinkClassName={'pagination-link is-disabled'}
+                      pageCount={Math.min(5, pages)}
+                      onPageChange={handleChangePage}
+                    />
+                  </nav>
+                )}
+              </Box>
+              <Box
+                sx={
+                  upTabScreen
+                    ? {
+                        width: '65%',
+                        maxWidth: '65%',
+                        height: '100vh',
+                        pb: '120px',
+                        overflow: 'auto',
+                      }
+                    : {
+                        width: '100%',
+                        height: '100vh',
+                        pb: '120px',
+                        overflow: 'auto',
+                      }
+                }
+              >
+                {isLoadingDetailJob ? (
+                  <Loader />
+                ) : jobDetails !== null ? (
+                  <JobDetails data={jobDetails} />
+                ) : (
+                  ''
+                )}
+              </Box>
+            </Box>
+          )}
+        </>
       ) : (
         <>
           <Box ref={jobsRef}>
@@ -510,27 +519,30 @@ const JobNearlyPage: React.FC = () => {
                       </Box>
                     ))
                   ) : (
-                    <Typography variant="h6" color="textSecondary">
-                      No jobs found
-                    </Typography>
+                    <NoData
+                      upTabScreen={upTabScreen}
+                      message="Complete your profile, and Fill in the address where you live"
+                    />
                   )}
 
-                  <nav key={totalJobs}>
-                    <ReactPaginate
-                      forcePage={page}
-                      previousLabel={'< '}
-                      nextLabel={'>'}
-                      breakLabel={'...'}
-                      containerClassName={'pagination-list'}
-                      pageLinkClassName={'pagination-link'}
-                      previousLinkClassName={'pagination-previous'}
-                      nextLinkClassName={'pagination-next'}
-                      activeLinkClassName={'pagination-link is-current'}
-                      disabledLinkClassName={'pagination-link is-disabled'}
-                      pageCount={Math.min(5, pages)}
-                      onPageChange={handleChangePage}
-                    />
-                  </nav>
+                  {jobs?.length > 0 && (
+                    <nav key={totalJobs}>
+                      <ReactPaginate
+                        forcePage={page}
+                        previousLabel={'< '}
+                        nextLabel={'>'}
+                        breakLabel={'...'}
+                        containerClassName={'pagination-list'}
+                        pageLinkClassName={'pagination-link'}
+                        previousLinkClassName={'pagination-previous'}
+                        nextLinkClassName={'pagination-next'}
+                        activeLinkClassName={'pagination-link is-current'}
+                        disabledLinkClassName={'pagination-link is-disabled'}
+                        pageCount={Math.min(5, pages)}
+                        onPageChange={handleChangePage}
+                      />
+                    </nav>
+                  )}
                 </Box>
 
                 <Dialog

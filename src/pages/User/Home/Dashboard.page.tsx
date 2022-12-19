@@ -7,6 +7,7 @@ import JobCard from '@/pages/User/Jobs/components/JobCard';
 import JobDetails from '@/pages/User/Jobs/components/JobDetails';
 import Loader from '@/components/Reusable/Loader';
 import SearchApp from '@/components/Reusable/SearchApp';
+import NoData from '@/components/Reusable/NoData';
 import { BACKEND_URL } from '@/config/config';
 import { IReturn_JobDetails, IReturn_Jobs } from '@/interfaces/job.interface';
 import { TransitionProps } from '@mui/material/transitions';
@@ -134,7 +135,6 @@ const Dashboard: React.FC = () => {
           },
         }
       );
-
       if (response.code === 200) {
         setDataState(response);
         if (response.data.length > 0) {
@@ -192,6 +192,7 @@ const Dashboard: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobIdParam]);
 
+  // ------------------ JSX ------------------
   return (
     <>
       <Helmet>
@@ -207,110 +208,52 @@ const Dashboard: React.FC = () => {
       {isLoading ? (
         <Loader />
       ) : upTabScreen ? (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'start',
-            alignItems: 'start',
-            flexDirection: 'row',
-            gap: 2,
-            mt: 3,
-            height: '100%',
-            positon: 'relative',
-          }}
-        >
-          <Box
-            ref={jobsRef}
-            sx={{
-              width: '33%',
-              height: '100vh',
-              pb: '120px',
-              overflow: 'auto',
-              pr: 2,
-            }}
-          >
-            {isLoadingJobs ? (
-              <Loader />
-            ) : jobs?.length > 0 ? (
-              jobs.map((job, index) => (
-                <JobCard
-                  path="jobs"
-                  handleDelete={() => 0}
-                  key={index}
-                  job={job}
-                />
-              ))
-            ) : (
-              <Typography variant="h6" color="textSecondary">
-                No jobs found
-              </Typography>
-            )}
-            <nav key={totalJobs}>
-              <ReactPaginate
-                forcePage={page}
-                previousLabel={'< '}
-                nextLabel={'>'}
-                breakLabel={'...'}
-                containerClassName={'pagination-list'}
-                pageLinkClassName={'pagination-link'}
-                previousLinkClassName={'pagination-previous'}
-                nextLinkClassName={'pagination-next'}
-                activeLinkClassName={'pagination-link is-current'}
-                disabledLinkClassName={'pagination-link is-disabled'}
-                pageCount={Math.min(5, pages)}
-                onPageChange={handleChangePage}
-              />
-            </nav>
-          </Box>
-          <Box
-            sx={
-              upTabScreen
-                ? {
-                    width: '65%',
-                    maxWidth: '65%',
-                    height: '100vh',
-                    pb: '120px',
-                    overflow: 'auto',
-                  }
-                : {
-                    width: '100%',
-                    height: '100vh',
-                    pb: '120px',
-                    overflow: 'auto',
-                  }
-            }
-          >
-            {isLoadingDetailJob ? (
-              <Loader />
-            ) : jobDetails ? (
-              <JobDetails data={jobDetails} />
-            ) : (
-              <Typography variant="h6" color="textSecondary">
-                No job found
-              </Typography>
-            )}
-          </Box>
-        </Box>
-      ) : (
+        // desktop
         <>
-          <Box ref={jobsRef}>
-            {isLoadingJobs ? (
-              <Loader />
-            ) : (
-              <>
-                <Box sx={{ mt: 5 }}>
-                  {jobs?.length > 0 ? (
-                    jobs.map((job, index) => (
-                      <Box key={index} onClick={handleClickOpen}>
-                        <JobCard path="jobs" handleDelete={() => 0} job={job} />
-                      </Box>
-                    ))
-                  ) : (
-                    <Typography variant="h6" color="textSecondary">
-                      No jobs found
-                    </Typography>
-                  )}
+          {!isLoading && !isLoadingJobs && jobs?.length === 0 ? (
+            <NoData
+              upTabScreen={upTabScreen}
+              message="Please check your connection or refresh this page"
+            />
+          ) : (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'start',
+                alignItems: 'start',
+                flexDirection: 'row',
+                gap: 2,
+                mt: 3,
+                height: '100%',
+                positon: 'relative',
+              }}
+            >
+              <Box
+                ref={jobsRef}
+                sx={{
+                  width: '33%',
+                  height: '100vh',
+                  pb: '120px',
+                  overflow: 'auto',
+                  pr: 2,
+                }}
+              >
+                {isLoadingJobs ? (
+                  <Loader />
+                ) : jobs?.length > 0 ? (
+                  jobs.map((job, index) => (
+                    <JobCard
+                      path="jobs"
+                      handleDelete={() => 0}
+                      key={index}
+                      job={job}
+                    />
+                  ))
+                ) : (
+                  ''
+                )}
 
+                {jobs?.length > 0 && (
                   <nav key={totalJobs}>
                     <ReactPaginate
                       forcePage={page}
@@ -327,6 +270,79 @@ const Dashboard: React.FC = () => {
                       onPageChange={handleChangePage}
                     />
                   </nav>
+                )}
+              </Box>
+
+              {/* detail job */}
+              <Box
+                sx={
+                  upTabScreen
+                    ? {
+                        width: '65%',
+                        maxWidth: '65%',
+                        height: '100vh',
+                        pb: '120px',
+                        overflow: 'auto',
+                      }
+                    : {
+                        width: '100%',
+                        height: '100vh',
+                        pb: '120px',
+                        overflow: 'auto',
+                      }
+                }
+              >
+                {isLoadingDetailJob ? (
+                  <Loader />
+                ) : jobDetails ? (
+                  <JobDetails data={jobDetails} />
+                ) : (
+                  ''
+                )}
+              </Box>
+            </Box>
+          )}
+        </>
+      ) : (
+        // mobile
+        <>
+          <Box ref={jobsRef}>
+            {isLoadingJobs ? (
+              <Loader />
+            ) : (
+              <>
+                <Box sx={{ mt: 5 }}>
+                  {jobs?.length > 0 ? (
+                    jobs.map((job, index) => (
+                      <Box key={index} onClick={handleClickOpen}>
+                        <JobCard path="jobs" handleDelete={() => 0} job={job} />
+                      </Box>
+                    ))
+                  ) : (
+                    <NoData
+                      upTabScreen={upTabScreen}
+                      message="Please check your connection or refresh this page"
+                    />
+                  )}
+
+                  {jobs?.length > 0 && (
+                    <nav key={totalJobs}>
+                      <ReactPaginate
+                        forcePage={page}
+                        previousLabel={'< '}
+                        nextLabel={'>'}
+                        breakLabel={'...'}
+                        containerClassName={'pagination-list'}
+                        pageLinkClassName={'pagination-link'}
+                        previousLinkClassName={'pagination-previous'}
+                        nextLinkClassName={'pagination-next'}
+                        activeLinkClassName={'pagination-link is-current'}
+                        disabledLinkClassName={'pagination-link is-disabled'}
+                        pageCount={Math.min(5, pages)}
+                        onPageChange={handleChangePage}
+                      />
+                    </nav>
+                  )}
                 </Box>
 
                 <Dialog
