@@ -31,6 +31,7 @@ import JobNearlyPage from '@/pages/User/Jobs/JobNearly.page';
 import JobSearchPage from '@/pages/User/Jobs/JobSearch.page';
 import UserReportPage from '@/pages/Admin/UserReport/UserReport.page';
 import UserReportDetail from '@/pages/Admin/UserReport/UserReportDetail.page';
+import JobListPage from '@/pages/Admin/Job/JobList.page';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -44,7 +45,7 @@ const AppRoutes: React.FC = () => {
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<DashboardAdmin />} />
             <Route path="/admin/users" element={<UserList />} />
-            <Route path="/admin/jobs" />
+            <Route path="/admin/jobs" element={<JobListPage />} />
             <Route path="/admin/reports" element={<UserReportPage />} />
             <Route
               path="/admin/reports/:reportId"

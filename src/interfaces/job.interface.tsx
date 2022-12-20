@@ -77,6 +77,24 @@ export interface IReturn_GET_JobById {
   deletedAt: Date | null;
 }
 
+export interface IReturn_GET_Jobs {
+  _id: never;
+  title: string;
+  salary: number;
+  description: string;
+  isClosed: boolean;
+  createdAt: Date;
+  updatedAt: Date | null;
+  user: {
+    _id: string;
+    username: string;
+    email: string;
+    fullName: string;
+    avatar: string;
+    phoneNumber: string;
+  };
+}
+
 export interface INew_ObjectJob {
   title: string;
   description: string;

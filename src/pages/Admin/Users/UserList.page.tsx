@@ -176,6 +176,7 @@ const UserList: React.FC = () => {
         },
       }
     );
+
     if (response.code === 200) {
       setUsers(
         users.map((user: any) =>
