@@ -12,11 +12,20 @@ import Skills from './Skills/Skills';
 import PortfolioUrl from './PortfolioUrl/PortfolioUrl';
 import { BACKEND_URL } from '@/config/config';
 import SendIcon from '@mui/icons-material/Send';
-import { Box, Button, Skeleton, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Skeleton,
+  Typography,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
 import FetchIntercept from '@/utils/api';
 
 const Profile: React.FC = () => {
   const { id } = useParams();
+  const theme = useTheme();
+  const upTabScreen = useMediaQuery(theme.breakpoints.up('md'));
   const dispatch = useAppDispatch();
   const { user, userId } = useAppSelector((state) => state.auth);
 
@@ -90,7 +99,30 @@ const Profile: React.FC = () => {
             <Skeleton sx={{ mt: '16px' }} variant="rectangular" height={100} />
           </>
         ) : !user ? (
-          <p>User Not Found</p>
+          <>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh',
+                gap: '16px',
+              }}
+            >
+              <img
+                style={upTabScreen ? { width: '200px' } : { width: '130px' }}
+                alt="not-found-img"
+                src={
+                  process.env.PUBLIC_URL +
+                  '/assets/img/svg/img_userNotFound.svg'
+                }
+              />
+              <Typography variant="h6" color="textSecondary">
+                User not found
+              </Typography>
+            </Box>
+          </>
         ) : (
           <>
             <div>

@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
+import Loader from '@/components/Reusable/Loader';
+import NoData from '@/components/Reusable/NoData';
 import { BACKEND_URL } from '@/config/config';
 import { DateToDMY } from '@/utils/utils';
+import FetchIntercept from '@/utils/api';
 import CheckIcon from '@mui/icons-material/Check';
 import {
   Card,
@@ -9,9 +12,9 @@ import {
   Typography,
   styled,
   Grid,
-  Box,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
-import FetchIntercept from '@/utils/api';
 
 const StyledContainer = styled(Grid)(({ theme }) => ({
   justifyContent: 'start',
@@ -67,6 +70,8 @@ const CardLink = ({ link, data }: { link: string; data: any }) => {
 
 const UserApplication: React.FC = () => {
   const params = useParams();
+  const theme = useTheme();
+  const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
   const [applications, setApplications] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -98,7 +103,7 @@ const UserApplication: React.FC = () => {
   return (
     <>
       {isLoading ? (
-        <p>Loading....</p>
+        <Loader />
       ) : applications?.length > 0 ? (
         <StyledContainer container spacing={2}>
           {applications.map((item: any, index: number) => (
@@ -110,9 +115,7 @@ const UserApplication: React.FC = () => {
           ))}
         </StyledContainer>
       ) : (
-        <Box sx={{ mt: 5 }}>
-          <p>Not Found</p>
-        </Box>
+        <NoData message="Not found" upTabScreen={upTabScreen} />
       )}
     </>
   );

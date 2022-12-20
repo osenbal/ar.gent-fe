@@ -4,23 +4,25 @@ import { toast } from 'react-toastify';
 import JobCard from '../../Jobs/components/JobCard';
 import JobDetails from '../../Jobs/components/JobDetails';
 import Loader from '@/components/Reusable/Loader';
+import NoData from '@/components/Reusable/NoData';
 import { IReturn_JobDetails, IReturn_Jobs } from '@/interfaces/job.interface';
 import { BACKEND_URL } from '@/config/config';
-import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, useMediaQuery, useTheme } from '@mui/material';
 import FetchIntercept from '@/utils/api';
 
 const JobListProfile: React.FC = () => {
+  const { id } = useParams();
   const theme = useTheme();
   const navigate = useNavigate();
-  const { id } = useParams();
   const [queryParams] = useSearchParams();
   const jobIdParam = queryParams.get('jobId');
   const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
 
   const [jobs, setJobs] = useState<IReturn_Jobs[] | []>([]);
   const [jobDetails, setJobDetails] = useState<IReturn_JobDetails | null>(null);
+
   const [isLoadingJobs, setIsLoadingJobs] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingJobDetail, setIsLoadingJobDetail] = useState<boolean>(true);
 
   const handleDelete = async (jobId: string) => {
     try {
@@ -62,6 +64,7 @@ const JobListProfile: React.FC = () => {
   };
 
   const getJobDetail = async (jobId: string) => {
+    setIsLoadingJobDetail(true);
     const response = await FetchIntercept(`${BACKEND_URL}/job/${jobId}`, {
       method: 'GET',
       credentials: 'include',
@@ -72,7 +75,9 @@ const JobListProfile: React.FC = () => {
 
     if (response.code === 200) {
       setJobDetails(response.data);
-      setIsLoading(false);
+      setIsLoadingJobDetail(false);
+    } else {
+      setIsLoadingJobDetail(false);
     }
   };
 
@@ -125,9 +130,7 @@ const JobListProfile: React.FC = () => {
                     />
                   ))
                 ) : (
-                  <Typography variant="h6" color="textSecondary">
-                    No jobs found
-                  </Typography>
+                  <NoData upTabScreen message="No jobs found in this user" />
                 )}
               </Box>
             )}
@@ -148,14 +151,12 @@ const JobListProfile: React.FC = () => {
                     }
               }
             >
-              {isLoading ? (
+              {isLoadingJobDetail ? (
                 <Loader />
-              ) : jobDetails ? (
+              ) : jobDetails && !isLoadingJobDetail ? (
                 <JobDetails data={jobDetails} />
               ) : (
-                <Typography variant="h6" color="textSecondary">
-                  Not Found
-                </Typography>
+                <NoData upTabScreen message="Job not found" />
               )}
             </Box>
           </Box>
@@ -174,9 +175,7 @@ const JobListProfile: React.FC = () => {
               />
             ))
           ) : (
-            <Typography variant="h6" color="textSecondary">
-              No jobs found
-            </Typography>
+            <NoData upTabScreen message="No jobs found in this user" />
           )}
         </Box>
       )}
