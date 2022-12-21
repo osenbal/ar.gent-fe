@@ -114,6 +114,14 @@ const JobDetails: React.FC<props> = ({ data }) => {
           {data.location?.country?.name} - {data.totalAppliciants} applicants
         </Typography>
 
+        <Typography variant="body2" fontWeight={'400'} sx={{ mt: 1 }}>
+          Salary :{' '}
+          {new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+          }).format(data?.salary)}
+        </Typography>
+
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
           <WorkTwoToneIcon sx={{ mr: 1 }} />
           <Typography variant="body2" fontWeight={'400'}>

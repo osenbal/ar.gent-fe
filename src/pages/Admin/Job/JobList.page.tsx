@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { filter } from 'lodash';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { Helmet } from 'react-helmet-async';
 import JobListHead from './JobListHead';
 import JobListToolbar from './JobListToolbar';
+import Loader from '@/components/Reusable/Loader';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ReactPaginate from 'react-paginate';
 import { BACKEND_URL } from '@/config/config';
-import IUser from '@/interfaces/user.interface';
-import IJob, { IReturn_GET_Jobs } from '@/interfaces/job.interface';
+import { IReturn_GET_Jobs } from '@/interfaces/job.interface';
 import {
   Card,
   Table,
@@ -25,8 +27,11 @@ import {
   Typography,
   IconButton,
   TableContainer,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import FetchAdminIntercept from '@/utils/api.admin';
+import NoData from '@/components/Reusable/NoData';
 
 // ----------------------------------------------------------------------
 
@@ -77,6 +82,9 @@ function applySortFilter(array: any, comparator: any, query: any) {
 // ----------------------------------------------------------------------
 
 const JobListPage: React.FC = () => {
+  const theme = useTheme();
+  const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [open, setOpen] = useState<HTMLButtonElement | null>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
@@ -170,7 +178,6 @@ const JobListPage: React.FC = () => {
       }
     );
 
-    console.log(response);
     if (response.code === 200) {
       setJobs(
         jobs.map((job: any) =>
@@ -179,24 +186,27 @@ const JobListPage: React.FC = () => {
       );
 
       setOpen(null);
+      toast.success('success');
     } else {
       console.log('error');
       setOpen(null);
+      toast.warn('failed');
     }
   };
 
-  const handleDeleteUsers = async () => {
+  const handleDeleteJobs = async () => {
     const response = await FetchAdminIntercept(
-      `${BACKEND_URL}/admin/user/delete`,
+      `${BACKEND_URL}/admin/job/delete`,
       {
         method: 'DELETE',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ usersId: selected }),
+        body: JSON.stringify({ jobIds: selected }),
       }
     );
+
     if (response.code === 200) {
       if (page === 0) {
         const controller = new AbortController();
@@ -213,10 +223,10 @@ const JobListPage: React.FC = () => {
     }
   };
 
-  const handleDeleteUserById = async (userId: string) => {
+  const handleDeleteJobById = async (jobId: string) => {
     if (!open) return;
     const response = await FetchAdminIntercept(
-      `${BACKEND_URL}/admin/user/${userId}`,
+      `${BACKEND_URL}/admin/job/${jobId}`,
       {
         method: 'DELETE',
         credentials: 'include',
@@ -237,6 +247,7 @@ const JobListPage: React.FC = () => {
   };
 
   const getJobList = async (controller: any) => {
+    setIsLoading(true);
     const response = await FetchAdminIntercept(
       `${BACKEND_URL}/admin/job?page=${page}&limit=${limit}&search=${search}`,
       {
@@ -255,8 +266,10 @@ const JobListPage: React.FC = () => {
       setLimit(response.limit);
       setPages(response.totalPage);
       setRows(response.totalRows);
+      setIsLoading(false);
     } else {
       setJobs([]);
+      setIsLoading(false);
     }
   };
 
@@ -298,112 +311,123 @@ const JobListPage: React.FC = () => {
             filterTitle={query}
             onChangeQuery={(e: any) => setQuery(e.target.value)}
             onFilterTitle={handleFilterByTitle}
-            handleDeleteJobs={handleDeleteUsers}
+            handleDeleteJobs={handleDeleteJobs}
           />
           <Paper sx={{ width: '100%', mb: 2, overflow: 'auto' }}>
             <TableContainer sx={{ minWidth: 800 }}>
-              <Table>
-                <JobListHead
-                  order={order}
-                  orderBy={orderBy}
-                  headLabel={TABLE_HEAD}
-                  rowCount={jobs.length}
-                  numSelected={selected.length}
-                  onRequestSort={handleRequestSort}
-                  onSelectAllClick={(e) => handleSelectAllClick(e, jobs)}
-                />
-                <TableBody>
-                  {filteredJobs.map((row: IReturn_GET_Jobs) => {
-                    const selectedJob = selected.indexOf(row._id) !== -1;
+              {isLoading ? (
+                <Loader />
+              ) : jobs?.length > 0 ? (
+                <Table>
+                  <JobListHead
+                    order={order}
+                    orderBy={orderBy}
+                    headLabel={TABLE_HEAD}
+                    rowCount={jobs.length}
+                    numSelected={selected.length}
+                    onRequestSort={handleRequestSort}
+                    onSelectAllClick={(e) => handleSelectAllClick(e, jobs)}
+                  />
+                  <TableBody>
+                    {filteredJobs.map((row: IReturn_GET_Jobs) => {
+                      const selectedJob = selected.indexOf(row._id) !== -1;
 
-                    return (
-                      <TableRow
-                        hover
-                        key={row?._id}
-                        tabIndex={-1}
-                        role="checkbox"
-                        selected={selectedJob}
-                      >
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            checked={selectedJob}
-                            onChange={(event) => handleClick(event, row?._id)}
-                          />
-                        </TableCell>
-
-                        <TableCell align="left">
-                          <Typography variant="subtitle2" noWrap>
-                            {row?.title}
-                          </Typography>
-                        </TableCell>
-
-                        <TableCell
-                          component="th"
-                          scope="row"
-                          padding="none"
-                          align="left"
+                      return (
+                        <TableRow
+                          hover
+                          key={row?._id}
+                          tabIndex={-1}
+                          role="checkbox"
+                          selected={selectedJob}
                         >
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            spacing={2}
-                          >
-                            <Avatar
-                              alt={row?.user.username}
-                              src={row?.user.avatar}
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              checked={selectedJob}
+                              onChange={(event) => handleClick(event, row?._id)}
                             />
-                            <Typography variant="subtitle2" noWrap>
-                              {row?.user.username}
-                            </Typography>
-                          </Stack>
-                        </TableCell>
+                          </TableCell>
 
-                        <TableCell align="left">{row?.user.email}</TableCell>
+                          <TableCell align="left">
+                            <Link to={`/admin/job/${row._id}`}>
+                              <Typography variant="subtitle2" noWrap>
+                                {row?.title}
+                              </Typography>
+                            </Link>
+                          </TableCell>
 
-                        <TableCell align="left">
-                          <Button> {row?.isClosed ? 'Closed' : 'Open'}</Button>
-                        </TableCell>
-
-                        <TableCell align="right">
-                          <IconButton
-                            id={row?._id}
-                            size="large"
-                            color="inherit"
-                            onClick={handleOpenMenu}
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            padding="none"
+                            align="left"
                           >
-                            <MoreVertIcon />
-                          </IconButton>
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              spacing={2}
+                            >
+                              <Avatar
+                                alt={row?.user.username}
+                                src={row?.user.avatar}
+                              />
+                              <Typography variant="subtitle2" noWrap>
+                                {row?.user.username}
+                              </Typography>
+                            </Stack>
+                          </TableCell>
+
+                          <TableCell align="left">{row?.user.email}</TableCell>
+
+                          <TableCell align="left">
+                            <Button>
+                              {' '}
+                              {row?.isClosed ? 'Closed' : 'Open'}
+                            </Button>
+                          </TableCell>
+
+                          <TableCell align="right">
+                            <IconButton
+                              id={row?._id}
+                              size="large"
+                              color="inherit"
+                              onClick={handleOpenMenu}
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+
+                  {isNotFound && (
+                    <TableBody>
+                      <TableRow>
+                        <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                          <Paper
+                            sx={{
+                              textAlign: 'center',
+                            }}
+                          >
+                            <Typography variant="h6" paragraph>
+                              Not found
+                            </Typography>
+
+                            <Typography variant="body2">
+                              No results found for &nbsp;
+                              <strong>&quot;{filterTitle}&quot;</strong>.
+                              <br /> Try checking for typos or using complete
+                              words.
+                            </Typography>
+                          </Paper>
                         </TableCell>
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-
-                {isNotFound && (
-                  <TableBody>
-                    <TableRow>
-                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                        <Paper
-                          sx={{
-                            textAlign: 'center',
-                          }}
-                        >
-                          <Typography variant="h6" paragraph>
-                            Not found
-                          </Typography>
-
-                          <Typography variant="body2">
-                            No results found for &nbsp;
-                            <strong>&quot;{filterTitle}&quot;</strong>.
-                            <br /> Try checking for typos or using complete
-                            words.
-                          </Typography>
-                        </Paper>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                )}
-              </Table>
+                    </TableBody>
+                  )}
+                </Table>
+              ) : (
+                <NoData upTabScreen={upTabScreen} message="No data found" />
+              )}
             </TableContainer>
             <div>
               <p className="pagginatiin-data">
@@ -465,7 +489,7 @@ const JobListPage: React.FC = () => {
         </MenuItem>
 
         <MenuItem
-          onClick={() => (open ? handleDeleteUserById(open.id) : null)}
+          onClick={() => (open ? handleDeleteJobById(open.id) : null)}
           sx={{ color: 'error.main' }}
         >
           Delete

@@ -23,7 +23,7 @@ const DashboardAdmin: React.FC = () => {
   const [totalJobs, setTotalJobs] = useState<number>(0);
   const [totalReports, setTotalReports] = useState<number>(0);
 
-  const getTotalUsers = async () => {
+  const getStats = async () => {
     dispatch(setIsLoading(true));
     const response = await FetchAdminIntercept(
       `${BACKEND_URL}/admin/user/total`,
@@ -43,10 +43,48 @@ const DashboardAdmin: React.FC = () => {
       setTotalUsers(0);
       dispatch(setIsLoading(false));
     }
+
+    const response2 = await FetchAdminIntercept(
+      `${BACKEND_URL}/admin/job/total`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      }
+    );
+
+    if (response2.code === 200) {
+      setTotalJobs(response2.data);
+      dispatch(setIsLoading(false));
+    } else {
+      setTotalJobs(0);
+      dispatch(setIsLoading(false));
+    }
+
+    const response3 = await FetchAdminIntercept(
+      `${BACKEND_URL}/admin/user/report/total`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      }
+    );
+
+    if (response3.code === 200) {
+      setTotalReports(response3.data);
+      dispatch(setIsLoading(false));
+    } else {
+      setTotalReports(0);
+      dispatch(setIsLoading(false));
+    }
   };
 
   useEffect(() => {
-    getTotalUsers();
+    getStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -112,7 +150,7 @@ const DashboardAdmin: React.FC = () => {
                   variant="h4"
                   sx={{ fontWeight: 'bold', textAlign: 'center', mt: 3 }}
                 >
-                  100
+                  {totalJobs}
                 </Typography>
                 <Typography
                   variant="body1"
@@ -141,7 +179,7 @@ const DashboardAdmin: React.FC = () => {
                   variant="h4"
                   sx={{ fontWeight: 'bold', textAlign: 'center', mt: 3 }}
                 >
-                  100
+                  {totalReports}
                 </Typography>
                 <Typography
                   variant="body1"

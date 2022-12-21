@@ -181,7 +181,7 @@ const JobCreatePage: React.FC = () => {
 
   return (
     <>
-      <Box>
+      <Box sx={{ mb: 4 }}>
         <Card>
           <CardContent>
             <Typography

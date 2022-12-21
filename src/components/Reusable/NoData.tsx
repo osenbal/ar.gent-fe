@@ -27,7 +27,7 @@ const NoData: React.FC<props> = ({ upTabScreen, message }) => {
         variant="h6"
         color="textSecondary"
       >
-        No Data jobs found
+        No Data
       </Typography>
       <Typography
         sx={{ textAlign: 'center' }}

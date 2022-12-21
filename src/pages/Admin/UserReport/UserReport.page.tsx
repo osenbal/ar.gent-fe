@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
 import UserReportListToolbar from './UserReportListToolbar';
 import UserReportListHead from './UserReportListHead';
+import NoData from '@/components/Reusable/NoData';
 import { BACKEND_URL } from '@/config/config';
 import FetchAdminIntercept from '@/utils/api.admin';
 import { IReturn_Reported_User } from '@/interfaces/user.interface';
@@ -22,7 +23,10 @@ import {
   Container,
   Typography,
   TableContainer,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
+import Loader from '@/components/Reusable/Loader';
 
 // ----------------------------------------------------------------------
 
@@ -76,6 +80,9 @@ function applySortFilter(array: any, comparator: any, query: any) {
 // ----------------------------------------------------------------------
 
 const UserReportPage: React.FC = () => {
+  const theme = useTheme();
+  const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
   const [pages, setPages] = useState<number>(0);
@@ -172,6 +179,7 @@ const UserReportPage: React.FC = () => {
   };
 
   const getUserList = async (controller: any) => {
+    setIsLoading(true);
     const response = await FetchAdminIntercept(
       `${BACKEND_URL}/admin/user/report?page=${page}&limit=${limit}&search=${search}`,
       {
@@ -185,16 +193,16 @@ const UserReportPage: React.FC = () => {
     );
 
     if (response.code === 200) {
-      // const data = await response.json();
-      console.log(response);
       setUsers(response.data);
       setPage(response.page);
       setLimit(response.limit);
       setPages(response.totalPage);
       setRows(response.totalRows);
+      setIsLoading(false);
     } else {
       console.log('error');
       setUsers([]);
+      setIsLoading(false);
     }
   };
 
@@ -242,124 +250,134 @@ const UserReportPage: React.FC = () => {
           />
           <Paper sx={{ width: '100%', mb: 2, overflow: 'auto' }}>
             <TableContainer sx={{ minWidth: 800 }}>
-              <Table>
-                <UserReportListHead
-                  order={order}
-                  orderBy={orderBy}
-                  headLabel={TABLE_HEAD}
-                  rowCount={users.length}
-                  numSelected={selected.length}
-                  onRequestSort={handleRequestSort}
-                  onSelectAllClick={(e) => handleSelectAllClick(e, users)}
-                />
-                <TableBody>
-                  {filteredUsers.map((row: IReturn_Reported_User) => {
-                    const selectedUser = selected.indexOf(row._id) !== -1;
+              {isLoading ? (
+                <Loader />
+              ) : users?.length > 0 ? (
+                <Table>
+                  <UserReportListHead
+                    order={order}
+                    orderBy={orderBy}
+                    headLabel={TABLE_HEAD}
+                    rowCount={users.length}
+                    numSelected={selected.length}
+                    onRequestSort={handleRequestSort}
+                    onSelectAllClick={(e) => handleSelectAllClick(e, users)}
+                  />
+                  <TableBody>
+                    {filteredUsers.map((row: IReturn_Reported_User) => {
+                      const selectedUser = selected.indexOf(row._id) !== -1;
 
-                    return (
-                      <TableRow
-                        hover
-                        key={row._id}
-                        tabIndex={-1}
-                        role="checkbox"
-                        selected={selectedUser}
-                      >
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            checked={selectedUser}
-                            onChange={(event) => handleClick(event, row._id)}
-                          />
-                        </TableCell>
-
-                        <TableCell component="th" scope="row" padding="none">
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            spacing={2}
-                          >
-                            <Avatar
-                              alt={row.userReported.fullName}
-                              src={row.userReported.avatar}
-                            />
-                            <Typography variant="subtitle2" noWrap>
-                              {row.userReported.fullName}
-                            </Typography>
-                          </Stack>
-                        </TableCell>
-
-                        <TableCell align="left">
-                          <Link to={`/admin/reports/${row._id}`}>
-                            {row.userReported.username}
-                          </Link>
-                        </TableCell>
-
-                        <TableCell align="left">
-                          {row.userReported.email}
-                        </TableCell>
-
-                        <TableCell align="left">
-                          {row.userReported.verified ? 'Yes' : 'No'}
-                        </TableCell>
-
-                        <TableCell align="left">
-                          <Button>
-                            {row.userReported.status ? 'Active' : 'Banned'}
-                          </Button>
-                        </TableCell>
-
-                        <TableCell
-                          sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}
-                          align="right"
+                      return (
+                        <TableRow
+                          hover
+                          key={row._id}
+                          tabIndex={-1}
+                          role="checkbox"
+                          selected={selectedUser}
                         >
-                          <Typography
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              checked={selectedUser}
+                              onChange={(event) => handleClick(event, row._id)}
+                            />
+                          </TableCell>
+
+                          <TableCell component="th" scope="row" padding="none">
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              spacing={2}
+                            >
+                              <Avatar
+                                alt={row.userReported.fullName}
+                                src={row.userReported.avatar}
+                              />
+                              <Typography variant="subtitle2" noWrap>
+                                {row.userReported.fullName}
+                              </Typography>
+                            </Stack>
+                          </TableCell>
+
+                          <TableCell align="left">
+                            <Link to={`/admin/reports/${row._id}`}>
+                              {row.userReported.username}
+                            </Link>
+                          </TableCell>
+
+                          <TableCell align="left">
+                            {row.userReported.email}
+                          </TableCell>
+
+                          <TableCell align="left">
+                            {row.userReported.verified ? 'Yes' : 'No'}
+                          </TableCell>
+
+                          <TableCell align="left">
+                            <Button>
+                              {row.userReported.status ? 'Active' : 'Banned'}
+                            </Button>
+                          </TableCell>
+
+                          <TableCell
                             sx={{
                               wordWrap: 'break-word',
                               whiteSpace: 'normal',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              display: '-webkit-box',
-                              textAlign: 'left',
-                              maxWidth: 130,
-                              '-webkit-line-clamp': 2,
-                              '-webkit-box-orient': 'vertical',
                             }}
-                            variant="subtitle2"
-                            noWrap
+                            align="right"
                           >
-                            {row.description}
-                          </Typography>
+                            <Typography
+                              sx={{
+                                wordWrap: 'break-word',
+                                whiteSpace: 'normal',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                display: '-webkit-box',
+                                textAlign: 'left',
+                                maxWidth: 130,
+                                '-webkit-line-clamp': 2,
+                                '-webkit-box-orient': 'vertical',
+                              }}
+                              variant="subtitle2"
+                              noWrap
+                            >
+                              {row.description}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+
+                  {isNotFound && (
+                    <TableBody>
+                      <TableRow>
+                        <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                          <Paper
+                            sx={{
+                              textAlign: 'center',
+                            }}
+                          >
+                            <Typography variant="h6" paragraph>
+                              Not found
+                            </Typography>
+
+                            <Typography variant="body2">
+                              No results found for &nbsp;
+                              <strong>&quot;{filterName}&quot;</strong>.
+                              <br /> Try checking for typos or using complete
+                              words.
+                            </Typography>
+                          </Paper>
                         </TableCell>
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-
-                {isNotFound && (
-                  <TableBody>
-                    <TableRow>
-                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                        <Paper
-                          sx={{
-                            textAlign: 'center',
-                          }}
-                        >
-                          <Typography variant="h6" paragraph>
-                            Not found
-                          </Typography>
-
-                          <Typography variant="body2">
-                            No results found for &nbsp;
-                            <strong>&quot;{filterName}&quot;</strong>.
-                            <br /> Try checking for typos or using complete
-                            words.
-                          </Typography>
-                        </Paper>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                )}
-              </Table>
+                    </TableBody>
+                  )}
+                </Table>
+              ) : (
+                <NoData upTabScreen={upTabScreen} message="No report data" />
+              )}
             </TableContainer>
+
             <div>
               <p className="pagginatiin-data">
                 Total Rows: {rows} | Total Pages: {rows ? page + 1 : 0} of
@@ -373,21 +391,24 @@ const UserReportPage: React.FC = () => {
                 {msg}
               </Typography>
             </div>
-            <nav key={rows}>
-              <ReactPaginate
-                previousLabel={'< '}
-                nextLabel={'>'}
-                breakLabel={'...'}
-                containerClassName={'pagination-list'}
-                pageLinkClassName={'pagination-link'}
-                previousLinkClassName={'pagination-previous'}
-                nextLinkClassName={'pagination-next'}
-                activeLinkClassName={'pagination-link is-current'}
-                disabledLinkClassName={'pagination-link is-disabled'}
-                pageCount={Math.min(10, pages)}
-                onPageChange={handleChangePage}
-              />
-            </nav>
+
+            {users?.length > 0 && (
+              <nav key={rows}>
+                <ReactPaginate
+                  previousLabel={'< '}
+                  nextLabel={'>'}
+                  breakLabel={'...'}
+                  containerClassName={'pagination-list'}
+                  pageLinkClassName={'pagination-link'}
+                  previousLinkClassName={'pagination-previous'}
+                  nextLinkClassName={'pagination-next'}
+                  activeLinkClassName={'pagination-link is-current'}
+                  disabledLinkClassName={'pagination-link is-disabled'}
+                  pageCount={Math.min(10, pages)}
+                  onPageChange={handleChangePage}
+                />
+              </nav>
+            )}
           </Paper>
         </Card>
       </Container>

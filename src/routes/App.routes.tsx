@@ -32,6 +32,7 @@ import JobSearchPage from '@/pages/User/Jobs/JobSearch.page';
 import UserReportPage from '@/pages/Admin/UserReport/UserReport.page';
 import UserReportDetail from '@/pages/Admin/UserReport/UserReportDetail.page';
 import JobListPage from '@/pages/Admin/Job/JobList.page';
+import JobDetailPage from '@/pages/Admin/Job/JobDetail.page';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -51,6 +52,7 @@ const AppRoutes: React.FC = () => {
               path="/admin/reports/:reportId"
               element={<UserReportDetail />}
             />
+            <Route path="/admin/job/:jobId" element={<JobDetailPage />} />
           </Route>
         </Route>
 

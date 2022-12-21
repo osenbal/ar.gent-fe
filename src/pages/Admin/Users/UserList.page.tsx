@@ -24,8 +24,12 @@ import {
   Typography,
   IconButton,
   TableContainer,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import FetchAdminIntercept from '@/utils/api.admin';
+import Loader from '@/components/Reusable/Loader';
+import NoData from '@/components/Reusable/NoData';
 
 // ----------------------------------------------------------------------
 
@@ -76,6 +80,9 @@ function applySortFilter(array: any, comparator: any, query: any) {
 // ----------------------------------------------------------------------
 
 const UserList: React.FC = () => {
+  const theme = useTheme();
+  const upTabScreen: boolean = useMediaQuery(theme.breakpoints.up('md'));
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [open, setOpen] = useState<HTMLButtonElement | null>(null);
   const [page, setPage] = useState<number>(0);
   const [limit, setLimit] = useState<number>(10);
@@ -142,14 +149,6 @@ const UserList: React.FC = () => {
       setMsg('');
     }
   };
-
-  // const handleChangeRowsPerPage = (event: any) => {
-  //   setPage(0);
-  //   setLimit(parseInt(event.target.value, 10));
-  // };
-
-  // const emptyRows =
-  //   page > 0 ? Math.max(0, (1 + page) * limit - users.length) : 0;
 
   const handleFilterByName = (event: any) => {
     event.preventDefault();
@@ -243,6 +242,7 @@ const UserList: React.FC = () => {
   };
 
   const getUserList = async (controller: any) => {
+    setIsLoading(true);
     const response = await FetchAdminIntercept(
       `${BACKEND_URL}/admin/user?page=${page}&limit=${limit}&search=${search}`,
       {
@@ -261,9 +261,11 @@ const UserList: React.FC = () => {
       setLimit(response.limit);
       setPages(response.totalPage);
       setRows(response.totalRows);
+      setIsLoading(false);
     } else {
       console.log('error');
       setUsers([]);
+      setIsLoading(false);
     }
   };
 
@@ -309,117 +311,123 @@ const UserList: React.FC = () => {
           />
           <Paper sx={{ width: '100%', mb: 2, overflow: 'auto' }}>
             <TableContainer sx={{ minWidth: 800 }}>
-              <Table>
-                <UserListHead
-                  order={order}
-                  orderBy={orderBy}
-                  headLabel={TABLE_HEAD}
-                  rowCount={users.length}
-                  numSelected={selected.length}
-                  onRequestSort={handleRequestSort}
-                  onSelectAllClick={(e) => handleSelectAllClick(e, users)}
-                />
-                <TableBody>
-                  {filteredUsers.map((row: any) => {
-                    const {
-                      _id,
-                      fullName,
-                      username,
-                      email,
-                      avatar,
-                      status,
-                      verified,
-                    }: {
-                      _id: never;
-                      fullName: never;
-                      username: any;
-                      email: any;
-                      status: any;
-                      avatar: any;
-                      verified: any;
-                    } = row;
-                    const selectedUser = selected.indexOf(_id) !== -1;
+              {isLoading ? (
+                <Loader />
+              ) : users?.length > 0 ? (
+                <Table>
+                  <UserListHead
+                    order={order}
+                    orderBy={orderBy}
+                    headLabel={TABLE_HEAD}
+                    rowCount={users.length}
+                    numSelected={selected.length}
+                    onRequestSort={handleRequestSort}
+                    onSelectAllClick={(e) => handleSelectAllClick(e, users)}
+                  />
+                  <TableBody>
+                    {filteredUsers.map((row: any) => {
+                      const {
+                        _id,
+                        fullName,
+                        username,
+                        email,
+                        avatar,
+                        status,
+                        verified,
+                      }: {
+                        _id: never;
+                        fullName: never;
+                        username: any;
+                        email: any;
+                        status: any;
+                        avatar: any;
+                        verified: any;
+                      } = row;
+                      const selectedUser = selected.indexOf(_id) !== -1;
 
-                    return (
-                      <TableRow
-                        hover
-                        key={_id}
-                        tabIndex={-1}
-                        role="checkbox"
-                        selected={selectedUser}
-                      >
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            checked={selectedUser}
-                            onChange={(event) => handleClick(event, _id)}
-                          />
-                        </TableCell>
+                      return (
+                        <TableRow
+                          hover
+                          key={_id}
+                          tabIndex={-1}
+                          role="checkbox"
+                          selected={selectedUser}
+                        >
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              checked={selectedUser}
+                              onChange={(event) => handleClick(event, _id)}
+                            />
+                          </TableCell>
 
-                        <TableCell component="th" scope="row" padding="none">
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            spacing={2}
+                          <TableCell component="th" scope="row" padding="none">
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              spacing={2}
+                            >
+                              <Avatar alt={fullName} src={avatar} />
+                              <Typography variant="subtitle2" noWrap>
+                                {fullName}
+                              </Typography>
+                            </Stack>
+                          </TableCell>
+
+                          <TableCell align="left">{username}</TableCell>
+
+                          <TableCell align="left">{email}</TableCell>
+
+                          <TableCell align="left">
+                            {verified ? 'Yes' : 'No'}
+                          </TableCell>
+
+                          <TableCell align="left">
+                            <Button>{status ? 'Active' : 'Banned'}</Button>
+                          </TableCell>
+
+                          <TableCell align="right">
+                            <IconButton
+                              id={_id}
+                              size="large"
+                              color="inherit"
+                              onClick={handleOpenMenu}
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+
+                  {isNotFound && (
+                    <TableBody>
+                      <TableRow>
+                        <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                          <Paper
+                            sx={{
+                              textAlign: 'center',
+                            }}
                           >
-                            <Avatar alt={fullName} src={avatar} />
-                            <Typography variant="subtitle2" noWrap>
-                              {fullName}
+                            <Typography variant="h6" paragraph>
+                              Not found
                             </Typography>
-                          </Stack>
-                        </TableCell>
 
-                        <TableCell align="left">{username}</TableCell>
-
-                        <TableCell align="left">{email}</TableCell>
-
-                        <TableCell align="left">
-                          {verified ? 'Yes' : 'No'}
-                        </TableCell>
-
-                        <TableCell align="left">
-                          <Button>{status ? 'Active' : 'Banned'}</Button>
-                        </TableCell>
-
-                        <TableCell align="right">
-                          <IconButton
-                            id={_id}
-                            size="large"
-                            color="inherit"
-                            onClick={handleOpenMenu}
-                          >
-                            <MoreVertIcon />
-                          </IconButton>
+                            <Typography variant="body2">
+                              No results found for &nbsp;
+                              <strong>&quot;{filterName}&quot;</strong>.
+                              <br /> Try checking for typos or using complete
+                              words.
+                            </Typography>
+                          </Paper>
                         </TableCell>
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-
-                {isNotFound && (
-                  <TableBody>
-                    <TableRow>
-                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                        <Paper
-                          sx={{
-                            textAlign: 'center',
-                          }}
-                        >
-                          <Typography variant="h6" paragraph>
-                            Not found
-                          </Typography>
-
-                          <Typography variant="body2">
-                            No results found for &nbsp;
-                            <strong>&quot;{filterName}&quot;</strong>.
-                            <br /> Try checking for typos or using complete
-                            words.
-                          </Typography>
-                        </Paper>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                )}
-              </Table>
+                    </TableBody>
+                  )}
+                </Table>
+              ) : (
+                <NoData upTabScreen={upTabScreen} message="no data found" />
+              )}
             </TableContainer>
             <div>
               <p className="pagginatiin-data">
@@ -434,22 +442,25 @@ const UserList: React.FC = () => {
                 {msg}
               </Typography>
             </div>
-            <nav key={rows}>
-              <ReactPaginate
-                forcePage={page}
-                previousLabel={'< '}
-                nextLabel={'>'}
-                breakLabel={'...'}
-                containerClassName={'pagination-list'}
-                pageLinkClassName={'pagination-link'}
-                previousLinkClassName={'pagination-previous'}
-                nextLinkClassName={'pagination-next'}
-                activeLinkClassName={'pagination-link is-current'}
-                disabledLinkClassName={'pagination-link is-disabled'}
-                pageCount={Math.min(10, pages)}
-                onPageChange={handleChangePage}
-              />
-            </nav>
+
+            {users?.length > 0 && (
+              <nav key={rows}>
+                <ReactPaginate
+                  forcePage={page}
+                  previousLabel={'< '}
+                  nextLabel={'>'}
+                  breakLabel={'...'}
+                  containerClassName={'pagination-list'}
+                  pageLinkClassName={'pagination-link'}
+                  previousLinkClassName={'pagination-previous'}
+                  nextLinkClassName={'pagination-next'}
+                  activeLinkClassName={'pagination-link is-current'}
+                  disabledLinkClassName={'pagination-link is-disabled'}
+                  pageCount={Math.min(10, pages)}
+                  onPageChange={handleChangePage}
+                />
+              </nav>
+            )}
           </Paper>
         </Card>
       </Container>

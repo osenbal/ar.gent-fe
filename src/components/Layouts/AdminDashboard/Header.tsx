@@ -22,10 +22,6 @@ const MENU_OPTIONS = [
     label: 'Home',
     linkTo: '/admin/dashboard',
   },
-  {
-    label: 'Profile',
-    linkTO: '/admin/profile',
-  },
 ];
 
 const drawerWidth = 240;
