@@ -125,6 +125,9 @@ const Dashboard: React.FC = () => {
     await jobsRef.current?.scrollTo(0, 0);
     setIsLoadingJobs(true);
     try {
+      console.log(
+        `${BACKEND_URL}/job?page=${page}&limit=${limit}&startIndex=${startParam}`
+      );
       const response = await FetchIntercept(
         `${BACKEND_URL}/job?page=${page}&limit=${limit}&startIndex=${startParam}`,
         {
@@ -135,6 +138,7 @@ const Dashboard: React.FC = () => {
           },
         }
       );
+
       if (response.code === 200) {
         console.log(response.data);
         setDataState(response);
