@@ -51,7 +51,7 @@ const Dashboard: React.FC = () => {
     startParam ? parseInt(startParam) : 0
   );
   const [limit, setLimit] = useState<number>(10);
-  const [pages, setPages] = useState<number>(0);
+  const [pages, setPages] = useState<number>(1);
   const [jobs, setJobs] = useState<IReturn_Jobs[] | []>([]);
   const [jobDetails, setJobDetails] = useState<IReturn_JobDetails | null>(null);
   const [totalJobs, setTotalJobs] = useState<number>(0);
@@ -135,8 +135,8 @@ const Dashboard: React.FC = () => {
           },
         }
       );
-      console.log(response);
       if (response.code === 200) {
+        console.log(response.data);
         setDataState(response);
         if (response.data.length > 0) {
           handleParams(response);
@@ -183,6 +183,7 @@ const Dashboard: React.FC = () => {
   // ------------------ useEffects ------------------
   useEffect(() => {
     loadJobs();
+    console.log('load jobs', jobs);
     console.log('load jobs in page, ', page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
