@@ -135,6 +135,7 @@ const Dashboard: React.FC = () => {
           },
         }
       );
+      console.log(response);
       if (response.code === 200) {
         setDataState(response);
         if (response.data.length > 0) {
@@ -182,7 +183,6 @@ const Dashboard: React.FC = () => {
   // ------------------ useEffects ------------------
   useEffect(() => {
     loadJobs();
-    console.log(loadJobs());
     console.log('load jobs in page, ', page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
