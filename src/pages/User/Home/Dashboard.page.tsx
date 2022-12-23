@@ -182,6 +182,7 @@ const Dashboard: React.FC = () => {
   // ------------------ useEffects ------------------
   useEffect(() => {
     loadJobs();
+    console.log(loadJobs());
     console.log('load jobs in page, ', page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
